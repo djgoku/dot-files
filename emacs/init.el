@@ -315,6 +315,12 @@ background of code to whatever theme I'm using's background"
    (shell . t)
    (ruby . t)))
 
+;; just add :async to any org babel src blocks!
+(use-package ob-async
+  :straight t
+  :config
+  (require 'ob-async))
+
 (use-package org-download
   :straight t
   :after org
