@@ -458,6 +458,9 @@ background of code to whatever theme I'm using's background"
   (setq vterm-use-vterm-prompt-detection-method t)
   (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path)))))
 
+(use-package json-to-org-table
+  :straight (:host github :repo "noonker/json-to-org-table"))
+
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
