@@ -37,7 +37,7 @@
   (tool-bar-mode -1)
   (global-auto-revert-mode 1)
   (setq make-backup-files nil)
-  (setq markdown-command "/usr/local/bin/pandoc")
+  (setq markdown-command "pandoc")
   (setq-default indent-tabs-mode nil)
   (setq auto-save-no-message t)
   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -210,10 +210,13 @@
                              kubel
                              markdown-mode
                              ob-elixir
+                             org
+                             org-contrib
                              org-ql
                              ox-jira
                              pdf-tools
                              ruby-mode
+                             speed-type
                              string-inflection
                              tree-sitter
                              tree-sitter-langs))
