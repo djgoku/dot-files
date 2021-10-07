@@ -1,9 +1,12 @@
-;; brew install cmake
+;; cp dot-files/nix/shell.nix ~/shell.nix
+;; install nix; nix-shell;
 ;; asdf plugin add ripgrep
 ;; asdf install ripgrep 13.0.0
 ;; asdf global ripgrep 13.0.0
+;; asdf plugin add nodejs
+;; asdf install nodejs 15.14.0
+;; asdf global nodejs 15.14.0
 ;; ln -s ~/dot-files/emacs/init.el ~/.config/emacs/init.el
-
 
 (defvar bootstrap-version)
 (setq straight-repository-branch "develop")
