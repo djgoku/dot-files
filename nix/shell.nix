@@ -1,3 +1,6 @@
+# nix-shell --argstr emacsconfig ~/.config/emacs/init.el
+
+{ emacsconfig ? ~/.config/emacs/init.el }:
 let
   pkgs = import <nixpkgs> {
     overlays = [
@@ -13,12 +16,23 @@ let
     ];
   };
 
+  emacsForCI =
+    if pkgs.stdenv.isAarch64 then
+      pkgs.emacsWithPackagesFromPackageRequires
+        {
+          packageElisp = builtins.readFile emacsconfig;
+          package = pkgs.emacsGit;
+          extraEmacsPackages = epkgs: [
+            epkgs.vterm
+          ];
+        }
+    else pkgs.emacsGit;
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     autoconf
     cmake
-    emacsGit
+    emacsForCI
     erlang_odbc_javac
     gcc
     gnupg
