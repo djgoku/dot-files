@@ -1,9 +1,8 @@
 # nix-shell --argstr emacsconfig ~/.config/emacs/init.el
 
-{ emacsconfig ? ~/.config/emacs/init.el
-, # 5ee2f08137100840c1db4d017420fc05c440e97e - 2021-10-08
-  commit ? "5ee2f08137100840c1db4d017420fc05c440e97e"
-}:
+{ emacsconfig ? ~/.config/emacs/init.el,
+  commit ? "89f2e82fec9f7c2dde0381976266a245f0072217" }:
+
 let
   pkgs = import <nixpkgs> {
     overlays = [
