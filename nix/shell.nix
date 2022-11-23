@@ -73,27 +73,49 @@ let
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    _1password
     autoconf
+    automake
+    beam.packages.erlangR25.elixir_1_14
+    chromedriver
     cmake
+    curl
+    elixir_ls
     emacsForCI
-    erlang_odbc_javac
+    fd
     gcc
+    git
     gnupg
+    graphviz
+    # inotify-tools
     jdk11
-    libxml2
+    jq
     libgccjit
-    libtool
+    libiconv
+    libxml2
+    ngrok
+    nixpkgs-fmt
+    nodejs-14_x
     openssl
     openssl.dev
-    python39
-    customPython
+    pandoc
+    postgresql_14
+    pre-commit
     readline
+    rebar3
+    ripgrep
+    ruby_3_1o
+    slack
     sqlite
+    squashfsTools
     tmux
-    wxmac
+    vscode-with-extensions
+    wget
     xz
     zlib
   ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
+    pkgs.wxmac
+    pkgs.wxGTK31
     pkgs.darwin.apple_sdk.frameworks.AGL
     pkgs.darwin.apple_sdk.frameworks.Carbon
     pkgs.darwin.apple_sdk.frameworks.Cocoa
