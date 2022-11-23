@@ -1,0 +1,540 @@
+#+begin_src emacs-lisp :results none
+(when (string-equal system-type "gnu/linux")
+  (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
+  (guix-emacs-autoload-packages))
+
+(when(or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+  (straight-use-package 'exwm)
+  (require 'exwm)
+  (require 'exwm-config)
+  (require 'exwm-randr)
+  (setq exwm-randr-workspace-output-plist
+        '(0 "Virtual-1"))
+  (add-hook 'exwm-randr-screen-change-hook
+            (lambda
+              ()
+              (start-process-shell-command
+               "xrandr" nil "xrandr -s 2560x1800 --output Virtual-1 --auto")))
+  (exwm-randr-enable)
+  (exwm-config-default)
+  (setq exwm-input-global-keys
+        `(
+          ;; 's-r': Reset (to line-mode).
+          ;; ([?\s-r]
+          ;;  . exwm-reset)
+          ;; 's-&': Launch application.
+          ([?\s-&]
+           .
+           (lambda
+             (command)
+             (interactive
+              (list
+               (read-shell-command "$ ")))
+             (start-process-shell-command command nil command))))))
+
+(use-package
+  emacs
+  :config (recentf-mode t)
+  (setq recentf-max-menu-items 10000)
+  (setq recentf-max-saved-items 10000)
+  (show-paren-mode 1)
+  (setq show-paren-style 'expression)
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+  (ido-mode -1)
+  (global-auto-revert-mode 1)
+  ;; (global-hl-line-mode) ;; TODO maybe turn off in vterm?
+  (setq make-backup-files nil)
+  (setq markdown-command "pandoc")
+  (setq-default indent-tabs-mode nil)
+  (setq auto-save-no-message t)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (electric-pair-mode t)
+  (display-time-mode 1)
+  (setq display-time-default-load-average nil)
+  (setq display-time-format "%F %H:%M - %a")
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "nyxt")
+  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
+  (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
+  ;; (setq split-window-preferred-function 'split-window-horizontally)
+  ;; (add-to-list 'default-frame-alist '(font . "Menlo-10"))
+  (when (version<= "26.0.50" emacs-version)
+    (global-display-line-numbers-mode))
+  :bind (;; Better than default - from /u/zck
+         ("M-c" . capitalize-dwim)
+         ("M-l" . downcase-dwim)
+         ("M-u" . upcase-dwim)
+         ("s-a" . mark-whole-buffer)
+         ("s-u" . revert-buffer)))
+
+(use-package
+  consult
+  :straight t
+  :bind (;; C-c bindings (mode-specific-map)
+         ("C-c h" . consult-history)
+         ("C-c m" . consult-mode-command)
+         ("C-c k" . consult-kmacro)
+         ;; C-x bindings (ctl-x-map)
+         ("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
+         ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)     ;; orig. yank-pop
+         ("<help> a" . consult-apropos) ;; orig. apropos-command
+         ;; M-g bindings (goto-map)
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)   ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line) ;; orig. goto-line
+         ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings (search-map)
+         ("M-s d" . consult-find)
+         ("M-s D" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("s-f" . consult-line)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s m" . consult-multi-occur)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map ("M-e" . consult-isearch-history) ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
+         ("M-s l" . consult-line) ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map ("M-s" . consult-history) ;; orig. next-matching-history-element
+         ("M-r" . consult-history)) ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5 register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview
+              :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key (kbd "M-."))
+  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize consult-theme
+                     :preview-key '(:debounce 0.2
+                                              any)
+                     consult-ripgrep consult-git-grep consult-grep consult-bookmark
+                     consult-recent-file consult-xref consult--source-bookmark
+                     consult--source-recent-file consult--source-project-recent-file
+                     :preview-key (kbd "M-."))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+  )
+
+(use-package
+  marginalia
+  :straight t
+  :config (marginalia-mode)
+  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
+
+(use-package
+  embark
+  :straight t
+  :bind ("M-a" . embark-act))
+
+(use-package
+  embark-consult
+  :straight t
+  :after (embark consult)
+  :demand t
+  :hook (embark-collect-mode . embark-consult-preview-minor-mode))
+
+(use-package orderless
+  :straight t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
+(with-eval-after-load 'eglot
+  (setq completion-category-defaults nil))
+
+(use-package vertico
+  :straight t
+  :init
+  (vertico-mode))
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :straight t
+  :init
+  (savehist-mode))
+
+(use-package corfu
+  :straight t
+  :custom
+  (corfu-auto t)        ;; Enable auto completion
+  (corfu-separator ?\s) ;; Orderless field separator
+  (corfu-auto-delay 0.0)
+  :init
+  (global-corfu-mode))
+
+(unless (display-graphic-p)
+  (use-package corfu-terminal
+    :straight t
+    :init
+    (corfu-terminal-mode +1)))
+
+(use-package
+  default-text-scale
+  :straight t
+  :config
+  :hook (after-init . default-text-scale-mode)
+  :bind (("s-=" . default-text-scale-increase)
+         ("s--" . default-text-scale-decrease)
+         ("C-x C-0" . default-text-scale-reset)))
+
+(use-package
+  wgrep
+  :straight t
+  :config (setq wgrep-auto-save-buffer t)
+  (setq wgrep-enable-key "r"))
+
+(use-package
+  rg
+  :straight t
+  :config (rg-enable-default-bindings)
+  (rg-enable-menu))
+
+(defun johnny5-split-window-horizontally ()
+  (interactive)
+  (split-window-horizontally)
+  (balance-windows))
+
+(defun johnny5-delete-window-evenly ()
+  (interactive)
+  (delete-window)
+  (balance-windows))
+
+(defun johnny5-split-window-below ()
+  (interactive)
+  (split-window-below)
+  (balance-windows))
+
+(global-set-key "\C-x3" 'johnny5-split-window-horizontally)
+(global-set-key "\C-x2" 'johnny5-split-window-below)
+(global-set-key "\C-x0" 'johnny5-delete-window-evenly)
+
+;;; It is the opposite of fill-paragraph
+(defun unfill-paragraph ()
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil)))
+
+(define-key global-map "\M-Q" 'unfill-paragraph)
+
+;; (use-package exec-path-from-shell
+;;   :straight t
+;;   :config
+;;   (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
+;;   (add-to-list 'exec-path-from-shell-variables var))
+;;   (when (memq window-system '(mac ns x))
+;;     (exec-path-from-shell-initialize)))
+
+;; try to setup spell-fu on macOS so we can remove these guards.
+(when (string-equal system-type "gnu/linux")
+  (use-package
+    spell-fu
+    :straight t))
+(when (string-equal system-type "gnu/linux")
+  (add-hook 'org-mode-hook (lambda ()
+                             (setq spell-fu-faces-exclude '(org-block-begin-line org-block-end-line
+                                                                                 org-code org-date
+                                                                                 org-drawer
+                                                                                 org-document-info-keyword
+                                                                                 org-ellipsis org-link
+                                                                                 org-meta-line
+                                                                                 org-properties
+                                                                                 org-properties-value
+                                                                                 org-special-keyword
+                                                                                 org-src org-tag
+                                                                                 org-verbatim))
+                             (spell-fu-mode))))
+(when (string-equal system-type "gnu/linux")
+  (add-hook 'emacs-lisp-mode-hook (lambda () (spell-fu-mode))))
+
+(use-package
+  magit
+  :straight t
+  :bind (("C-x g" . magit-status)))
+
+(use-package
+  beacon
+  :straight t
+  :init
+  (beacon-mode))
+
+(setq johnny5-package-list
+      '(affe beacon deadgrep
+             ;; docker
+             elfeed flycheck-yamllint git-link git-timemachine
+             htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir org orgit
+             org-chef org-contrib org-ql ox-jira pdf-tools ruby-mode
+             ;; speed-type
+             string-inflection
+             ;; tree-sitter
+             ;; tree-sitter-langs
+             ))
+
+(defun johnny5-install-package-list (package-list)
+  "Install johnny5 PACKAGE-LIST."
+  (while package-list (straight-use-package (car package-list))
+         (setq package-list (cdr package-list))))
+
+(johnny5-install-package-list johnny5-package-list)
+
+(use-package
+  git-identity
+  :straight t
+  :after magit
+  :config (git-identity-magit-mode 1)
+  (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
+  :custom (git-identity-verify t))
+
+(use-package
+  project
+  :straight t
+  :config (add-to-list 'project-switch-commands '(?m "Magit" magit-status)))
+
+(use-package
+  org
+  :straight t
+  :bind (("C-c c" . 'org-capture))
+  :config (setq org-confirm-babel-evaluate nil)
+  (setq org-src-fontify-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-edit-src-content-indentation t)
+  (setq org-log-into-drawer t)
+  (setq org-todo-keywords '((sequence "TODO(t!)" "INPROGRESS(i@)" "WAIT(w@)" "|" "DONE(d@)"
+                                      "CANCELED(c@)")))
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
+  (setq org-agenda-files '("~/org/test"))
+  ;; (setq org-agenda-include-inactive-timestamps 't)
+  (setq org-log-refile 'note)
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers)
+  (progn
+    (defun imalison:org-inline-css-hook (exporter)
+      "Insert custom inline css to automatically set the
+  background of code to whatever theme I'm using's background"
+      (when (eq exporter 'html)
+        (let* ((my-pre-bg (face-background 'default))
+               (my-pre-fg (face-foreground 'default)))
+          (setq org-html-head-extra (concat org-html-head-extra (format
+                                                                 "<style type=\"text/css\">\n pre.src {background-color: %s; color: %s;}</style>\n"
+                                                                 my-pre-bg my-pre-fg))))))
+    (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
+  :mode (("\\.org$" . org-mode)))
+
+(setq org-capture-templates '(("t" "Todo" entry (file+headline "~/org/test/inbox.org" "Inbox")
+                               "** %? [/]\n   :PROPERTIES:\n   :Created: %U\n   :END:\n %i\n %a")
+                              ("j" "Jira" entry (file+headline "~/org/test/inbox.org" "Inbox")
+                               "** %(johnny5-prompt-org-capture \"Jira URL\" 'org-capture-jira-url 'johnny5-parse-jira-url-for-task-id) [/]\n:PROPERTIES:\n:Created: %U\n:Jira-Summary: %^{Jira-Summary} \n:Jira-URL: %(progn org-capture-jira-url)\n:END:\n%?")
+                              ("c" "Cookbook" entry (file "~/org/cookbook.org")
+                               "%(org-chef-get-recipe-from-url)"
+                               :empty-lines 1)
+                              ("m" "Manual Cookbook" entry (file "~/org/cookbook.org")
+                               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
+
+(require 'ox-md nil t)
+(org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
+                                                         (emacs-lisp . t)
+                                                         (eshell . t)
+                                                         (elixir . t)
+                                                         (perl . t)
+                                                         (python . t)
+                                                         (sed . t)
+                                                         (shell . t)
+                                                         (ruby . t)))
+
+;; just add :async to any org babel src blocks!
+(use-package
+  ob-async
+  :straight t
+  :config (require 'ob-async))
+
+;; (use-package org-download
+;;   :straight t
+;;   :after org
+;;   :defer nil
+;;   :custom
+;;   (org-download-method 'directory)
+;;   (org-download-image-dir "images")
+;;   (org-download-heading-lvl nil)
+;;   (org-download-timestamp "%Y%m%d-%H%M%S_")
+;;   (org-image-actual-width 300)
+;;   (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
+;;   :bind
+;;   ("C-M-y" . org-download-screenshot)
+;;   :config
+;;   (require 'org-download))
+
+;; ;; (require 'tree-sitter)
+;; ;; (require 'tree-sitter-langs)
+
+;; ;; (global-tree-sitter-mode)
+;; ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+
+(use-package
+  elixir-mode
+  :straight t
+  :config
+  (add-hook 'elixir-mode-hook
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
+
+;; (use-package
+;;   eglot-grammarly
+;;   :straight (:host github
+;;                    :repo "emacs-grammarly/eglot-grammarly")
+;;   :hook ((text-mode markdown-mode org-mode). (lambda ()
+;;                                                (require 'eglot-grammarly)
+;;                                                (eglot-ensure))))
+
+;; M-. xref-find-definitions
+;; M-? xref-find-references
+(use-package
+  eglot
+  :straight (eglot :type git :host nil :repo "git://git.sv.gnu.org/emacs.git" :files ("lisp/progmodes/eglot.el"))
+  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
+
+  (setq eglot-server-programs '((elixir-mode . ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
+                                ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
+                                ;; "node"
+                                ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
+                                ;; "--stdio"))
+                                )))
+
+(use-package eglot-ltex
+  :straight (:host github :repo "emacs-languagetool/eglot-ltex")
+  :hook ;; (text-mode . (lambda () (require 'eglot-ltex) (call-interactively #'eglot)))
+  ;; (org-mode . (lambda ()
+  ;;               (require 'eglot-ltex
+  ;;                        (call-interactively #'eglot))))
+  (markdown-mode . (lambda ()
+                     (require 'eglot-ltex
+                              (call-interactively #'eglot))))
+  :init
+  (setq eglot-languagetool-server-path "/home/johnny/lsp/ltex-ls-15.2.1-alpha.1.nightly.2022-11-04"))
+
+;; TODO
+;; (add-to-list 'eglot-server-programs
+;;              '((web-mode :language-id "html")
+;;                .
+;;                ("/home/johnny/node_modules/@tailwindcss/language-server/bin/tailwindcss-language-server")))
+;; npm install -g @tailwindcss/language-server
+
+(use-package
+  which-key
+  :straight t
+  :config (which-key-mode))
+
+(use-package
+  switch-window
+  :straight t
+  :bind (("C-x o" . switch-window))
+  :config (setq switch-window-shortcut-style 'qwerty)
+  (setq switch-window-minibuffer-shortcut ?z))
+
+(use-package
+  tramp
+  :straight (tramp :host nil
+                   :repo "https://git.savannah.gnu.org/r/tramp.git"))
+
+;; (defun crontab-e ()
+;;     "Run `crontab -e' in a emacs buffer."
+;;     (interactive)
+;;     (with-editor-async-shell-command "crontab -e"))
+
+(use-package
+  multiple-cursors
+  :straight t
+  :config (setq mc/always-run-for-all 1)
+  (define-key mc/keymap (kbd "<return>") nil)
+  :bind (("s-d" . mc/mark-next-like-this)
+         ("s-D" . mc/mark-all-dwim)
+         ("M-s-d" . mc/edit-beginnings-of-lines)))
+
+(use-package avy
+  :straight t
+  :bind (("M-j" . avy-goto-char-timer)))
+
+(use-package
+  vterm
+  ;; :straight t
+  :config (setq vterm-buffer-name-string "vterm %s")
+  (setq vterm-kill-buffer-on-exit nil)
+  (setq vterm-max-scrollback 100000)
+  (setq vterm-use-vterm-prompt-detection-method t)
+  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                                 (setq default-directory path)))))
+
+(defun screenshot-svg ()
+  "Save a screenshot of the current frame as an SVG image.
+  Saves to a temp file and puts the filename in the kill ring."
+  (interactive)
+  (let* ((filename (make-temp-file "Emacs" nil ".png"))
+         (data (x-export-frames nil 'png)))
+    (with-temp-file filename
+      (insert data))
+    (kill-new filename)
+    (message filename)))
+
+(use-package
+ elisp-demos
+ :straight t
+ :init
+ (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
+
+(when (file-exists-p "~/.config/emacs/custom.el")
+  (setq custom-file "~/.config/emacs/custom.el")
+  (load custom-file))
+#+end_src
