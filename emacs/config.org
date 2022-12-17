@@ -311,11 +311,11 @@
   (beacon-mode))
 
 (setq johnny5-package-list
-      '(affe beacon deadgrep
+      '(affe beacon deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir org orgit
-             org-chef org-contrib org-ql ox-jira pdf-tools ruby-mode
+             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ruby-mode
              ;; speed-type
              string-inflection
              ;; tree-sitter
