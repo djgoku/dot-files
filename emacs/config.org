@@ -330,6 +330,10 @@
 (johnny5-install-package-list johnny5-package-list)
 
 (use-package
+  git-timemachine
+  :straight (git-timemachine :type git :host "https://codeberg.org" :repo "pidu/git-timemachine"))
+
+(use-package
   git-identity
   :straight t
   :after magit
