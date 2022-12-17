@@ -401,6 +401,12 @@
   :straight t
   :config (require 'ob-async))
 
+(use-package
+  denote
+  :straight t
+  :config
+  (setq denote-directory "~/dev/notes"))
+
 ;; (use-package org-download
 ;;   :straight t
 ;;   :after org
