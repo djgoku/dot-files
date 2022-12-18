@@ -104,7 +104,7 @@ pkgs.mkShell {
     readline
     rebar3
     ripgrep
-    ruby_3_1o
+    ruby_3_1
     slack
     sqlite
     squashfsTools

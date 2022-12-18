@@ -91,7 +91,6 @@
          ("C-M-#" . consult-register)
          ;; Other custom bindings
          ("M-y" . consult-yank-pop)     ;; orig. yank-pop
-         ("<help> a" . consult-apropos) ;; orig. apropos-command
          ;; M-g bindings (goto-map)
          ("M-g e" . consult-compile-error)
          ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
@@ -312,11 +311,11 @@
   (beacon-mode))
 
 (setq johnny5-package-list
-      '(affe beacon deadgrep
+      '(affe beacon deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir org orgit
-             org-chef org-contrib org-ql ox-jira pdf-tools ruby-mode
+             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ruby-mode
              ;; speed-type
              string-inflection
              ;; tree-sitter
@@ -329,6 +328,10 @@
          (setq package-list (cdr package-list))))
 
 (johnny5-install-package-list johnny5-package-list)
+
+(use-package
+  git-timemachine
+  :straight (git-timemachine :type git :host "https://codeberg.org" :repo "pidu/git-timemachine"))
 
 (use-package
   git-identity
@@ -401,6 +404,12 @@
   ob-async
   :straight t
   :config (require 'ob-async))
+
+(use-package
+  denote
+  :straight t
+  :config
+  (setq denote-directory "~/dev/notes"))
 
 ;; (use-package org-download
 ;;   :straight t
