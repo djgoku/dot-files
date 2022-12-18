@@ -1,0 +1,275 @@
+#+STARTUP: indent
+
+* dev-setup.org
+** first pass
+:PROPERTIES:
+:header-args: :tangle (format "%s:~/dev-setup.sh" ssh-host)
+:END:
+
+# add a emacs.org for notes on notes/useful keybindings
+
+1. download arch linux parallels image
+2. update package info ~pacman -Sy~
+3. ~pacman -S sudo openssh tmux~
+4. ~sudo localectl set-locale LANG=en_US.UTF-8~
+5. ~systemctl enable sshd && systemctl start sshd~
+6. add johnny user
+   #+begin_src sh :results output drawer :tangle no
+   useradd -m -G wheel johnny
+   #+end_src
+7. visudo ~johnny ALL=(ALL:ALL) ALL~
+
+8. copy ssh public key
+   #+begin_src emacs-lisp :tangle no :results none
+   (mkdir (format "%s:~/.ssh" ssh-host) t)
+   (copy-file (format "%s" ssh-public-key) (format "%s:/home/johnny/.ssh/authorized_keys" scp-host) t)
+   #+end_src
+
+9. copy emacs config
+   #+begin_src emacs-lisp :tangle no :results none
+   (mkdir (format "%s:~/.config/emacs" ssh-host) t)
+   (copy-file (format "%s/early-init.el" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
+   (copy-file (format "%s/init.el" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
+   (copy-file (format "%s/config.org" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
+   #+end_src
+
+10. set timezone
+    #+begin_src sh
+    sudo pacman -Sy
+    sudo pacman -S xorg-server xorg-xinit lightdm lightdm-gtk-greeter wget accountsservice firefox which ripgrep unzip gnome-keyring aspell aspell-en openntpd inotify-tools openbox xterm --noconfirm
+    #+end_src
+
+11. start openntpd
+    #+begin_src sh
+    sudo systemctl start openntpd && sudo systemctl enable openntpd
+    #+end_src
+
+12. usermod -aG docker johnny
+    #+begin_src sh
+    sudo usermod -aG docker johnny
+    #+end_src
+
+13. lightdm config
+    #+begin_src conf :tangle (format "%s|%s:/etc/lightdm/lightdm.conf" ssh-host sudo-host) :mkdirp yes
+    [LightDM]
+    run-directory=/run/lightdm
+    [Seat:*]
+    greeter-session=lightdm-gtk-greeter
+    session-wrapper=/etc/lightdm/Xsession
+    #+end_src
+
+14. install guix
+    #+begin_src sh
+    cd /tmp &&
+    wget https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
+    sudo chmod +x guix-install.sh
+    #+end_src
+
+** guix pull
+
+1. install guix
+   #+begin_src sh
+   sudo /tmp/guix-install.sh
+   #+end_src
+
+** after guix
+:PROPERTIES:
+:header-args: :tangle (format "%s:~/dev-setup-next.sh" ssh-host)
+:END:
+
+1. copy ~/.bashrc
+   #+begin_src text :tangle (format "%s:~/.bashrc" ssh-host)
+   #
+   # ~/.bashrc
+   #
+
+   GUIX_PROFILE="/home/johnny/.guix-profile"
+   . "$GUIX_PROFILE/etc/profile"
+   GUIX_LOCPATH=$HOME/.guix-profile/lib/locale
+   ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+   ELIXIR_EDITOR="emacs +__LINE__ __FILE__"
+   ECTO_EDITOR=$ELIXIR_EDITOR
+   PLUG_EDITOR=$ELIXIR_EDITOR
+
+   # this is needed when emacs --daemon is running so nyxt will operate correct and get org.gnome.system.proxy settings.
+   # export XDG_DATA_DIRS=$XDG_DATA_DIRS:/home/johnny/.config/guix/current/share:/usr/local/share/:/usr/share/
+
+   # If not running interactively, don't do anything
+   [[ $- != *i* ]] && return
+
+   alias ls='ls --color=auto'
+   PS1='[\u@\h \W]\$ '
+   #+end_src
+
+2. ~guix install nss-certs glibc-locales~
+   #+begin_src sh
+   guix install glibc-locales nss-certs
+   export GUIX_LOCPATH="$HOME/.guix-profile/lib/locale"
+   guix pull
+   GUIX_PROFILE="/home/johnny/.config/guix/current"
+   . "$GUIX_PROFILE/etc/profile"
+   guix upgrade
+   #+end_src
+
+3. install emacs git and nss-certs ~guix pull && guix install emacs-next git emacs-vterm elixir~
+   sometimes this can fail so might need to run this twice.
+   #+begin_src sh
+   guix install emacs-next git emacs-vterm
+   #+end_src
+
+4. Copy nyxt init.lisp
+   #+begin_src lisp :tangle (format "%s:~/.config/nyxt/init.lisp" ssh-host) :mkdirp yes
+   (define-configuration buffer
+       ((default-modes (append '(emacs-mode) %slot-default%))
+        (override-map (let ((map (make-keymap "override-map")))
+                      (define-key map
+                          "S-w" 'delete-current-buffer
+                          "S-t" 'make-buffer-focus
+                          "S-f" 'nyxt/web-mode:search-buffer
+                          "S-r" 'reload-current-buffer)))))
+   (define-configuration browser
+     ((session-restore-prompt :always-restore)))
+   #+end_src
+
+5. add emacs.service file
+   #+begin_src sh :tangle (format "%s:/home/johnny/.config/systemd/user/emacs.service" ssh-host) :mkdirp yes
+   [Unit]
+   Description=Emacs text editor
+   Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+
+   [Service]
+   Type=forking
+   ExecStart=/home/johnny/.config/emacs.sh
+   # ExecStop=emacsclient --eval "(save-buffers-kill-emacs)"
+   Environment=SSH_AUTH_SOCK=%t/keyring/ssh
+   EnvironmentFile=/home/johnny/.config/guix/current/etc/profile
+   Restart=on-failure
+
+   [Install]
+   WantedBy=default.target
+   #+end_src
+
+6. add /home/johnny/.config/emacs.sh
+   #+begin_src sh :tangle (format "%s:/home/johnny/.config/emacs.sh" ssh-host)
+   # #!/bin/bash
+
+   source ~/.bashrc
+
+   # emacs --daemon
+   emacs
+   #+end_src
+7. start and enable emacs.service
+   #+begin_src sh :tangle no
+   # systemctl enable --user emacs && systemctl start --user emacs
+   #+end_src
+
+8. ln -s ~/.bashrc ~/.xprofile
+   #+begin_src sh
+   ln -s ~/.bashrc ~/.xprofile
+   #+end_src
+
+9. .xinirc
+   #+begin_src sh :tangle (format "%s:~/.xinitrc" ssh-host)
+   xhost +SI:localuser:$USER
+   exec emacs
+   #+end_src
+
+10. printf "[Desktop Entry]\nName=EXWM\nComment=Emacs Window Manager\nExec=emacs\nType=Application" >> /usr/share/xsessions/emacs.desktop
+    #+begin_src sh :tangle (format "%s|%s:/usr/share/xsessions/emacs.desktop" ssh-host sudo-host) :mkdirp yes
+    [Desktop Entry]
+    Name=EXWM
+    Comment=Emacs Window Manager
+    Exec=emacs
+    # Exec=emacsclient -c -a ""
+    Type=Application
+    #+end_src
+
+11. enable lxdm ~systemctl enable lightdm~
+    #+begin_src sh
+    sudo systemctl enable lightdm && sudo systemctl start lightdm
+    #+end_src
+
+** up and running setup
+:PROPERTIES:
+:header-args: :tangle (format "%s:~/dev-setup-up-and-running.sh" ssh-host)
+:END:
+1. pacman -S base-devel --needed
+   #+begin_src sh
+   sudo pacman -S base-devel --needed --noconfirm
+   #+end_src
+
+2. pacman install the rest of the deps
+   #+begin_src sh
+   sudo pacman -S docker docker-compose nyxt postgresql  --noconfirm
+   #+end_src
+
+3. git clone https://aur.archlinux.org/paru.git
+   #+begin_src sh
+   # source ~/.bashrc
+   git clone https://aur.archlinux.org/paru.git
+   #+end_src
+
+4. install node and imagemagick
+   node is for language servers
+   #+begin_src sh
+   guix install node imagemagick elixir
+   #+end_src
+
+5. cd paru && makepkg -si
+   #+begin_src sh
+   cd paru && makepkg -si
+   #+end_src
+6. paru visual-studio-code-bin mermaid-cli
+   this might need to be run locally since I can't do this from sudo here since it errors with can't install AUR as root
+   #+begin_src sh
+   paru -S visual-studio-code-bin mermaid-cli --noconfirm
+   #+end_src
+7. install vs code liveshare manually
+8. install eglot-grammarly
+   #+begin_src sh :tangle no
+   npm install @emacs-grammarly/grammarly-languageserver
+   #+end_src
+
+** 1password
+1. wget https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.0/op_linux_arm64_v2.7.0.zip
+    https://developer.1password.com/docs/cli/get-started
+    #+begin_src sh
+    # exec 2>&1
+    cd
+    gpg --receive-keys 3FEF9748469ADBE15DA7CA80AC2D62742012EA22
+    wget https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1/op_linux_arm64_v2.7.1.zip
+    unzip op_linux_arm64*.zip
+    gpg --verify op.sig op
+    # :
+    #+end_src
+
+2. mv 1password cli op to /usr/local/bin
+   #+begin_src sh
+   # exec 2>&1
+   sudo mv /home/johnny/op /usr/local/bin/
+   op --version
+   #+end_src
+3. curl -sSO https://downloads.1password.com/linux/tar/stable/aarch64/1password-latest.tar.gz
+   #+begin_src sh
+   # exec 2>&1
+   curl -sSO https://downloads.1password.com/linux/tar/stable/aarch64/1password-latest.tar.gz
+   tar -xf 1password-latest.tar.gz
+   # sudo mkdir -p /opt/1Password
+   # sudo mv 1password-*/* /opt/1Password
+   # sudo /opt/1Password/after-install.sh
+   # :
+   #+end_src
+** hmm
+
+will need pinentry for exwm emacs package
+
+- (multi-occur-in-matching-buffers)
+  M-x multi-occur-in-matching-buffers . RET emac RET
+
+# Local Variables:
+# ssh-host: /ssh:johnny@10.5.0.133
+# scp-host: /scp:johnny@10.5.0.133
+# sudo-host: sudo:root@10.5.0.133
+# ssh-public-key: /Users/dj_goku/.ssh/id_rsa.pub
+# emacs-config-path: /Users/dj_goku/dev/github/djgoku/dot-files/emacs
+# End:
