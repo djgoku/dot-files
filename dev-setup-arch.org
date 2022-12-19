@@ -66,9 +66,11 @@
     #+end_src
 
 ** guix pull
-#+begin_src sh
-sudo /tmp/guix-install.sh
-#+end_src
+
+1. install guix
+   #+begin_src sh
+   sudo /tmp/guix-install.sh
+   #+end_src
 
 ** after guix
 :PROPERTIES:
@@ -93,7 +95,7 @@ sudo /tmp/guix-install.sh
    # export XDG_DATA_DIRS=$XDG_DATA_DIRS:/home/johnny/.config/guix/current/share:/usr/local/share/:/usr/share/
 
    # If not running interactively, don't do anything
-  [[ $- != *i* ]] && return
+   [[ $- != *i* ]] && return
 
    alias ls='ls --color=auto'
    PS1='[\u@\h \W]\$ '
@@ -268,5 +270,6 @@ will need pinentry for exwm emacs package
 # ssh-host: /ssh:johnny@10.5.0.133
 # scp-host: /scp:johnny@10.5.0.133
 # sudo-host: sudo:root@10.5.0.133
-# ssh-public-key: ~/.ssh/id_rsa.pub
+# ssh-public-key: /Users/dj_goku/.ssh/id_rsa.pub
+# emacs-config-path: /Users/dj_goku/dev/github/djgoku/dot-files/emacs
 # End:
