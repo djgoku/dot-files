@@ -10,45 +10,46 @@
 
 1. download arch linux parallels image
 2. update package info ~pacman -Sy~
-3. ~pacman -S sudo openssh~
-4. ~systemctl enable sshd && systemctl start sshd~
-5. add johnny user
+3. ~pacman -S sudo openssh tmux~
+4. ~sudo localectl set-locale LANG=en_US.UTF-8~
+5. ~systemctl enable sshd && systemctl start sshd~
+6. add johnny user
    #+begin_src sh :results output drawer :tangle no
    useradd -m -G wheel johnny
    #+end_src
-6. visudo ~johnny ALL=(ALL:ALL) ALL~
+7. visudo ~johnny ALL=(ALL:ALL) ALL~
 
-7. copy ssh public key
+8. copy ssh public key
    #+begin_src emacs-lisp :tangle no :results none
-   (mkdir (format "%s:~/.ssh" ssh-host))
-   (copy-file ssh-public-key (format "%s:/home/johnny/.ssh/authorized_keys" scp-host))
+   (mkdir (format "%s:~/.ssh" ssh-host) t)
+   (copy-file (format "%s" ssh-public-key) (format "%s:/home/johnny/.ssh/authorized_keys" scp-host) t)
    #+end_src
 
-8. copy emacs config
+9. copy emacs config
    #+begin_src emacs-lisp :tangle no :results none
    (mkdir (format "%s:~/.config/emacs" ssh-host) t)
-   (copy-file "/Users/dj_goku/dev/github/djgoku/dot-files/emacs/early-init.el" (format "%s:/home/johnny/.config/emacs/" scp-host))
-   (copy-file "/Users/dj_goku/dev/github/djgoku/dot-files/emacs/init.el" (format "%s:/home/johnny/.config/emacs/" scp-host))
-   (copy-file "/Users/dj_goku/dev/github/djgoku/dot-files/emacs/config.org" (format "%s:/home/johnny/.config/emacs/" scp-host))
+   (copy-file (format "%s/early-init.el" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
+   (copy-file (format "%s/init.el" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
+   (copy-file (format "%s/config.org" emacs-config-path) (format "%s:/home/johnny/.config/emacs/" scp-host) t)
    #+end_src
 
-9. set timezone
-   #+begin_src sh
-   sudo pacman -Sy
-   sudo pacman -S xorg-server xorg-xinit lightdm lightdm-gtk-greeter wget accountsservice firefox which ripgrep unzip gnome-keyring aspell aspell-en openntpd inotify-tools openbox xterm --noconfirm
-   #+end_src
+10. set timezone
+    #+begin_src sh
+    sudo pacman -Sy
+    sudo pacman -S xorg-server xorg-xinit lightdm lightdm-gtk-greeter wget accountsservice firefox which ripgrep unzip gnome-keyring aspell aspell-en openntpd inotify-tools openbox xterm --noconfirm
+    #+end_src
 
-10. start openntpd
+11. start openntpd
     #+begin_src sh
     sudo systemctl start openntpd && sudo systemctl enable openntpd
     #+end_src
 
-11. usermod -aG docker johnny
+12. usermod -aG docker johnny
     #+begin_src sh
     sudo usermod -aG docker johnny
     #+end_src
 
-12. lightdm config
+13. lightdm config
     #+begin_src conf :tangle (format "%s|%s:/etc/lightdm/lightdm.conf" ssh-host sudo-host) :mkdirp yes
     [LightDM]
     run-directory=/run/lightdm
@@ -57,7 +58,7 @@
     session-wrapper=/etc/lightdm/Xsession
     #+end_src
 
-13. install guix
+14. install guix
     #+begin_src sh
     cd /tmp &&
     wget https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
