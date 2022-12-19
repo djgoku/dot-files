@@ -101,10 +101,11 @@ sudo /tmp/guix-install.sh
 
 2. ~guix install nss-certs glibc-locales~
    #+begin_src sh
-   guix describe && guix install nss-certs glibc-locales
-   export GUIX_PROFILE="/home/johnny/.guix-profile"
+   guix install glibc-locales nss-certs
+   export GUIX_LOCPATH="$HOME/.guix-profile/lib/locale"
+   guix pull
+   GUIX_PROFILE="/home/johnny/.config/guix/current"
    . "$GUIX_PROFILE/etc/profile"
-   export GUIX_LOCPATH=$HOME/.guix-profile/lib/locale
    guix upgrade
    #+end_src
 
