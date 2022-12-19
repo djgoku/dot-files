@@ -66,8 +66,9 @@
     #+end_src
 
 ** guix pull
-I think I need to run git pull then logout to get ~/.bashrc then can proceed.
-1. guix pull
+#+begin_src sh
+sudo /tmp/guix-install.sh
+#+end_src
 
 ** after guix
 :PROPERTIES:
