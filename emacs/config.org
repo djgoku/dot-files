@@ -338,11 +338,6 @@
   :custom (git-identity-verify t))
 
 (use-package
-  project
-  :straight t
-  :config (add-to-list 'project-switch-commands '(?m "Magit" magit-status)))
-
-(use-package
   org
   :straight t
   :bind (("C-c c" . 'org-capture))
