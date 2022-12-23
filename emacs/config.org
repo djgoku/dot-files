@@ -302,7 +302,7 @@
 (use-package
   magit
   :straight t
-  :bind (("C-x g" . magit-status)))
+  :bind (("C-x g" . magit-project-status)))
 
 (use-package
   beacon
@@ -340,11 +340,6 @@
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
-
-(use-package
-  project
-  :straight t
-  :config (add-to-list 'project-switch-commands '(?m "Magit" magit-status)))
 
 (use-package
   org
