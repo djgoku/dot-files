@@ -72,6 +72,18 @@
          ("s-u" . revert-buffer)))
 
 (use-package
+  affe
+  :straight t
+  :after orderless
+  :config
+  (setq affe-regexp-function #'orderless-pattern-compiler
+        affe-highlight-function #'orderless--highlight
+        affe-find-command "rg --color=never --files --hidden -g !.git/*"
+        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
+  :bind (("C-x a f" . affe-find)
+         ("s-r" . affe-grep)))
+
+(use-package
   consult
   :straight t
   :bind (;; C-c bindings (mode-specific-map)
@@ -311,7 +323,7 @@
   (beacon-mode))
 
 (setq johnny5-package-list
-      '(affe beacon deadgrep define-word
+      '(beacon deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir org orgit
