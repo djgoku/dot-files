@@ -64,12 +64,26 @@
   ;; (add-to-list 'default-frame-alist '(font . "Menlo-10"))
   (when (version<= "26.0.50" emacs-version)
     (global-display-line-numbers-mode))
+  (setq delete-by-moving-to-trash t)
+  (setq initial-major-mode #'org-mode)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
          ("s-u" . revert-buffer)))
+
+(use-package
+  affe
+  :straight t
+  :after orderless
+  :config
+  (setq affe-regexp-function #'orderless-pattern-compiler
+        affe-highlight-function #'orderless--highlight
+        affe-find-command "rg --color=never --files --hidden -g !.git/*"
+        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
+  :bind (("C-x a f" . affe-find)
+         ("s-r" . affe-grep)))
 
 (use-package
   consult
@@ -311,10 +325,10 @@
   (beacon-mode))
 
 (setq johnny5-package-list
-      '(affe beacon deadgrep define-word
+      '(beacon deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
-             htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir org orgit
+             htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
              org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ruby-mode
              ;; speed-type
              string-inflection
@@ -373,10 +387,8 @@
     (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
   :mode (("\\.org$" . org-mode)))
 
-(setq org-capture-templates '(("t" "Todo" entry (file+headline "~/org/test/inbox.org" "Inbox")
+(setq org-capture-templates '(("t" "Todo" entry (file "~/org/test/inbox.org" "Inbox")
                                "** %? [/]\n   :PROPERTIES:\n   :Created: %U\n   :END:\n %i\n %a")
-                              ("j" "Jira" entry (file+headline "~/org/test/inbox.org" "Inbox")
-                               "** %(johnny5-prompt-org-capture \"Jira URL\" 'org-capture-jira-url 'johnny5-parse-jira-url-for-task-id) [/]\n:PROPERTIES:\n:Created: %U\n:Jira-Summary: %^{Jira-Summary} \n:Jira-URL: %(progn org-capture-jira-url)\n:END:\n%?")
                               ("c" "Cookbook" entry (file "~/org/cookbook.org")
                                "%(org-chef-get-recipe-from-url)"
                                :empty-lines 1)
@@ -537,6 +549,11 @@
  :straight t
  :init
  (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
+
+(use-package
+  envrc
+  :straight t
+  :config (envrc-global-mode))
 
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
