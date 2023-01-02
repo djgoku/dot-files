@@ -383,10 +383,8 @@
     (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
   :mode (("\\.org$" . org-mode)))
 
-(setq org-capture-templates '(("t" "Todo" entry (file+headline "~/org/test/inbox.org" "Inbox")
+(setq org-capture-templates '(("t" "Todo" entry (file "~/org/test/inbox.org" "Inbox")
                                "** %? [/]\n   :PROPERTIES:\n   :Created: %U\n   :END:\n %i\n %a")
-                              ("j" "Jira" entry (file+headline "~/org/test/inbox.org" "Inbox")
-                               "** %(johnny5-prompt-org-capture \"Jira URL\" 'org-capture-jira-url 'johnny5-parse-jira-url-for-task-id) [/]\n:PROPERTIES:\n:Created: %U\n:Jira-Summary: %^{Jira-Summary} \n:Jira-URL: %(progn org-capture-jira-url)\n:END:\n%?")
                               ("c" "Cookbook" entry (file "~/org/cookbook.org")
                                "%(org-chef-get-recipe-from-url)"
                                :empty-lines 1)
