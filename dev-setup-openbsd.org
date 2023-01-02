@@ -1,0 +1,7 @@
+* OpenBSD setup
+
+1. qemu-img convert install72.img
+2. install openbsd
+3. enable xenodm
+4. install emacs ripgrep elixir erlang cmake gmake
+5. look into if vterm will work on openbsd
