@@ -453,29 +453,42 @@
 
 ;; M-. xref-find-definitions
 ;; M-? xref-find-references
-(use-package
-  eglot
-  :straight (eglot :type git :host nil :repo "git://git.sv.gnu.org/emacs.git" :files ("lisp/progmodes/eglot.el"))
-  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
+;; (use-package
+;;  eglot
+;;  :straight
+;;  (eglot
+;;   :type git
+;;   :host nil
+;;   :repo "git://git.sv.gnu.org/emacs.git"
+;;   :files ("lisp/progmodes/eglot.el"))
+;;  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
 
-  (setq eglot-server-programs '((elixir-mode . ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
-                                ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
-                                ;; "node"
-                                ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
-                                ;; "--stdio"))
-                                )))
+;; (setq
+;;  eglot-server-programs
+;;  '((elixir-mode
+;;     .
+;;     ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
+    ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
+    ;; "node"
+    ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
+    ;; "--stdio"))
+;;    )))
 
-(use-package eglot-ltex
-  :straight (:host github :repo "emacs-languagetool/eglot-ltex")
-  :hook ;; (text-mode . (lambda () (require 'eglot-ltex) (call-interactively #'eglot)))
-  ;; (org-mode . (lambda ()
-  ;;               (require 'eglot-ltex
-  ;;                        (call-interactively #'eglot))))
-  (markdown-mode . (lambda ()
-                     (require 'eglot-ltex
-                              (call-interactively #'eglot))))
-  :init
-  (setq eglot-languagetool-server-path "/home/johnny/lsp/ltex-ls-15.2.1-alpha.1.nightly.2022-11-04"))
+;; (use-package
+;;  eglot-ltex
+;;  :straight (:host github :repo "emacs-languagetool/eglot-ltex")
+;;  :hook ;; (text-mode . (lambda () (require 'eglot-ltex) (call-interactively #'eglot)))
+;;  ;; (org-mode . (lambda ()
+;;  ;;               (require 'eglot-ltex
+;;  ;;                        (call-interactively #'eglot))))
+;;  (markdown-mode
+;;   .
+;;   (lambda ()
+;;     (require 'eglot-ltex (call-interactively #'eglot))))
+;;  :init
+;;  (setq
+;;   eglot-languagetool-server-path
+;;   "/home/johnny/lsp/ltex-ls-15.2.1-alpha.1.nightly.2022-11-04"))
 
 ;; TODO
 ;; (add-to-list 'eglot-server-programs
