@@ -1,7 +1,8 @@
 # nix-shell --argstr emacsconfig ~/.config/emacs/init.el
 
-{ emacsconfig ? ~/.config/emacs/init.el,
-  commit ? "89f2e82fec9f7c2dde0381976266a245f0072217" }:
+{ emacsconfig ? ~/.config/emacs/init.el
+, commit ? "ba6ca0397eee6d322755d9128495010b70db790e" # 2023-01-02
+}:
 
 let
   pkgs = import <nixpkgs> {
@@ -74,6 +75,7 @@ in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     _1password
+    awscli2
     autoconf
     automake
     beam.packages.erlangR25.elixir_1_14
@@ -108,6 +110,8 @@ pkgs.mkShell {
     slack
     sqlite
     squashfsTools
+    tree-sitter
+    texlive.combined.scheme-full # pdf2latex
     tmux
     vscode-with-extensions
     wget
