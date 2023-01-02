@@ -91,6 +91,8 @@
    ECTO_EDITOR=$ELIXIR_EDITOR
    PLUG_EDITOR=$ELIXIR_EDITOR
 
+   eval "$(direnv hook bash)"
+
    # this is needed when emacs --daemon is running so nyxt will operate correct and get org.gnome.system.proxy settings.
    # export XDG_DATA_DIRS=$XDG_DATA_DIRS:/home/johnny/.config/guix/current/share:/usr/local/share/:/usr/share/
 
@@ -114,7 +116,7 @@
 3. install emacs git and nss-certs ~guix pull && guix install emacs-next git emacs-vterm elixir~
    sometimes this can fail so might need to run this twice.
    #+begin_src sh
-   guix install emacs-next git emacs-vterm
+   guix install emacs-next git emacs-vterm direnv
    #+end_src
 
 4. Copy nyxt init.lisp

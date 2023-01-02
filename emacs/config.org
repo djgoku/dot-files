@@ -546,6 +546,11 @@
  :init
  (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
+(use-package
+  envrc
+  :straight t
+  :config (envrc-global-mode))
+
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
