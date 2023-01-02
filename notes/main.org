@@ -1,0 +1,6 @@
+#+STARTUP: indent
+
+* Main
+** Org
+~(org-narrow-to-subtree)~ ~C-x n s~
+~(widen)~ ~C-x n w~
