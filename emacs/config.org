@@ -357,24 +357,29 @@
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
 
+;; (org-narrow-to-subtree) C-x n s
+;; (widen) C-x n w
 (use-package
   org
   :straight t
-  :bind (("C-c c" . 'org-capture))
+  :bind (("C-c c" . 'org-capture)
+         ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
   (setq org-edit-src-content-indentation t)
   (setq org-log-into-drawer t)
-  (setq org-todo-keywords '((sequence "TODO(t!)" "INPROGRESS(i@)" "WAIT(w@)" "|" "DONE(d@)"
-                                      "CANCELED(c@)")))
+  ;; NOT-RETAINED - will not continue in the application process
+  (setq org-todo-keywords '((sequence "TODO(t!)" "IN-PROGRESS(i!)" "WAIT(w!)" "APPLIED(a!)" "|" "DONE(d@)"
+                                      "CANCELED(@)" "WITHDRAWN(@)" "FILLED" "HIRED" "NOT-RETAINED(n@)")))
   (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
-  (setq org-agenda-files '("~/org/test"))
+  (setq org-agenda-files '("~/dev/org" "~/dev/notes"))
   ;; (setq org-agenda-include-inactive-timestamps 't)
   (setq org-log-refile 'note)
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-startup-indented t)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
   (progn
     (defun imalison:org-inline-css-hook (exporter)
