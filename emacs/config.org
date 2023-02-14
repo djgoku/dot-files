@@ -74,6 +74,10 @@
     (global-display-line-numbers-mode))
   (setq delete-by-moving-to-trash t)
   (setq initial-major-mode #'org-mode)
+  (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
+  (setq window-combination-resize t)
+  (setq use-short-answers t)
+  (delete-selection-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
@@ -90,8 +94,8 @@
         affe-highlight-function #'orderless--highlight
         affe-find-command "rg --color=never --files --hidden -g !.git/*"
         affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
-  :bind (("C-x a f" . affe-find)
-         ("s-r" . affe-grep)))
+  :bind (("M-s f" . affe-find)
+         ("M-s r" . affe-grep)))
 
 (use-package
   consult
