@@ -9,7 +9,7 @@
   (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
   (guix-emacs-autoload-packages))
 
-(when(or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+(when (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
   (straight-use-package 'exwm)
   (require 'exwm)
   (require 'exwm-config)
@@ -566,10 +566,10 @@
     (message filename)))
 
 (use-package
- elisp-demos
- :straight t
- :init
- (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
+  elisp-demos
+  :straight t
+  :init
+  (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
 (use-package
   envrc
