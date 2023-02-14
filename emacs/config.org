@@ -1,9 +1,15 @@
+* Unbind the =suspend-frame= vs ~suspend-frame~ command.
+
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-x C-z"))
+#+end_src
+
 #+begin_src emacs-lisp :results none
 (when (string-equal system-type "gnu/linux")
   (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
   (guix-emacs-autoload-packages))
 
-(when(or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+(when (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
   (straight-use-package 'exwm)
   (require 'exwm)
   (require 'exwm-config)
@@ -55,8 +61,10 @@
   (display-time-mode 1)
   (setq display-time-default-load-average nil)
   (setq display-time-format "%F %H:%M - %a")
-  (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-program "nyxt")
+  (if (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+      (setq browse-url-browser-function 'browse-url-generic
+            browse-url-generic-program "nyxt")
+    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
@@ -66,6 +74,10 @@
     (global-display-line-numbers-mode))
   (setq delete-by-moving-to-trash t)
   (setq initial-major-mode #'org-mode)
+  (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
+  (setq window-combination-resize t)
+  (setq use-short-answers t)
+  (delete-selection-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
@@ -82,8 +94,8 @@
         affe-highlight-function #'orderless--highlight
         affe-find-command "rg --color=never --files --hidden -g !.git/*"
         affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
-  :bind (("C-x a f" . affe-find)
-         ("s-r" . affe-grep)))
+  :bind (("M-s f" . affe-find)
+         ("M-s r" . affe-grep)))
 
 (use-package
   consult
@@ -318,12 +330,6 @@
   :straight t
   :bind (("C-x g" . magit-project-status)))
 
-(use-package
-  beacon
-  :straight t
-  :init
-  (beacon-mode))
-
 (setq johnny5-package-list
       '(beacon deadgrep define-word
              ;; docker
@@ -355,24 +361,29 @@
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
 
+;; (org-narrow-to-subtree) C-x n s
+;; (widen) C-x n w
 (use-package
   org
   :straight t
-  :bind (("C-c c" . 'org-capture))
+  :bind (("C-c c" . 'org-capture)
+         ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
   (setq org-edit-src-content-indentation t)
   (setq org-log-into-drawer t)
-  (setq org-todo-keywords '((sequence "TODO(t!)" "INPROGRESS(i@)" "WAIT(w@)" "|" "DONE(d@)"
-                                      "CANCELED(c@)")))
+  ;; NOT-RETAINED - will not continue in the application process
+  (setq org-todo-keywords '((sequence "TODO(t!)" "IN-PROGRESS(i!)" "WAIT(w!)" "APPLIED(a!)" "|" "DONE(d@)"
+                                      "CANCELED(@)" "WITHDRAWN(@)" "FILLED" "HIRED" "NOT-RETAINED(n@)")))
   (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
-  (setq org-agenda-files '("~/org/test"))
+  (setq org-agenda-files '("~/dev/org" "~/dev/notes"))
   ;; (setq org-agenda-include-inactive-timestamps 't)
   (setq org-log-refile 'note)
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-startup-indented t)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
   (progn
     (defun imalison:org-inline-css-hook (exporter)
@@ -387,12 +398,12 @@
     (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
   :mode (("\\.org$" . org-mode)))
 
-(setq org-capture-templates '(("t" "Todo" entry (file "~/org/test/inbox.org" "Inbox")
-                               "** %? [/]\n   :PROPERTIES:\n   :Created: %U\n   :END:\n %i\n %a")
-                              ("c" "Cookbook" entry (file "~/org/cookbook.org")
+(setq org-capture-templates '(("t" "Todo" entry (file "~/dev/org/inbox.org")
+                               "* TODO %? [/]\n:PROPERTIES:\n:Created: %U\nEND:\n %i\n %a")
+                              ("c" "Cookbook" entry (file "~/dev/org/cookbook.org")
                                "%(org-chef-get-recipe-from-url)"
                                :empty-lines 1)
-                              ("m" "Manual Cookbook" entry (file "~/org/cookbook.org")
+                              ("m" "Manual Cookbook" entry (file "~/dev/org/cookbook.org")
                                "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
 
 (require 'ox-md nil t)
@@ -404,6 +415,7 @@
                                                          (python . t)
                                                          (sed . t)
                                                          (shell . t)
+                                                         (sql . t)
                                                          (ruby . t)))
 
 ;; just add :async to any org babel src blocks!
@@ -457,29 +469,42 @@
 
 ;; M-. xref-find-definitions
 ;; M-? xref-find-references
-(use-package
-  eglot
-  :straight (eglot :type git :host nil :repo "git://git.sv.gnu.org/emacs.git" :files ("lisp/progmodes/eglot.el"))
-  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
+;; (use-package
+;;  eglot
+;;  :straight
+;;  (eglot
+;;   :type git
+;;   :host nil
+;;   :repo "git://git.sv.gnu.org/emacs.git"
+;;   :files ("lisp/progmodes/eglot.el"))
+;;  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
 
-  (setq eglot-server-programs '((elixir-mode . ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
-                                ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
-                                ;; "node"
-                                ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
-                                ;; "--stdio"))
-                                )))
+;; (setq
+;;  eglot-server-programs
+;;  '((elixir-mode
+;;     .
+;;     ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
+    ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
+    ;; "node"
+    ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
+    ;; "--stdio"))
+;;    )))
 
-(use-package eglot-ltex
-  :straight (:host github :repo "emacs-languagetool/eglot-ltex")
-  :hook ;; (text-mode . (lambda () (require 'eglot-ltex) (call-interactively #'eglot)))
-  ;; (org-mode . (lambda ()
-  ;;               (require 'eglot-ltex
-  ;;                        (call-interactively #'eglot))))
-  (markdown-mode . (lambda ()
-                     (require 'eglot-ltex
-                              (call-interactively #'eglot))))
-  :init
-  (setq eglot-languagetool-server-path "/home/johnny/lsp/ltex-ls-15.2.1-alpha.1.nightly.2022-11-04"))
+;; (use-package
+;;  eglot-ltex
+;;  :straight (:host github :repo "emacs-languagetool/eglot-ltex")
+;;  :hook ;; (text-mode . (lambda () (require 'eglot-ltex) (call-interactively #'eglot)))
+;;  ;; (org-mode . (lambda ()
+;;  ;;               (require 'eglot-ltex
+;;  ;;                        (call-interactively #'eglot))))
+;;  (markdown-mode
+;;   .
+;;   (lambda ()
+;;     (require 'eglot-ltex (call-interactively #'eglot))))
+;;  :init
+;;  (setq
+;;   eglot-languagetool-server-path
+;;   "/home/johnny/lsp/ltex-ls-15.2.1-alpha.1.nightly.2022-11-04"))
 
 ;; TODO
 ;; (add-to-list 'eglot-server-programs
@@ -545,10 +570,10 @@
     (message filename)))
 
 (use-package
- elisp-demos
- :straight t
- :init
- (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
+  elisp-demos
+  :straight t
+  :init
+  (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
 (use-package
   envrc

@@ -82,6 +82,7 @@ pkgs.mkShell {
     chromedriver
     cmake
     curl
+    direnv
     elixir_ls
     emacsForCI
     fd
@@ -98,6 +99,7 @@ pkgs.mkShell {
     ngrok
     nixpkgs-fmt
     nodejs-14_x
+    nodePackages_latest.tailwindcss
     openssl
     openssl.dev
     pandoc
