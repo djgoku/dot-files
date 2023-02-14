@@ -61,8 +61,10 @@
   (display-time-mode 1)
   (setq display-time-default-load-average nil)
   (setq display-time-format "%F %H:%M - %a")
-  (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-program "nyxt")
+  (if (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+      (setq browse-url-browser-function 'browse-url-generic
+            browse-url-generic-program "nyxt")
+    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
   (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
