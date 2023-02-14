@@ -1,3 +1,9 @@
+* Unbind the =suspend-frame= vs ~suspend-frame~ command.
+
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-x C-z"))
+#+end_src
+
 #+begin_src emacs-lisp :results none
 (when (string-equal system-type "gnu/linux")
   (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
