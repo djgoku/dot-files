@@ -15,10 +15,10 @@
 (straight-use-package 'org)
 
 (use-package
- modus-themes
- :straight t
- :init (setq modus-themes-org-blocks 'gray-background)
- :config (modus-themes-load-theme 'modus-vivendi-deuteranopia))
+  modus-themes
+  :straight t
+  :init (setq modus-themes-org-blocks 'gray-background)
+  :config (modus-themes-load-theme 'modus-vivendi-deuteranopia))
 
 (use-package undo-fu
   :straight t
