@@ -78,6 +78,13 @@
   (setq window-combination-resize t)
   (setq use-short-answers t)
   (delete-selection-mode 1)
+  (setq-default mode-line-buffer-identification
+                (list
+                 'buffer-file-name
+                 (propertized-buffer-identification "%12f")
+                 (propertized-buffer-identification "%12b")))
+  ;; this allows for Copying or Renaming across dired buffers
+  (setq dired-dwim-target t)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
