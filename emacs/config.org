@@ -330,12 +330,6 @@
   :straight t
   :bind (("C-x g" . magit-project-status)))
 
-(use-package
-  beacon
-  :straight t
-  :init
-  (beacon-mode))
-
 (setq johnny5-package-list
       '(beacon deadgrep define-word
              ;; docker
