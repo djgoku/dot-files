@@ -394,12 +394,12 @@
     (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
   :mode (("\\.org$" . org-mode)))
 
-(setq org-capture-templates '(("t" "Todo" entry (file "~/org/test/inbox.org" "Inbox")
-                               "** %? [/]\n   :PROPERTIES:\n   :Created: %U\n   :END:\n %i\n %a")
-                              ("c" "Cookbook" entry (file "~/org/cookbook.org")
+(setq org-capture-templates '(("t" "Todo" entry (file "~/dev/org/inbox.org")
+                               "* TODO %? [/]\n:PROPERTIES:\n:Created: %U\nEND:\n %i\n %a")
+                              ("c" "Cookbook" entry (file "~/dev/org/cookbook.org")
                                "%(org-chef-get-recipe-from-url)"
                                :empty-lines 1)
-                              ("m" "Manual Cookbook" entry (file "~/org/cookbook.org")
+                              ("m" "Manual Cookbook" entry (file "~/dev/org/cookbook.org")
                                "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
 
 (require 'ox-md nil t)
@@ -411,6 +411,7 @@
                                                          (python . t)
                                                          (sed . t)
                                                          (shell . t)
+                                                         (sql . t)
                                                          (ruby . t)))
 
 ;; just add :async to any org babel src blocks!
