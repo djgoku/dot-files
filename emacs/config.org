@@ -10,7 +10,7 @@
   (guix-emacs-autoload-packages))
 
 (when (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
-  (straight-use-package 'exwm)
+  (use-package exwm)
   (require 'exwm)
   (require 'exwm-config)
   (require 'exwm-randr)
@@ -40,6 +40,7 @@
 
 (use-package
   emacs
+  :elpaca nil
   :config (recentf-mode t)
   (setq recentf-max-menu-items 10000)
   (setq recentf-max-saved-items 10000)
@@ -78,6 +79,13 @@
   (setq window-combination-resize t)
   (setq use-short-answers t)
   (delete-selection-mode 1)
+  (setq-default mode-line-buffer-identification
+                (list
+                 'buffer-file-name
+                 (propertized-buffer-identification "%12f")
+                 (propertized-buffer-identification "%12b")))
+  ;; this allows for Copying or Renaming across dired buffers
+  (setq dired-dwim-target t)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
@@ -87,7 +95,6 @@
 
 (use-package
   affe
-  :straight t
   :after orderless
   :config
   (setq affe-regexp-function #'orderless-pattern-compiler
@@ -97,122 +104,57 @@
   :bind (("M-s f" . affe-find)
          ("M-s r" . affe-grep)))
 
-(use-package
-  consult
-  :straight t
-  :bind (;; C-c bindings (mode-specific-map)
-         ("C-c h" . consult-history)
-         ("C-c m" . consult-mode-command)
-         ("C-c k" . consult-kmacro)
-         ;; C-x bindings (ctl-x-map)
-         ("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
-         ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
+;; Example configuration for Consult
+(use-package consult
+  :bind (("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
          ;; Other custom bindings
-         ("M-y" . consult-yank-pop)     ;; orig. yank-pop
-         ;; M-g bindings (goto-map)
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
          ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)   ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line) ;; orig. goto-line
-         ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings (search-map)
-         ("M-s d" . consult-find)
-         ("M-s D" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("s-f" . consult-line)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s m" . consult-multi-occur)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map ("M-e" . consult-isearch-history) ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
-         ("M-s l" . consult-line) ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map ("M-s" . consult-history) ;; orig. next-matching-history-element
-         ("M-r" . consult-history)) ;; orig. previous-matching-history-element
-
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("s-f" . consult-line))
   :hook (completion-list-mode . consult-preview-at-point-mode)
-
-  ;; The :init configuration is always executed (Not lazy)
   :init
-
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5 register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview
-              :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref xref-show-definitions-function #'consult-xref)
-
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+  (advice-add #'register-preview :override #'consult-register-window)
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
   :config
-
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key (kbd "M-."))
-  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize consult-theme
-                     :preview-key '(:debounce 0.2
-                                              any)
-                     consult-ripgrep consult-git-grep consult-grep consult-bookmark
-                     consult-recent-file consult-xref consult--source-bookmark
-                     consult--source-recent-file consult--source-project-recent-file
-                     :preview-key (kbd "M-."))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; (kbd "C-+")
-  )
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+  (setq consult-narrow-key "<") ;; "C-+"
+)
 
 (use-package
   marginalia
-  :straight t
   :config (marginalia-mode)
   (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 
 (use-package
   embark
-  :straight t
   :bind ("M-a" . embark-act))
 
 (use-package
   embark-consult
-  :straight t
   :after (embark consult)
   :demand t
   :hook (embark-collect-mode . embark-consult-preview-minor-mode))
 
 (use-package orderless
-  :straight t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
@@ -221,7 +163,6 @@
   (setq completion-category-defaults nil))
 
 (use-package vertico
-  :straight t
   :init
   (vertico-mode))
 
@@ -232,7 +173,6 @@
   (savehist-mode))
 
 (use-package corfu
-  :straight t
   :custom
   (corfu-auto t)        ;; Enable auto completion
   (corfu-separator ?\s) ;; Orderless field separator
@@ -242,13 +182,11 @@
 
 (unless (display-graphic-p)
   (use-package corfu-terminal
-    :straight t
     :init
     (corfu-terminal-mode +1)))
 
 (use-package
   default-text-scale
-  :straight t
   :config
   :hook (after-init . default-text-scale-mode)
   :bind (("s-=" . default-text-scale-increase)
@@ -257,13 +195,11 @@
 
 (use-package
   wgrep
-  :straight t
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
 
 (use-package
   rg
-  :straight t
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
 
@@ -306,8 +242,7 @@
 ;; try to setup spell-fu on macOS so we can remove these guards.
 (when (string-equal system-type "gnu/linux")
   (use-package
-    spell-fu
-    :straight t))
+    spell-fu))
 (when (string-equal system-type "gnu/linux")
   (add-hook 'org-mode-hook (lambda ()
                              (setq spell-fu-faces-exclude '(org-block-begin-line org-block-end-line
@@ -327,7 +262,6 @@
 
 (use-package
   magit
-  :straight t
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
@@ -335,19 +269,15 @@
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
-             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ruby-mode
+             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ;; ruby-mode
              ;; speed-type
              string-inflection
              ;; tree-sitter
              ;; tree-sitter-langs
              ))
 
-(defun johnny5-install-package-list (package-list)
-  "Install johnny5 PACKAGE-LIST."
-  (while package-list (straight-use-package (car package-list))
-         (setq package-list (cdr package-list))))
-
-(johnny5-install-package-list johnny5-package-list)
+(dolist (package johnny5-package-list)
+  (eval `(use-package ,package) t))
 
 (use-package
   git-timemachine
@@ -355,7 +285,6 @@
 
 (use-package
   git-identity
-  :straight t
   :after magit
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
@@ -365,7 +294,6 @@
 ;; (widen) C-x n w
 (use-package
   org
-  :straight t
   :bind (("C-c c" . 'org-capture)
          ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
@@ -410,7 +338,7 @@
 (org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
                                                          (emacs-lisp . t)
                                                          (eshell . t)
-                                                         (elixir . t)
+                                                         ;; (elixir . t)
                                                          (perl . t)
                                                          (python . t)
                                                          (sed . t)
@@ -421,12 +349,10 @@
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
-  :straight t
   :config (require 'ob-async))
 
 (use-package
   denote
-  :straight t
   :config
   (setq denote-directory "~/dev/notes"))
 
@@ -452,12 +378,12 @@
 ;; ;; (global-tree-sitter-mode)
 ;; ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
-(use-package
-  elixir-mode
-  :straight t
-  :config
-  (add-hook 'elixir-mode-hook
-            (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
+;; (use-package
+;;   elixir-mode
+;;   :straight t
+;;   :config
+;;   (add-hook 'elixir-mode-hook
+;;             (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
 ;; (use-package
 ;;   eglot-grammarly
@@ -477,18 +403,20 @@
 ;;   :host nil
 ;;   :repo "git://git.sv.gnu.org/emacs.git"
 ;;   :files ("lisp/progmodes/eglot.el"))
-;;  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
+;;  :config ;; (add-hook 'elixir-mode-hook 'eglot-ensure)
+;; (add-hook 'elixir-ts-mode-hook (lambda () (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+;;  )
 
 ;; (setq
 ;;  eglot-server-programs
 ;;  '((elixir-mode
 ;;     .
-;;     ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
-    ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
-    ;; "node"
-    ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
-    ;; "--stdio"))
-;;    )))
+;;     ("~/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
+;;     ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
+;;     "node"
+;;     "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
+;;     "--stdio"))
+;;    ))
 
 ;; (use-package
 ;;  eglot-ltex
@@ -515,29 +443,24 @@
 
 (use-package
   which-key
-  :straight t
   :config (which-key-mode))
 
 (use-package
   switch-window
-  :straight t
   :bind (("C-x o" . switch-window))
   :config (setq switch-window-shortcut-style 'qwerty)
   (setq switch-window-minibuffer-shortcut ?z))
 
-(use-package
-  tramp
-  :straight (tramp :host nil
-                   :repo "https://git.savannah.gnu.org/r/tramp.git"))
+;; (use-package
+;;   tramp)
 
-;; (defun crontab-e ()
-;;     "Run `crontab -e' in a emacs buffer."
-;;     (interactive)
-;;     (with-editor-async-shell-command "crontab -e"))
+;; ;; (defun crontab-e ()
+;; ;;     "Run `crontab -e' in a emacs buffer."
+;; ;;     (interactive)
+;; ;;     (with-editor-async-shell-command "crontab -e"))
 
 (use-package
   multiple-cursors
-  :straight t
   :config (setq mc/always-run-for-all 1)
   (define-key mc/keymap (kbd "<return>") nil)
   :bind (("s-d" . mc/mark-next-like-this)
@@ -545,12 +468,10 @@
          ("M-s-d" . mc/edit-beginnings-of-lines)))
 
 (use-package avy
-  :straight t
   :bind (("M-j" . avy-goto-char-timer)))
 
 (use-package
   vterm
-  ;; :straight t
   :config (setq vterm-buffer-name-string "vterm %s")
   (setq vterm-kill-buffer-on-exit nil)
   (setq vterm-max-scrollback 100000)
@@ -571,13 +492,11 @@
 
 (use-package
   elisp-demos
-  :straight t
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
 (use-package
   envrc
-  :straight t
   :config (envrc-global-mode))
 
 (when (file-exists-p "~/.config/emacs/custom.el")
