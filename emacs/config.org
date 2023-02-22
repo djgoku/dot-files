@@ -10,7 +10,7 @@
   (guix-emacs-autoload-packages))
 
 (when (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
-  (straight-use-package 'exwm)
+  (use-package exwm)
   (require 'exwm)
   (require 'exwm-config)
   (require 'exwm-randr)
@@ -40,6 +40,7 @@
 
 (use-package
   emacs
+  :elpaca nil
   :config (recentf-mode t)
   (setq recentf-max-menu-items 10000)
   (setq recentf-max-saved-items 10000)
@@ -94,7 +95,6 @@
 
 (use-package
   affe
-  :straight t
   :after orderless
   :config
   (setq affe-regexp-function #'orderless-pattern-compiler
@@ -141,24 +141,20 @@
 
 (use-package
   marginalia
-  :straight t
   :config (marginalia-mode)
   (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 
 (use-package
   embark
-  :straight t
   :bind ("M-a" . embark-act))
 
 (use-package
   embark-consult
-  :straight t
   :after (embark consult)
   :demand t
   :hook (embark-collect-mode . embark-consult-preview-minor-mode))
 
 (use-package orderless
-  :straight t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
@@ -167,7 +163,6 @@
   (setq completion-category-defaults nil))
 
 (use-package vertico
-  :straight t
   :init
   (vertico-mode))
 
@@ -178,7 +173,6 @@
   (savehist-mode))
 
 (use-package corfu
-  :straight t
   :custom
   (corfu-auto t)        ;; Enable auto completion
   (corfu-separator ?\s) ;; Orderless field separator
@@ -188,13 +182,11 @@
 
 (unless (display-graphic-p)
   (use-package corfu-terminal
-    :straight t
     :init
     (corfu-terminal-mode +1)))
 
 (use-package
   default-text-scale
-  :straight t
   :config
   :hook (after-init . default-text-scale-mode)
   :bind (("s-=" . default-text-scale-increase)
@@ -203,13 +195,11 @@
 
 (use-package
   wgrep
-  :straight t
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
 
 (use-package
   rg
-  :straight t
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
 
@@ -252,8 +242,7 @@
 ;; try to setup spell-fu on macOS so we can remove these guards.
 (when (string-equal system-type "gnu/linux")
   (use-package
-    spell-fu
-    :straight t))
+    spell-fu))
 (when (string-equal system-type "gnu/linux")
   (add-hook 'org-mode-hook (lambda ()
                              (setq spell-fu-faces-exclude '(org-block-begin-line org-block-end-line
@@ -273,7 +262,6 @@
 
 (use-package
   magit
-  :straight t
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
@@ -281,23 +269,18 @@
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
-             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ruby-mode
+             org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ;; ruby-mode
              ;; speed-type
              string-inflection
              ;; tree-sitter
              ;; tree-sitter-langs
              ))
 
-(defun johnny5-install-package-list (package-list)
-  "Install johnny5 PACKAGE-LIST."
-  (while package-list (straight-use-package (car package-list))
-         (setq package-list (cdr package-list))))
-
-(johnny5-install-package-list johnny5-package-list)
+(dolist (package johnny5-package-list)
+  (eval `(use-package ,package) t))
 
 (use-package
   git-identity
-  :straight t
   :after magit
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
@@ -307,7 +290,6 @@
 ;; (widen) C-x n w
 (use-package
   org
-  :straight t
   :bind (("C-c c" . 'org-capture)
          ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
@@ -352,7 +334,7 @@
 (org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
                                                          (emacs-lisp . t)
                                                          (eshell . t)
-                                                         (elixir . t)
+                                                         ;; (elixir . t)
                                                          (perl . t)
                                                          (python . t)
                                                          (sed . t)
@@ -363,12 +345,10 @@
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
-  :straight t
   :config (require 'ob-async))
 
 (use-package
   denote
-  :straight t
   :config
   (setq denote-directory "~/dev/notes"))
 
@@ -394,12 +374,12 @@
 ;; ;; (global-tree-sitter-mode)
 ;; ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
-(use-package
-  elixir-mode
-  :straight t
-  :config
-  (add-hook 'elixir-mode-hook
-            (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
+;; (use-package
+;;   elixir-mode
+;;   :straight t
+;;   :config
+;;   (add-hook 'elixir-mode-hook
+;;             (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
 ;; (use-package
 ;;   eglot-grammarly
@@ -419,18 +399,20 @@
 ;;   :host nil
 ;;   :repo "git://git.sv.gnu.org/emacs.git"
 ;;   :files ("lisp/progmodes/eglot.el"))
-;;  :config (add-hook 'elixir-mode-hook 'eglot-ensure)
+;;  :config ;; (add-hook 'elixir-mode-hook 'eglot-ensure)
+;; (add-hook 'elixir-ts-mode-hook (lambda () (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+;;  )
 
 ;; (setq
 ;;  eglot-server-programs
 ;;  '((elixir-mode
 ;;     .
-;;     ("/home/johnny/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
-    ;; ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
-    ;; "node"
-    ;; "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
-    ;; "--stdio"))
-;;    )))
+;;     ("~/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))
+;;     ((text-mode latex-mode org-mode markdown-mode) eglot-grammarly-server
+;;     "node"
+;;     "~/node_modules/\@emacs-grammarly/grammarly-languageserver/bin/server.js"
+;;     "--stdio"))
+;;    ))
 
 ;; (use-package
 ;;  eglot-ltex
@@ -457,29 +439,24 @@
 
 (use-package
   which-key
-  :straight t
   :config (which-key-mode))
 
 (use-package
   switch-window
-  :straight t
   :bind (("C-x o" . switch-window))
   :config (setq switch-window-shortcut-style 'qwerty)
   (setq switch-window-minibuffer-shortcut ?z))
 
-(use-package
-  tramp
-  :straight (tramp :host nil
-                   :repo "https://git.savannah.gnu.org/r/tramp.git"))
+;; (use-package
+;;   tramp)
 
-;; (defun crontab-e ()
-;;     "Run `crontab -e' in a emacs buffer."
-;;     (interactive)
-;;     (with-editor-async-shell-command "crontab -e"))
+;; ;; (defun crontab-e ()
+;; ;;     "Run `crontab -e' in a emacs buffer."
+;; ;;     (interactive)
+;; ;;     (with-editor-async-shell-command "crontab -e"))
 
 (use-package
   multiple-cursors
-  :straight t
   :config (setq mc/always-run-for-all 1)
   (define-key mc/keymap (kbd "<return>") nil)
   :bind (("s-d" . mc/mark-next-like-this)
@@ -487,12 +464,10 @@
          ("M-s-d" . mc/edit-beginnings-of-lines)))
 
 (use-package avy
-  :straight t
   :bind (("M-j" . avy-goto-char-timer)))
 
 (use-package
   vterm
-  ;; :straight t
   :config (setq vterm-buffer-name-string "vterm %s")
   (setq vterm-kill-buffer-on-exit nil)
   (setq vterm-max-scrollback 100000)
@@ -513,13 +488,11 @@
 
 (use-package
   elisp-demos
-  :straight t
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
 (use-package
   envrc
-  :straight t
   :config (envrc-global-mode))
 
 (when (file-exists-p "~/.config/emacs/custom.el")
