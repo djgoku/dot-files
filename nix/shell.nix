@@ -35,7 +35,7 @@ let
         extraEmacsPackages = epkgs: [
           epkgs.vterm
         ];
-      }
+      };
 
       # sha256 can be calculated via nix-prefetch-url --unpack http://url
       vscodeExtensions = (with pkgs.vscode-extensions;
