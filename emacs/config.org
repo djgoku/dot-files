@@ -97,6 +97,7 @@
   affe
   :after orderless
   :config
+  (setq affe-count 10000)
   (setq affe-regexp-function #'orderless-pattern-compiler
         affe-highlight-function #'orderless--highlight
         affe-find-command "rg --color=never --files --hidden -g !.git/*"
@@ -262,6 +263,7 @@
 
 (use-package
   magit
+  :init (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
@@ -294,6 +296,7 @@
 ;; (widen) C-x n w
 (use-package
   org
+  :elpaca nil
   :bind (("C-c c" . 'org-capture)
          ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)

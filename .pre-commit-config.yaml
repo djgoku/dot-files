@@ -1,0 +1,55 @@
+# install pre-commit git hooks
+# pre-commit install
+#
+# pre-commit run --all-files
+ci:
+  skip: [terraform_tfsec]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-yaml
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-encoding-pragma
+      - id: sort-simple-yaml
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.1
+    hooks:
+      - id: infracost_breakdown
+      - id: terraform_fmt
+      - id: terraform_providers_lock
+      - id: terraform_tfsec
+      - id: terraform_validate
+      - id: terrascan
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.1
+    hooks:
+      - id: python-safety-dependencies-check
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+  - repo: https://gitlab.com/jvenom/elixir-pre-commit-hooks
+    rev: v1.2.0
+    hooks:
+      - id: mix-format
+      - id: mix-test
+  - repo: https://github.com/nix-community/nixpkgs-fmt
+    rev: v1.3.0
+    hooks:
+      - id: nixpkgs-fmt
