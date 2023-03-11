@@ -1,7 +1,7 @@
 # nix-shell --argstr emacsconfig ~/.config/emacs/init.el
 
 { emacsconfig ? ~/.config/emacs/init.el
-, commit ? "ba6ca0397eee6d322755d9128495010b70db790e" # 2023-01-02
+, commit ? "5b3d95676be5c6963c4d16f21ecf82beb14c6c05" # pragma: allowlist secret
 }:
 
 let
@@ -16,9 +16,14 @@ let
     ];
   };
 
-  customPython = pkgs.python39.buildEnv.override {
+  customPython = pkgs.python310.buildEnv.override {
     extraLibs = [
-      pkgs.python39Packages.virtualenv
+      pkgs.python310Packages.virtualenv
+      pkgs.python310Packages.ipython
+      pkgs.python310Packages.requests
+      pkgs.python310Packages.pudb
+      pkgs.python310Packages.ipykernel
+      pkgs.python310Packages.python-lsp-server
     ];
   };
 
@@ -59,7 +64,7 @@ let
       name = "elixir-ls";
       publisher = "JakeBecker";
       version = "0.9.0";
-      sha256 = "1qz8jxpzanaccd5v68z4v1344kw0iy671ksi1bmpyavinlxdkmr8";
+      sha256 = "1qz8jxpzanaccd5v68z4v1344kw0iy671ksi1bmpyavinlxdkmr8"; # pragma: allowlist secret
     }
     {
       name = "surface";
@@ -80,8 +85,10 @@ pkgs.mkShell {
     automake
     beam.packages.erlangR25.elixir_1_14
     chromedriver
+    colima
     cmake
     curl
+    customPython
     direnv
     elixir_ls
     emacsForCI
@@ -93,6 +100,7 @@ pkgs.mkShell {
     # inotify-tools
     jdk11
     jq
+    kubectl
     libgccjit
     libiconv
     libxml2
@@ -114,6 +122,7 @@ pkgs.mkShell {
     squashfsTools
     tree-sitter
     texlive.combined.scheme-full # pdf2latex
+    tfsec
     tmux
     vscode-with-extensions
     wget
