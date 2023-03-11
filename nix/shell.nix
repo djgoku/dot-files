@@ -98,16 +98,20 @@ pkgs.mkShell {
     gnupg
     graphviz
     # inotify-tools
+    isync
     jdk11
     jq
     kubectl
     libgccjit
     libiconv
     libxml2
+    mailutils
+    msmtp
     ngrok
     nixpkgs-fmt
     nodejs-14_x
     nodePackages_latest.tailwindcss
+    notmuch
     openssl
     openssl.dev
     pandoc
