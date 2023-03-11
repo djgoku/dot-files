@@ -91,6 +91,7 @@ pkgs.mkShell
     curl
     customPython
     direnv
+    earthly
     elixir_ls
     emacsForCI
     fd
@@ -127,6 +128,7 @@ pkgs.mkShell
     squashfsTools
     steampipe
     terraform
+    terrascan
     texlive.combined.scheme-full # pdf2latex
     tfsec
     tmux
