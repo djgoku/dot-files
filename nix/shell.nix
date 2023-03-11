@@ -28,16 +28,14 @@ let
   };
 
   emacsForCI =
-    if pkgs.stdenv.isAarch64 then
-      pkgs.emacsWithPackagesFromPackageRequires
-        {
-          packageElisp = builtins.readFile emacsconfig;
-          package = pkgs.emacsGit;
-          extraEmacsPackages = epkgs: [
-            epkgs.vterm
-          ];
-        }
-    else pkgs.emacsGit;
+    pkgs.emacsWithPackagesFromPackageRequires
+      {
+        packageElisp = builtins.readFile emacsconfig;
+        package = pkgs.emacsGit;
+        extraEmacsPackages = epkgs: [
+          epkgs.vterm
+        ];
+      }
 
   # sha256 can be calculated via nix-prefetch-url --unpack http://url
   vscodeExtensions = (with pkgs.vscode-extensions; [
@@ -80,13 +78,14 @@ in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     _1password
-    awscli2
     autoconf
     automake
+    awscli2
     beam.packages.erlangR25.elixir_1_14
+    cargo
     chromedriver
-    colima
     cmake
+    colima
     curl
     customPython
     direnv
@@ -97,7 +96,6 @@ pkgs.mkShell {
     git
     gnupg
     graphviz
-    # inotify-tools
     isync
     jdk11
     jq
@@ -109,8 +107,8 @@ pkgs.mkShell {
     msmtp
     ngrok
     nixpkgs-fmt
-    nodejs-14_x
     nodePackages_latest.tailwindcss
+    nodejs-14_x
     notmuch
     openssl
     openssl.dev
@@ -122,12 +120,15 @@ pkgs.mkShell {
     ripgrep
     ruby_3_1
     slack
+    sops
     sqlite
     squashfsTools
-    tree-sitter
+    steampipe
+    terraform
     texlive.combined.scheme-full # pdf2latex
     tfsec
     tmux
+    tree-sitter
     vscode-with-extensions
     wget
     xz
