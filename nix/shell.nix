@@ -28,50 +28,49 @@ let
   };
 
   emacsForCI =
-    if pkgs.stdenv.isAarch64 then
-      pkgs.emacsWithPackagesFromPackageRequires
-        {
-          packageElisp = builtins.readFile emacsconfig;
-          package = pkgs.emacsGit;
-          extraEmacsPackages = epkgs: [
-            epkgs.vterm
-          ];
-        }
-    else pkgs.emacsGit;
+    pkgs.emacsWithPackagesFromPackageRequires
+      {
+        packageElisp = builtins.readFile emacsconfig;
+        package = pkgs.emacsGit;
+        extraEmacsPackages = epkgs: [
+          epkgs.vterm
+        ];
+      }
 
-  # sha256 can be calculated via nix-prefetch-url --unpack http://url
-  vscodeExtensions = (with pkgs.vscode-extensions; [
+      # sha256 can be calculated via nix-prefetch-url --unpack http://url
+      vscodeExtensions = (with pkgs.vscode-extensions;
+  [
   ]) ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-    {
-      name = "vscode-emacs-friendly";
-      publisher = "lfs";
-      version = "0.9.0";
-      sha256 = "1j4cy77m1077wdl2vvpmzi98y3jkycvf8z84pscs3lkkk1mvcsv1";
-    }
-    {
-      name = "vscode-terminals";
-      publisher = "fabiospampinato";
-      version = "1.13.0";
-      sha256 = "0j96c6486h4073b7551xdr50fir572f22nlkz0y6q52670gdii5y";
-    }
-    {
-      name = "vscode-mjml";
-      publisher = "attilabuti";
-      version = "1.6.0";
-      sha256 = "180rvy17l0x5mg2nqkpfl6bcyqjnf72qknr521fmrkak2dp957yd";
-    }
-    {
-      name = "elixir-ls";
-      publisher = "JakeBecker";
-      version = "0.9.0";
-      sha256 = "1qz8jxpzanaccd5v68z4v1344kw0iy671ksi1bmpyavinlxdkmr8"; # pragma: allowlist secret
-    }
-    {
-      name = "surface";
-      publisher = "msaraiva";
-      version = "0.7.0";
-      sha256 = "1y5m0p4lkr0zfiyshrm9mkg0rzx81zhp6p16mw08jwndvy0396zn";
-    }
+  {
+  name = "vscode-emacs-friendly";
+  publisher = "lfs";
+  version = "0.9.0";
+  sha256 = "1j4cy77m1077wdl2vvpmzi98y3jkycvf8z84pscs3lkkk1mvcsv1";
+  }
+  {
+  name = "vscode-terminals";
+  publisher = "fabiospampinato";
+  version = "1.13.0";
+  sha256 = "0j96c6486h4073b7551xdr50fir572f22nlkz0y6q52670gdii5y";
+  }
+  {
+  name = "vscode-mjml";
+  publisher = "attilabuti";
+  version = "1.6.0";
+  sha256 = "180rvy17l0x5mg2nqkpfl6bcyqjnf72qknr521fmrkak2dp957yd";
+  }
+  {
+  name = "elixir-ls";
+  publisher = "JakeBecker";
+  version = "0.9.0";
+  sha256 = "1qz8jxpzanaccd5v68z4v1344kw0iy671ksi1bmpyavinlxdkmr8"; # pragma: allowlist secret
+  }
+  {
+  name = "surface";
+  publisher = "msaraiva";
+  version = "0.7.0";
+  sha256 = "1y5m0p4lkr0zfiyshrm9mkg0rzx81zhp6p16mw08jwndvy0396zn";
+  }
   ];
   vscode-with-extensions = pkgs.vscode-with-extensions.override {
     vscodeExtensions = vscodeExtensions;
@@ -80,13 +79,14 @@ in
 pkgs.mkShell {
   buildInputs = with pkgs; [
     _1password
-    awscli2
     autoconf
     automake
+    awscli2
     beam.packages.erlangR25.elixir_1_14
+    cargo
     chromedriver
-    colima
     cmake
+    colima
     curl
     customPython
     direnv
@@ -97,7 +97,6 @@ pkgs.mkShell {
     git
     gnupg
     graphviz
-    # inotify-tools
     isync
     jdk11
     jq
@@ -109,8 +108,8 @@ pkgs.mkShell {
     msmtp
     ngrok
     nixpkgs-fmt
-    nodejs-14_x
     nodePackages_latest.tailwindcss
+    nodejs-14_x
     notmuch
     openssl
     openssl.dev
@@ -122,12 +121,15 @@ pkgs.mkShell {
     ripgrep
     ruby_3_1
     slack
+    sops
     sqlite
     squashfsTools
-    tree-sitter
+    steampipe
+    terraform
     texlive.combined.scheme-full # pdf2latex
     tfsec
     tmux
+    tree-sitter
     vscode-with-extensions
     wget
     xz
