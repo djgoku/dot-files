@@ -1,7 +1,7 @@
 # nix-shell --argstr emacsconfig ~/.config/emacs/init.el
 
 { emacsconfig ? ~/.config/emacs/init.el
-, commit ? "5b3d95676be5c6963c4d16f21ecf82beb14c6c05" # pragma: allowlist secret
+, commit ? "3f244dadfdd7012d2df04f7e4b1884ca016ebf2a" # pragma: allowlist secret
 }:
 
 let
@@ -23,7 +23,7 @@ let
       pkgs.python310Packages.requests
       pkgs.python310Packages.pudb
       pkgs.python310Packages.ipykernel
-      pkgs.python310Packages.python-lsp-server
+      pkgs.python310Packages.black
     ];
   };
 
@@ -111,6 +111,7 @@ pkgs.mkShell
     ngrok
     nixpkgs-fmt
     nodePackages_latest.tailwindcss
+    nodePackages.pyright
     nodejs-14_x
     notmuch
     openssl
