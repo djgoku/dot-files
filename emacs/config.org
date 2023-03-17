@@ -102,8 +102,8 @@
         affe-highlight-function #'orderless--highlight
         affe-find-command "rg --color=never --files --hidden -g !.git/*"
         affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
-  :bind (("M-s f" . affe-find)
-         ("M-s r" . affe-grep)))
+  :bind (("M-s af" . affe-find)
+         ("M-s ag" . affe-grep)))
 
 ;; Example configuration for Consult
 (use-package consult
