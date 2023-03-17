@@ -18,12 +18,13 @@ let
 
   customPython = pkgs.python310.buildEnv.override {
     extraLibs = [
-      pkgs.python310Packages.virtualenv
-      pkgs.python310Packages.ipython
-      pkgs.python310Packages.requests
-      pkgs.python310Packages.pudb
-      pkgs.python310Packages.ipykernel
       pkgs.python310Packages.black
+      pkgs.python310Packages.ipykernel
+      pkgs.python310Packages.ipython
+      pkgs.python310Packages.pip
+      pkgs.python310Packages.pudb
+      pkgs.python310Packages.requests
+      pkgs.python310Packages.virtualenv
     ];
   };
 
@@ -110,8 +111,9 @@ pkgs.mkShell
     msmtp
     ngrok
     nixpkgs-fmt
-    nodePackages_latest.tailwindcss
+    nodePackages.js-beautify
     nodePackages.pyright
+    nodePackages_latest.tailwindcss
     nodejs-14_x
     notmuch
     openssl
