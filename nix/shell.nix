@@ -148,4 +148,3 @@ pkgs.mkShell
     pkgs.wxmac
   ]);
 }
-OB
