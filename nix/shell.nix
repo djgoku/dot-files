@@ -141,10 +141,11 @@ pkgs.mkShell
     xz
     zlib
   ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
-    pkgs.wxmac
-    pkgs.wxGTK31
     pkgs.darwin.apple_sdk.frameworks.AGL
     pkgs.darwin.apple_sdk.frameworks.Carbon
     pkgs.darwin.apple_sdk.frameworks.Cocoa
+    pkgs.wxGTK31
+    pkgs.wxmac
   ]);
 }
+OB
