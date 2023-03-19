@@ -52,7 +52,6 @@
   (tool-bar-mode -1)
   (ido-mode -1)
   (global-auto-revert-mode 1)
-  ;; (global-hl-line-mode) ;; TODO maybe turn off in vterm?
   (setq make-backup-files nil)
   (setq markdown-command "pandoc")
   (setq-default indent-tabs-mode nil)
@@ -93,7 +92,9 @@
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
-         ("s-u" . revert-buffer)))
+         ("s-u" . revert-buffer))
+  :hook ((prog-mode . hl-line-mode)
+         (text-mode . hl-line-mode))
 
 (use-package
   affe
