@@ -372,8 +372,26 @@
 ;;   :config
 ;;   (require 'org-download))
 
+(setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
 
+(use-package heex-ts-mode)
 
+(use-package elixir-ts-mode
+   :config (global-subword-mode t))
+
+;; M-. xref-find-definitions
+;; M-? xref-find-references
+(use-package eglot
+  :config
+  (dolist (mode '(elixir-ts-mode heex-ts-mode))
+    (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
+  :hook ((elixir-ts-mode . eglot-ensure)
+         (heex-ts-mode . eglot-ensure)
+         (elixir-ts-mode . eglot-ensure)
+         (python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)))
 
 ;; (use-package
 ;;   eglot-grammarly
@@ -382,20 +400,6 @@
 ;;   :hook ((text-mode markdown-mode org-mode). (lambda ()
 ;;                                                (require 'eglot-grammarly)
 ;;                                                (eglot-ensure))))
-
-;; M-. xref-find-definitions
-;; M-? xref-find-references
-;; (use-package
-;;  eglot
-;;  :straight
-;;  (eglot
-;;   :type git
-;;   :host nil
-;;   :repo "git://git.sv.gnu.org/emacs.git"
-;;   :files ("lisp/progmodes/eglot.el"))
-;;  :config ;; (add-hook 'elixir-mode-hook 'eglot-ensure)
-;; (add-hook 'elixir-ts-mode-hook (lambda () (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-;;  )
 
 ;; (setq
 ;;  eglot-server-programs
