@@ -1,0 +1,33 @@
+VERSION 0.6
+
+emacs:
+    FROM silex/emacs:master
+    WORKDIR /
+
+deps:
+    FROM +emacs
+    RUN apt update
+    RUN DEBIAN_FRONTEND=noninteractive apt install git --yes
+
+build:
+    FROM +deps
+    COPY +emacs-files/emacs/early-init.el /.config/emacs/
+
+early-init:
+    FROM +build
+    WORKDIR /
+    COPY early-init.el .
+    RUN emacs --batch -l early-init.el
+
+test:
+    FROM +early-init
+    COPY +emacs-files/emacs/init.el /.config/emacs/
+    COPY +emacs-files/emacs/config.org /.config/emacs/
+    COPY +emacs-files/emacs/custom.el /.config/emacs/
+    COPY test.el .
+    RUN emacs --batch -l test.el
+
+# https://github.com/earthly/earthly/issues/1221#issuecomment-925390672
+emacs-files:
+    LOCALLY
+    SAVE ARTIFACT ../emacs emacs
