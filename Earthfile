@@ -1,3 +1,4 @@
+VERSION 0.7
 emacs:
     FROM silex/emacs:master
     WORKDIR /
