@@ -46,12 +46,12 @@
   (setq recentf-max-saved-items 10000)
   (show-paren-mode 1)
   (setq show-paren-style 'expression)
+  (set-face-attribute 'show-paren-match-expression nil :background "blue")
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
   (tool-bar-mode -1)
   (ido-mode -1)
   (global-auto-revert-mode 1)
-  ;; (global-hl-line-mode) ;; TODO maybe turn off in vterm?
   (setq make-backup-files nil)
   (setq markdown-command "pandoc")
   (setq-default indent-tabs-mode nil)
@@ -71,8 +71,6 @@
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
   ;; (setq split-window-preferred-function 'split-window-horizontally)
   ;; (add-to-list 'default-frame-alist '(font . "Menlo-10"))
-  (when (version<= "26.0.50" emacs-version)
-    (global-display-line-numbers-mode))
   (setq delete-by-moving-to-trash t)
   (setq initial-major-mode #'org-mode)
   (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
@@ -86,12 +84,17 @@
                  (propertized-buffer-identification "%12b")))
   ;; this allows for Copying or Renaming across dired buffers
   (setq dired-dwim-target t)
+  (setq native-comp-async-report-warnings-errors 'silent)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
-         ("s-u" . revert-buffer)))
+         ("s-u" . revert-buffer))
+  :hook ((prog-mode . hl-line-mode)
+         (text-mode . hl-line-mode)
+         (prog-mode . display-line-numbers-mode)
+         (text-mode . display-line-numbers-mode)))
 
 (use-package
   affe
@@ -267,15 +270,13 @@
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
-      '(beacon deadgrep define-word
+      '(deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
              org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ;; ruby-mode
              ;; speed-type
              string-inflection
-             ;; tree-sitter
-             ;; tree-sitter-langs
              ))
 
 (dolist (package johnny5-package-list)
@@ -349,6 +350,9 @@
                                                          (sql . t)
                                                          (ruby . t)))
 
+(use-package python-mode
+  :init
+  (setq python-indent-offset 2))
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
@@ -375,18 +379,26 @@
 ;;   :config
 ;;   (require 'org-download))
 
-;; ;; (require 'tree-sitter)
-;; ;; (require 'tree-sitter-langs)
+(setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
 
-;; ;; (global-tree-sitter-mode)
-;; ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+(use-package heex-ts-mode)
 
-;; (use-package
-;;   elixir-mode
-;;   :straight t
-;;   :config
-;;   (add-hook 'elixir-mode-hook
-;;             (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
+(use-package elixir-ts-mode
+   :config (global-subword-mode t))
+
+;; M-. xref-find-definitions
+;; M-? xref-find-references
+(use-package eglot
+  :config
+  (dolist (mode '(elixir-ts-mode heex-ts-mode))
+    (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
+  :hook ((elixir-ts-mode . eglot-ensure)
+         (heex-ts-mode . eglot-ensure)
+         (elixir-ts-mode . eglot-ensure)
+         (python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)))
 
 ;; (use-package
 ;;   eglot-grammarly
@@ -395,20 +407,6 @@
 ;;   :hook ((text-mode markdown-mode org-mode). (lambda ()
 ;;                                                (require 'eglot-grammarly)
 ;;                                                (eglot-ensure))))
-
-;; M-. xref-find-definitions
-;; M-? xref-find-references
-;; (use-package
-;;  eglot
-;;  :straight
-;;  (eglot
-;;   :type git
-;;   :host nil
-;;   :repo "git://git.sv.gnu.org/emacs.git"
-;;   :files ("lisp/progmodes/eglot.el"))
-;;  :config ;; (add-hook 'elixir-mode-hook 'eglot-ensure)
-;; (add-hook 'elixir-ts-mode-hook (lambda () (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-;;  )
 
 ;; (setq
 ;;  eglot-server-programs
