@@ -270,7 +270,7 @@
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
-      '(beacon deadgrep define-word
+      '(deadgrep define-word
              ;; docker
              elfeed flycheck-yamllint git-link git-timemachine
              htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
