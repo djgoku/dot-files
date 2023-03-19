@@ -277,8 +277,6 @@
              org-chef org-contrib org-ql ox-jira pdf-tools powerthesaurus ;; ruby-mode
              ;; speed-type
              string-inflection
-             ;; tree-sitter
-             ;; tree-sitter-langs
              ))
 
 (dolist (package johnny5-package-list)
@@ -374,18 +372,8 @@
 ;;   :config
 ;;   (require 'org-download))
 
-;; ;; (require 'tree-sitter)
-;; ;; (require 'tree-sitter-langs)
 
-;; ;; (global-tree-sitter-mode)
-;; ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
-;; (use-package
-;;   elixir-mode
-;;   :straight t
-;;   :config
-;;   (add-hook 'elixir-mode-hook
-;;             (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
 ;; (use-package
 ;;   eglot-grammarly
