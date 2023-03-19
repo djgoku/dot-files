@@ -71,8 +71,6 @@
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
   ;; (setq split-window-preferred-function 'split-window-horizontally)
   ;; (add-to-list 'default-frame-alist '(font . "Menlo-10"))
-  (when (version<= "26.0.50" emacs-version)
-    (global-display-line-numbers-mode))
   (setq delete-by-moving-to-trash t)
   (setq initial-major-mode #'org-mode)
   (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
@@ -94,7 +92,9 @@
          ("s-a" . mark-whole-buffer)
          ("s-u" . revert-buffer))
   :hook ((prog-mode . hl-line-mode)
-         (text-mode . hl-line-mode))
+         (text-mode . hl-line-mode)
+         (prog-mode . display-line-numbers-mode)
+         (text-mode . display-line-numbers-mode)))
 
 (use-package
   affe
