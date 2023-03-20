@@ -23,7 +23,9 @@ test:
     FROM +early-init
     COPY +emacs-files/emacs/init.el /.config/emacs/
     COPY +emacs-files/emacs/config.org /.config/emacs/
-    COPY +emacs-files/emacs/custom.el /.config/emacs/
+    IF [ -f +emacs-files/emacs/custom.el ]
+        COPY +emacs-files/emacs/custom.el /.config/emacs/
+    END
     COPY test.el .
     RUN emacs --batch -l test.el
 
