@@ -5,11 +5,11 @@
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(when (string-equal system-type "gnu/linux")
+(when (and (string-equal system-type "gnu/linux") (fboundp 'guix-emacs-autoload-packages))
   (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
   (guix-emacs-autoload-packages))
 
-(when (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+(when (or (string-equal system-type "berkley-unix") (and (string-equal system-type "gnu/linux") (fboundp 'guix-emacs-autoload-packages)))
   (use-package exwm)
   (require 'exwm)
   (require 'exwm-config)
@@ -48,7 +48,8 @@
   (setq show-paren-style 'expression)
   (set-face-attribute 'show-paren-match-expression nil :background "blue")
   (menu-bar-mode -1)
-  (toggle-scroll-bar -1)
+  (if (fboundp 'toggle-scroll-bar)
+      (toggle-scroll-bar nil))
   (tool-bar-mode -1)
   (ido-mode -1)
   (global-auto-revert-mode 1)

@@ -15,4 +15,4 @@ jobs:
           version: "latest"
       - uses: actions/checkout@v2
       - name: run earthly for testing emacs
-        run: earthly +test
+        run: earthly ./earthly+test
