@@ -14,5 +14,7 @@ jobs:
         with:
           version: "latest"
       - uses: actions/checkout@v2
+      - name: Docker login
+        run: docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password "${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: run earthly for testing emacs
         run: earthly ./earthly+test
