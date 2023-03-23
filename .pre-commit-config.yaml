@@ -59,3 +59,13 @@ repos:
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.9.0
+    hooks:
+      - id: reorder-python-imports
+        exclude: ^(pre_commit/resources/|testing/resources/python3_hooks_repo/)
+        args: [--py310-plus, --add-import, 'from __future__ import annotations']
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8

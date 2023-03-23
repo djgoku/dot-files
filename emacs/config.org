@@ -399,7 +399,18 @@
          (heex-ts-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure)))
+         (python-ts-mode . eglot-ensure))
+  :bind(:map eglot-mode-map
+             ("C-c l r" . eglot-rename)
+             ("C-c l h" . eglot-help-at-point)
+             ("C-c l a" . eglot-code-actions)
+             ("M-n" . flymake-goto-next-error)
+             ("M-p" . flymake-goto-prev-error))
+  :custom
+  ;; Shutdown server after buffer kill
+  (eglot-autoshutdown t)
+  ;; Enable eglot in code external to project
+  (eglot-extend-to-xref t))
 
 ;; (use-package
 ;;   eglot-grammarly
