@@ -92,8 +92,12 @@
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
          ("s-u" . revert-buffer))
-  :hook ((prog-mode . hl-line-mode)
+  :hook ((eshell-mode . hl-line-mode)
+         (vterm-mode . hl-line-mode)
+         (prog-mode . hl-line-mode)
          (text-mode . hl-line-mode)
+         (eshell-mode . display-line-numbers-mode)
+         (vterm-mode . display-line-numbers-mode)
          (prog-mode . display-line-numbers-mode)
          (text-mode . display-line-numbers-mode)))
 
