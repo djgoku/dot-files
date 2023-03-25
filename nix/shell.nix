@@ -127,7 +127,7 @@ pkgs.mkShell
     ruby_3_1
     slack
     sops
-    sqlite
+    sqlite-interactive
     squashfsTools
     steampipe
     terraform
