@@ -479,14 +479,16 @@
 (use-package avy
   :bind (("M-j" . avy-goto-char-timer)))
 
-(use-package
+(when (executable-find "cmake")
+  (use-package
   vterm
   :config (setq vterm-buffer-name-string "vterm %s")
   (setq vterm-kill-buffer-on-exit nil)
   (setq vterm-max-scrollback 100000)
   (setq vterm-use-vterm-prompt-detection-method t)
+  (setq vterm-always-compile-module t)
   (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                 (setq default-directory path)))))
+                                                 (setq default-directory path))))))
 
 (defun screenshot-svg ()
   "Save a screenshot of the current frame as an SVG image.
