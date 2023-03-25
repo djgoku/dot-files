@@ -511,6 +511,13 @@
   envrc
   :config (envrc-global-mode))
 
+(use-package pdf-tools
+  :defer t
+  :magic ("%PDF" . pdf-view-mode) ;; https://github.com/jwiegley/use-package#magic-handlers
+  :config
+  (pdf-loader-install)
+  (setq pdf-view-use-scaling t))
+
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
