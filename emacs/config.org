@@ -267,6 +267,7 @@
 
 (use-package
   magit
+  :after project
   :init (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   :bind (("C-x g" . magit-project-status)))
 
