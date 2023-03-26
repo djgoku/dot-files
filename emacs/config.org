@@ -276,14 +276,27 @@
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
-      '(deadgrep define-word
-             ;; docker
-             elfeed it-link git-timemachine
-             htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
-             org-chef org-contrib org-jira org-ql ox-jira powerthesaurus ;; ruby-mode
-             ;; speed-type
-             string-inflection
-             ))
+      '(deadgrep
+        define-word
+        docker
+        elfeed
+        git-link
+        git-timemachine
+        htmlize
+        ipcalc
+        jeison
+        json-mode
+        kubel
+        markdown-mode
+        ob-elixir
+        org-chef
+        org-contrib
+        org-jira
+        org-ql
+        orgit
+        ox-jira
+        powerthesaurus
+        string-inflection))
 
 (dolist (package johnny5-package-list)
   (eval `(use-package ,package) t))
