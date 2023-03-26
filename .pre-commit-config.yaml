@@ -15,7 +15,6 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: check-yaml
-      - id: check-yaml
       - id: detect-aws-credentials
         args: [--allow-missing-credentials]
       - id: detect-private-key
@@ -69,3 +68,7 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.8.0
+    hooks:
+      - id: yamlfmt

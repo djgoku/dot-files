@@ -99,6 +99,7 @@ pkgs.mkShell
     gcc
     git
     gnupg
+    go_1_20
     graphviz
     isync
     jdk11
