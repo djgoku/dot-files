@@ -86,14 +86,20 @@
   ;; this allows for Copying or Renaming across dired buffers
   (setq dired-dwim-target t)
   (setq native-comp-async-report-warnings-errors 'silent)
+  (pixel-scroll-precision-mode 1)
+  (setq pixel-scroll-precision-use-momentum t)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
          ("s-u" . revert-buffer))
-  :hook ((prog-mode . hl-line-mode)
+  :hook ((eshell-mode . hl-line-mode)
+         (vterm-mode . hl-line-mode)
+         (prog-mode . hl-line-mode)
          (text-mode . hl-line-mode)
+         (eshell-mode . display-line-numbers-mode)
+         (vterm-mode . display-line-numbers-mode)
          (prog-mode . display-line-numbers-mode)
          (text-mode . display-line-numbers-mode)))
 
@@ -104,8 +110,8 @@
   (setq affe-count 10000)
   (setq affe-regexp-function #'orderless-pattern-compiler
         affe-highlight-function #'orderless--highlight
-        affe-find-command "rg --color=never --files --hidden -g !.git/*"
-        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/*")
+        affe-find-command "rg --color=never --files --hidden -g !.git/"
+        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/")
   :bind (("M-s af" . affe-find)
          ("M-s ag" . affe-grep)))
 
@@ -164,9 +170,6 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(with-eval-after-load 'eglot
-  (setq completion-category-defaults nil))
-
 (use-package vertico
   :init
   (vertico-mode))
@@ -176,19 +179,6 @@
   :elpaca nil
   :init
   (savehist-mode))
-
-(use-package corfu
-  :custom
-  (corfu-auto t)        ;; Enable auto completion
-  (corfu-separator ?\s) ;; Orderless field separator
-  (corfu-auto-delay 0.0)
-  :init
-  (global-corfu-mode))
-
-(unless (display-graphic-p)
-  (use-package corfu-terminal
-    :init
-    (corfu-terminal-mode +1)))
 
 (use-package
   default-text-scale
@@ -272,14 +262,28 @@
   :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
-      '(deadgrep define-word
-             ;; docker
-             elfeed it-link git-timemachine
-             htmlize ipcalc jeison json-mode kubel markdown-mode ob-elixir orgit
-             org-chef org-contrib org-jira org-ql ox-jira powerthesaurus ;; ruby-mode
-             ;; speed-type
-             string-inflection
-             ))
+      '(deadgrep
+        define-word
+        docker
+        elfeed
+        git-link
+        git-timemachine
+        htmlize
+        ipcalc
+        jeison
+        json-mode
+        kubel
+        markdown-mode
+        nix-mode
+        ob-elixir
+        org-chef
+        org-contrib
+        org-jira
+        org-ql
+        orgit
+        ox-jira
+        powerthesaurus
+        string-inflection))
 
 (dolist (package johnny5-package-list)
   (eval `(use-package ,package) t))
@@ -382,28 +386,33 @@
 ;;   (require 'org-download))
 
 (setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
-
+(add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package heex-ts-mode)
 
 (use-package elixir-ts-mode
    :config (global-subword-mode t))
 
 ;; M-. xref-find-definitions
+;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
   :config
+  (setq eldoc-echo-area-use-multiline-p t)
   (dolist (mode '(elixir-ts-mode heex-ts-mode))
     (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
+  (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
+  (add-to-list 'eglot-server-programs '(terraform-mode "terraform-ls" "serve"))
   :hook ((elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure))
+         (python-ts-mode . eglot-ensure)
+         (nix-mode . eglot-ensure)
+         (terraform-mode . eglot-ensure))
   :bind(:map eglot-mode-map
              ("C-c l r" . eglot-rename)
-             ("C-c l h" . eglot-help-at-point)
              ("C-c l a" . eglot-code-actions)
              ("M-n" . flymake-goto-next-error)
              ("M-p" . flymake-goto-prev-error))
@@ -412,6 +421,14 @@
   (eglot-autoshutdown t)
   ;; Enable eglot in code external to project
   (eglot-extend-to-xref t))
+
+(use-package company
+  :hook
+  (prog-mode . company-mode)
+  :config
+  (setq company-minimum-prefix-length 1
+	company-idle-delay 0.0
+	company-backends '((company-capf company-dabbrev-code))))
 
 ;; (use-package
 ;;   eglot-grammarly
