@@ -170,9 +170,6 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(with-eval-after-load 'eglot
-  (setq completion-category-defaults nil))
-
 (use-package vertico
   :init
   (vertico-mode))
@@ -182,19 +179,6 @@
   :elpaca nil
   :init
   (savehist-mode))
-
-(use-package corfu
-  :custom
-  (corfu-auto t)        ;; Enable auto completion
-  (corfu-separator ?\s) ;; Orderless field separator
-  (corfu-auto-delay 0.0)
-  :init
-  (global-corfu-mode))
-
-(unless (display-graphic-p)
-  (use-package corfu-terminal
-    :init
-    (corfu-terminal-mode +1)))
 
 (use-package
   default-text-scale
