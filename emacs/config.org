@@ -382,29 +382,33 @@
 ;;   (require 'org-download))
 
 (setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
-
+(add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package heex-ts-mode)
 
 (use-package elixir-ts-mode
    :config (global-subword-mode t))
 
 ;; M-. xref-find-definitions
+;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
   :config
+  (setq eldoc-echo-area-use-multiline-p t)
   (dolist (mode '(elixir-ts-mode heex-ts-mode))
     (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
   (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
+  (add-to-list 'eglot-server-programs '(terraform-mode "terraform-ls" "serve"))
   :hook ((elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure))
+         (python-ts-mode . eglot-ensure)
+         (nix-mode . eglot-ensure)
+         (terraform-mode . eglot-ensure))
   :bind(:map eglot-mode-map
              ("C-c l r" . eglot-rename)
-             ("C-c l h" . eglot-help-at-point)
              ("C-c l a" . eglot-code-actions)
              ("M-n" . flymake-goto-next-error)
              ("M-p" . flymake-goto-prev-error))
