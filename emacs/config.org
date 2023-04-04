@@ -414,6 +414,14 @@
   ;; Enable eglot in code external to project
   (eglot-extend-to-xref t))
 
+(use-package company
+  :hook
+  (prog-mode . company-mode)
+  :config
+  (setq company-minimum-prefix-length 1
+	company-idle-delay 0.0
+	company-backends '((company-capf company-dabbrev-code))))
+
 ;; (use-package
 ;;   eglot-grammarly
 ;;   :straight (:host github
