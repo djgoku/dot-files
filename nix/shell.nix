@@ -120,11 +120,14 @@ pkgs.mkShell
     openssl
     openssl.dev
     pandoc
+    poppler_utils # pdftotext
     postgresql_14
     pre-commit
+    qemu
     readline
     rebar3
     ripgrep
+    rnix-lsp
     ruby_3_1
     slack
     sops
@@ -132,6 +135,7 @@ pkgs.mkShell
     squashfsTools
     steampipe
     terraform
+    terraform-ls
     terrascan
     texlive.combined.scheme-full # pdf2latex
     tfsec
@@ -140,12 +144,12 @@ pkgs.mkShell
     vscode-with-extensions
     wget
     xz
+    yamlfmt
     zlib
   ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
     pkgs.darwin.apple_sdk.frameworks.AGL
     pkgs.darwin.apple_sdk.frameworks.Carbon
     pkgs.darwin.apple_sdk.frameworks.Cocoa
     pkgs.wxGTK31
-    pkgs.wxmac
   ]);
 }
