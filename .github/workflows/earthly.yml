@@ -1,5 +1,4 @@
 name: Earthly
-
 on:
   push:
     paths:
