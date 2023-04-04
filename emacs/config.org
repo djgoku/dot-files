@@ -86,6 +86,8 @@
   ;; this allows for Copying or Renaming across dired buffers
   (setq dired-dwim-target t)
   (setq native-comp-async-report-warnings-errors 'silent)
+  (pixel-scroll-precision-mode 1)
+  (setq pixel-scroll-precision-use-momentum t)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
