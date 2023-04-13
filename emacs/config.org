@@ -88,6 +88,7 @@
   (setq native-comp-async-report-warnings-errors 'silent)
   (pixel-scroll-precision-mode 1)
   (setq pixel-scroll-precision-use-momentum t)
+  (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
