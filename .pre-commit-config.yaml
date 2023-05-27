@@ -27,6 +27,8 @@ repos:
     rev: v1.4.0
     hooks:
       - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.79.1
     hooks:
