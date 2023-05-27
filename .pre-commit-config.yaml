@@ -28,7 +28,7 @@ repos:
     hooks:
       - id: detect-secrets
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.2
+    rev: v1.79.1
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
@@ -54,7 +54,7 @@ repos:
     hooks:
       - id: nixpkgs-fmt
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.4.0
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
