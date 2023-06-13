@@ -30,7 +30,7 @@ repos:
         args: [--baseline, .secrets.baseline]
         additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.79.1
+    rev: v1.81.0
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
@@ -56,11 +56,11 @@ repos:
     hooks:
       - id: nixpkgs-fmt
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.4.0
+    rev: v3.6.0
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
-  - repo: https://github.com/asottile/reorder_python_imports
+  - repo: https://github.com/asottile/reorder-python-imports
     rev: v3.9.0
     hooks:
       - id: reorder-python-imports
