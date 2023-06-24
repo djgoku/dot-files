@@ -519,6 +519,11 @@
 (use-package buffer-env
   :hook (hack-local-variables . buffer-env-update)
   :config (setq buffer-env-script-name '(".venv/bin/activate")))
+
+(use-package buffer-name-relative
+  :init
+  (setq buffer-name-relative-prefix '("<" ">/"))
+  (buffer-name-relative-mode))
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
