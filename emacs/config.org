@@ -193,25 +193,6 @@
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
 
-(defun johnny5-split-window-horizontally ()
-  (interactive)
-  (split-window-horizontally)
-  (balance-windows))
-
-(defun johnny5-delete-window-evenly ()
-  (interactive)
-  (delete-window)
-  (balance-windows))
-
-(defun johnny5-split-window-below ()
-  (interactive)
-  (split-window-below)
-  (balance-windows))
-
-(global-set-key "\C-x3" 'johnny5-split-window-horizontally)
-(global-set-key "\C-x2" 'johnny5-split-window-below)
-(global-set-key "\C-x0" 'johnny5-delete-window-evenly)
-
 ;;; It is the opposite of fill-paragraph
 (defun unfill-paragraph ()
   "Takes a multi-line paragraph and makes it into a single line of text."
