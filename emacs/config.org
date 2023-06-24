@@ -400,7 +400,9 @@
   :config
   (setq company-minimum-prefix-length 1
 	company-idle-delay 0.0
-	company-backends '((company-capf company-dabbrev-code))))
+	company-backends '((company-capf company-dabbrev-code))
+        company-dabbrev-minimum-length 2
+        company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
 
 ;; (use-package
 ;;   eglot-grammarly
