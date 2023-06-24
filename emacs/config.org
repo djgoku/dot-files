@@ -513,6 +513,12 @@
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
 
+(use-package inheritenv
+  :elpaca (:type git :host github :repo "purcell/inheritenv"))
+
+(use-package buffer-env
+  :hook (hack-local-variables . buffer-env-update)
+  :config (setq buffer-env-script-name '(".venv/bin/activate")))
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
