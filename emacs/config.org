@@ -555,6 +555,10 @@
           (funcall callback)))
   (add-to-list 'apheleia-formatters
                '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
+
+(use-package yasnippet
+  :config
+  (yas-global-mode 1))
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
