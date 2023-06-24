@@ -559,6 +559,12 @@
 (use-package yasnippet
   :config
   (yas-global-mode 1))
+
+(use-package burly
+  :elpaca (:type git :host github :repo "alphapapa/burly.el"))
+
+(elpaca-process-queues)
+
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
