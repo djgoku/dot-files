@@ -524,6 +524,19 @@
   :init
   (setq buffer-name-relative-prefix '("<" ">/"))
   (buffer-name-relative-mode))
+
+(use-package sideline-blame)
+(use-package sideline-flymake)
+(use-package sideline
+  :init
+  (setq sideline-flymake-display-mode 'line
+        sideline-backends-right '(sideline-flymake sideline-blame)
+        sideline-backends-skip-current-line t  ; don't display on current line
+        sideline-format-left "%s   "           ; format for left aligment
+        sideline-format-right "   %s"          ; format for right aligment
+        sideline-priority 100                  ; overlays' priority
+        )
+  :hook (flymake-mode . sideline-mode))
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
