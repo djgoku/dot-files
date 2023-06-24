@@ -366,6 +366,9 @@
 ;; M-? xref-find-references
 (use-package eglot
   :config
+  ;; else eglot + python will not work well
+  ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
+  (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
   (dolist (mode '(elixir-ts-mode heex-ts-mode))
     (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
