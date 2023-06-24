@@ -89,20 +89,14 @@
   (pixel-scroll-precision-mode 1)
   (setq pixel-scroll-precision-use-momentum t)
   (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
+  (global-hl-line-mode 1)
+  (global-display-line-numbers-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
-         ("s-u" . revert-buffer))
-  :hook ((eshell-mode . hl-line-mode)
-         (vterm-mode . hl-line-mode)
-         (prog-mode . hl-line-mode)
-         (text-mode . hl-line-mode)
-         (eshell-mode . display-line-numbers-mode)
-         (vterm-mode . display-line-numbers-mode)
-         (prog-mode . display-line-numbers-mode)
-         (text-mode . display-line-numbers-mode)))
+         ("s-u" . revert-buffer)))
 
 (use-package
   affe
@@ -198,25 +192,6 @@
   rg
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
-
-(defun johnny5-split-window-horizontally ()
-  (interactive)
-  (split-window-horizontally)
-  (balance-windows))
-
-(defun johnny5-delete-window-evenly ()
-  (interactive)
-  (delete-window)
-  (balance-windows))
-
-(defun johnny5-split-window-below ()
-  (interactive)
-  (split-window-below)
-  (balance-windows))
-
-(global-set-key "\C-x3" 'johnny5-split-window-horizontally)
-(global-set-key "\C-x2" 'johnny5-split-window-below)
-(global-set-key "\C-x0" 'johnny5-delete-window-evenly)
 
 ;;; It is the opposite of fill-paragraph
 (defun unfill-paragraph ()
@@ -357,9 +332,6 @@
                                                          (sql . t)
                                                          (ruby . t)))
 
-(use-package python-mode
-  :init
-  (setq python-indent-offset 2))
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
@@ -398,6 +370,9 @@
 ;; M-? xref-find-references
 (use-package eglot
   :config
+  ;; else eglot + python will not work well
+  ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
+  (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
   (dolist (mode '(elixir-ts-mode heex-ts-mode))
     (add-to-list 'eglot-server-programs `(,mode . ("/Users/dj_goku/dev/github/elixir-lsp/elixir-ls/release/language_server.sh"))))
@@ -429,7 +404,9 @@
   :config
   (setq company-minimum-prefix-length 1
 	company-idle-delay 0.0
-	company-backends '((company-capf company-dabbrev-code))))
+	company-backends '((company-capf company-dabbrev-code))
+        company-dabbrev-minimum-length 2
+        company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
 
 ;; (use-package
 ;;   eglot-grammarly
@@ -539,6 +516,58 @@
   :config
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
+
+(use-package inheritenv
+  :elpaca (:type git :host github :repo "purcell/inheritenv"))
+
+(use-package buffer-env
+  :hook (hack-local-variables . buffer-env-update)
+  :config (setq buffer-env-script-name '(".venv/bin/activate")))
+
+(use-package buffer-name-relative
+  :init
+  (setq buffer-name-relative-prefix '("<" ">/"))
+  (buffer-name-relative-mode))
+
+(use-package sideline-blame)
+(use-package sideline-flymake)
+(use-package sideline
+  :init
+  (setq sideline-flymake-display-mode 'line
+        sideline-backends-right '(sideline-flymake sideline-blame)
+        sideline-backends-skip-current-line t  ; don't display on current line
+        sideline-format-left "%s   "           ; format for left aligment
+        sideline-format-right "   %s"          ; format for right aligment
+        sideline-priority 100                  ; overlays' priority
+        )
+  :hook (flymake-mode . sideline-mode))
+
+(use-package apheleia
+  :config
+  (apheleia-global-mode +1)
+  (require 'cl-lib)
+  ;; https://github.com/radian-software/apheleia/issues/153
+  (cl-defun apheleia-indent-eglot-managed-buffer
+          (&key buffer scratch callback &allow-other-keys)
+        "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
+        (with-current-buffer scratch
+          (setq-local eglot--cached-server
+                      (with-current-buffer buffer
+                        (eglot-current-server)))
+          (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
+            (eglot-format-buffer))
+          (funcall callback)))
+  (add-to-list 'apheleia-formatters
+               '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
+
+(use-package yasnippet
+  :config
+  (yas-global-mode 1))
+
+(use-package burly
+  :elpaca (:type git :host github :repo "alphapapa/burly.el"))
+
+(elpaca-process-queues)
 
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
