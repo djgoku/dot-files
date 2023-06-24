@@ -89,20 +89,14 @@
   (pixel-scroll-precision-mode 1)
   (setq pixel-scroll-precision-use-momentum t)
   (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
+  (global-hl-line-mode 1)
+  (global-display-line-numbers-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
          ("M-u" . upcase-dwim)
          ("s-a" . mark-whole-buffer)
-         ("s-u" . revert-buffer))
-  :hook ((eshell-mode . hl-line-mode)
-         (vterm-mode . hl-line-mode)
-         (prog-mode . hl-line-mode)
-         (text-mode . hl-line-mode)
-         (eshell-mode . display-line-numbers-mode)
-         (vterm-mode . display-line-numbers-mode)
-         (prog-mode . display-line-numbers-mode)
-         (text-mode . display-line-numbers-mode)))
+         ("s-u" . revert-buffer)))
 
 (use-package
   affe
