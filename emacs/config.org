@@ -328,9 +328,6 @@
                                                          (sql . t)
                                                          (ruby . t)))
 
-(use-package python-mode
-  :init
-  (setq python-indent-offset 2))
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
