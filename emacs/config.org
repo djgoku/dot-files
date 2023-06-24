@@ -537,6 +537,24 @@
         sideline-priority 100                  ; overlays' priority
         )
   :hook (flymake-mode . sideline-mode))
+
+(use-package apheleia
+  :config
+  (apheleia-global-mode +1)
+  (require 'cl-lib)
+  ;; https://github.com/radian-software/apheleia/issues/153
+  (cl-defun apheleia-indent-eglot-managed-buffer
+          (&key buffer scratch callback &allow-other-keys)
+        "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
+        (with-current-buffer scratch
+          (setq-local eglot--cached-server
+                      (with-current-buffer buffer
+                        (eglot-current-server)))
+          (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
+            (eglot-format-buffer))
+          (funcall callback)))
+  (add-to-list 'apheleia-formatters
+               '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
 (when (file-exists-p "~/.config/emacs/custom.el")
   (setq custom-file "~/.config/emacs/custom.el")
   (load custom-file))
