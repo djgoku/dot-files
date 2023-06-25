@@ -526,7 +526,7 @@
 
 (use-package buffer-name-relative
   :init
-  (setq buffer-name-relative-prefix '("<" ">/"))
+  (setq buffer-name-relative-prefix '("<" . ">/"))
   (buffer-name-relative-mode))
 
 (use-package sideline-blame)
