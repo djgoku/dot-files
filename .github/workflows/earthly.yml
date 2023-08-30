@@ -4,10 +4,14 @@ on:
     paths:
       - 'emacs/**.el'
       - 'emacs/**.org'
+      - '.github/**.yml'
 jobs:
   tests:
     name: Testing Emacs
-    runs-on: [ubuntu-latest, macos-13]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-13]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: earthly/actions-setup@v1
         with:
