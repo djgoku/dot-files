@@ -565,7 +565,7 @@
 
 (elpaca-process-queues)
 
-(when (file-exists-p "~/.config/emacs/custom.el")
-  (setq custom-file "~/.config/emacs/custom.el")
+(when (file-exists-p (locate-user-emacs-file "custom.el"))
+  (setq custom-file (locate-user-emacs-file "custom.el"))
   (load custom-file))
 #+end_src
