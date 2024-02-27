@@ -45,14 +45,15 @@
 
 (elpaca-wait)
 
-(use-package
-  modus-themes
+(use-package modus-themes
   :ensure t
-  :init (setq modus-themes-org-blocks 'gray-background)
-  :config (modus-themes-load-theme 'modus-vivendi-deuteranopia))
+  :custom-face
+  (show-paren-match-expression ((t :background "#0000ff")))
+  :config
+  (setq modus-themes-org-blocks 'gray-background)
+  (modus-themes-load-theme 'modus-vivendi-deuteranopia))
 
-(use-package
-  undo-fu
+(use-package undo-fu
   :ensure t
   :bind (("C-z" . undo-fu-only-undo) ("C-S-z" . undo-fu-only-redo)))
 
