@@ -10,7 +10,7 @@
   (guix-emacs-autoload-packages))
 
 (when (or (string-equal system-type "berkley-unix") (and (string-equal system-type "gnu/linux") (fboundp 'guix-emacs-autoload-packages)))
-  (use-package exwm)
+  (use-package exwm :ensure t)
   (require 'exwm)
   (require 'exwm-config)
   (require 'exwm-randr)
@@ -40,7 +40,7 @@
 
 (use-package
   emacs
-  :elpaca nil
+  :ensure nil
   :config (recentf-mode t)
   (setq recentf-max-menu-items 10000)
   (setq recentf-max-saved-items 10000)
@@ -99,6 +99,7 @@
 
 (use-package
   affe
+  :ensure t
   :after orderless
   :config
   (setq affe-count 10000)
@@ -111,6 +112,7 @@
 
 ;; Example configuration for Consult
 (use-package consult
+  :ensure t
   :bind (("C-c m" . consult-man)
          ("C-c i" . consult-info)
          ([remap Info-search] . consult-info)
@@ -142,40 +144,46 @@
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<") ;; "C-+"
-)
+  )
 
 (use-package
   marginalia
+  :ensure t
   :config (marginalia-mode)
   (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 
 (use-package
   embark
+  :ensure t
   :bind ("M-a" . embark-act))
 
 (use-package
   embark-consult
+  :ensure t
   :after (embark consult)
   :demand t
   :hook (embark-collect-mode . embark-consult-preview-minor-mode))
 
 (use-package orderless
+  :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (use-package vertico
+  :ensure t
   :init
   (vertico-mode))
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
-  :elpaca nil
+  :ensure nil
   :init
   (savehist-mode))
 
 (use-package
   default-text-scale
+  :ensure t
   :config
   :hook (after-init . default-text-scale-mode)
   :bind (("s-=" . default-text-scale-increase)
@@ -184,11 +192,13 @@
 
 (use-package
   wgrep
+  :ensure t
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
 
 (use-package
   rg
+  :ensure t
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
 
@@ -212,7 +222,7 @@
 ;; try to setup spell-fu on macOS so we can remove these guards.
 (when (string-equal system-type "gnu/linux")
   (use-package
-    spell-fu))
+    spell-fu :ensure t))
 (when (string-equal system-type "gnu/linux")
   (add-hook 'org-mode-hook (lambda ()
                              (setq spell-fu-faces-exclude '(org-block-begin-line org-block-end-line
@@ -232,6 +242,7 @@
 
 (use-package
   magit
+  :ensure t
   :after project
   :init (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   :bind (("C-x g" . magit-project-status)))
@@ -262,10 +273,11 @@
         transient))
 
 (dolist (package johnny5-package-list)
-  (eval `(use-package ,package) t))
+  (eval `(use-package ,package :ensure t) t))
 
 (use-package
   git-identity
+  :ensure t
   :after magit
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
@@ -275,7 +287,7 @@
 ;; (widen) C-x n w
 (use-package
   org
-  :elpaca nil
+  :ensure nil
   :bind (("C-c c" . 'org-capture)
          ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
@@ -331,10 +343,12 @@
 ;; just add :async to any org babel src blocks!
 (use-package
   ob-async
+  :ensure t
   :config (require 'ob-async))
 
 (use-package
   denote
+  :ensure t
   :config
   (setq denote-directory "~/dev/notes"))
 
@@ -356,15 +370,17 @@
 
 (setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-(use-package heex-ts-mode)
+(use-package heex-ts-mode :ensure t)
 
 (use-package elixir-ts-mode
-   :config (global-subword-mode t))
+  :ensure t
+  :config (global-subword-mode t))
 
 ;; M-. xref-find-definitions
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
+  :ensure t
   :config
   ;; else eglot + python will not work well
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
@@ -395,6 +411,7 @@
   (eglot-extend-to-xref t))
 
 (use-package company
+  :ensure t
   :hook
   (prog-mode . company-mode)
   :config
@@ -448,10 +465,12 @@
 
 (use-package
   which-key
+  :ensure t
   :config (which-key-mode))
 
 (use-package
   switch-window
+  :ensure t
   :bind (("C-x o" . switch-window))
   :config (setq switch-window-shortcut-style 'qwerty)
   (setq switch-window-minibuffer-shortcut ?z))
@@ -466,6 +485,7 @@
 
 (use-package
   multiple-cursors
+  :ensure t
   :config (setq mc/always-run-for-all 1)
   (define-key mc/keymap (kbd "<return>") nil)
   :bind (("s-d" . mc/mark-next-like-this)
@@ -473,18 +493,20 @@
          ("M-s-d" . mc/edit-beginnings-of-lines)))
 
 (use-package avy
+  :ensure t
   :bind (("M-j" . avy-goto-char-timer)))
 
 (when (executable-find "cmake")
   (use-package
-  vterm
-  :config (setq vterm-buffer-name-string "vterm %s")
-  (setq vterm-kill-buffer-on-exit nil)
-  (setq vterm-max-scrollback 100000)
-  (setq vterm-use-vterm-prompt-detection-method t)
-  (setq vterm-always-compile-module t)
-  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                 (setq default-directory path))))))
+    vterm
+    :ensure t
+    :config (setq vterm-buffer-name-string "vterm %s")
+    (setq vterm-kill-buffer-on-exit nil)
+    (setq vterm-max-scrollback 100000)
+    (setq vterm-use-vterm-prompt-detection-method t)
+    (setq vterm-always-compile-module t)
+    (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                                   (setq default-directory path))))))
 
 (defun screenshot-svg ()
   "Save a screenshot of the current frame as an SVG image.
@@ -499,14 +521,17 @@
 
 (use-package
   elisp-demos
+  :ensure t
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
 (use-package
   envrc
+  :ensure t
   :config (envrc-global-mode))
 
 (use-package pdf-tools
+  :ensure t
   :defer t
   :magic ("%PDF" . pdf-view-mode) ;; https://github.com/jwiegley/use-package#magic-handlers
   :config
@@ -514,20 +539,23 @@
   (setq pdf-view-use-scaling t))
 
 (use-package inheritenv
-  :elpaca (:type git :host github :repo "purcell/inheritenv"))
+  :ensure (:type git :host github :repo "purcell/inheritenv"))
 
 (use-package buffer-env
+  :ensure t
   :hook (hack-local-variables . buffer-env-update)
   :config (setq buffer-env-script-name '(".venv/bin/activate")))
 
 (use-package buffer-name-relative
+  :ensure t
   :init
   (setq buffer-name-relative-prefix '("<" . ">/"))
   (buffer-name-relative-mode))
 
-(use-package sideline-blame)
-(use-package sideline-flymake)
+(use-package sideline-blame :ensure t)
+(use-package sideline-flymake :ensure t)
 (use-package sideline
+  :ensure t
   :init
   (setq sideline-flymake-display-mode 'line
         sideline-backends-right '(sideline-flymake sideline-blame)
@@ -539,29 +567,31 @@
   :hook (flymake-mode . sideline-mode))
 
 (use-package apheleia
+  :ensure t
   :config
   (apheleia-global-mode +1)
   (require 'cl-lib)
   ;; https://github.com/radian-software/apheleia/issues/153
   (cl-defun apheleia-indent-eglot-managed-buffer
-          (&key buffer scratch callback &allow-other-keys)
-        "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
-        (with-current-buffer scratch
-          (setq-local eglot--cached-server
-                      (with-current-buffer buffer
-                        (eglot-current-server)))
-          (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
-            (eglot-format-buffer))
-          (funcall callback)))
+      (&key buffer scratch callback &allow-other-keys)
+    "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
+    (with-current-buffer scratch
+      (setq-local eglot--cached-server
+                  (with-current-buffer buffer
+                    (eglot-current-server)))
+      (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
+        (eglot-format-buffer))
+      (funcall callback)))
   (add-to-list 'apheleia-formatters
                '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
 
 (use-package yasnippet
+  :ensure t
   :config
   (yas-global-mode 1))
 
 (use-package burly
-  :elpaca (:type git :host github :repo "alphapapa/burly.el"))
+  :ensure (:type git :host github :repo "alphapapa/burly.el"))
 
 (elpaca-process-queues)
 
