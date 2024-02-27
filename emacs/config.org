@@ -258,7 +258,8 @@
         orgit
         ox-jira
         powerthesaurus
-        string-inflection))
+        string-inflection
+        transient))
 
 (dolist (package johnny5-package-list)
   (eval `(use-package ,package) t))
