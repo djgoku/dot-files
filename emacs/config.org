@@ -265,10 +265,6 @@
   (eval `(use-package ,package) t))
 
 (use-package
-  git-timemachine
-  :straight (git-timemachine :type git :host "https://codeberg.org" :repo "pidu/git-timemachine"))
-
-(use-package
   git-identity
   :after magit
   :config (git-identity-magit-mode 1)
