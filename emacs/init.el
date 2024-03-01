@@ -65,6 +65,8 @@
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
 
+(elpaca-wait)
+
 (when (file-readable-p (locate-user-emacs-file "config.org"))
   (org-babel-load-file (locate-user-emacs-file "config.org")))
 

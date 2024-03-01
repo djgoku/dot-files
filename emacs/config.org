@@ -593,7 +593,7 @@
 (use-package burly
   :ensure (:type git :host github :repo "alphapapa/burly.el"))
 
-(elpaca-process-queues)
+(elpaca-wait)
 
 (when (file-exists-p (locate-user-emacs-file "custom.el"))
   (setq custom-file (locate-user-emacs-file "custom.el"))
