@@ -1,6 +1,6 @@
 (condition-case e
     (progn
-      (load "/.config/emacs/early-init.el")
+      (load "/root/.config/emacs/early-init.el")
       (message "-OK-"))
   (error
    (message "ERROR!")

@@ -1,8 +1,7 @@
 (condition-case e
     (progn
-      (load "/.config/emacs/early-init.el")
-      (when (file-readable-p "/.config/emacs/config.org")
-        (org-babel-load-file (expand-file-name "/.config/emacs/config.org")))
+      (load "/root/.config/emacs/early-init.el")
+      (load "/root/.config/emacs/init.el")
       (message "-OK-"))
   (error
    (message "ERROR!")

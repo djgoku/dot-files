@@ -2,29 +2,20 @@ VERSION 0.6
 
 emacs:
     FROM silex/emacs:master
-    WORKDIR /
+    WORKDIR /root/.config/emacs
 
 deps:
     FROM +emacs
     RUN apt update
     RUN DEBIAN_FRONTEND=noninteractive apt install git --yes
 
-build:
-    FROM +deps
-    COPY +emacs-files/emacs/early-init.el /.config/emacs/
-
-early-init:
-    FROM +build
-    WORKDIR /
-    COPY early-init.el .
-    RUN emacs --batch -l early-init.el
-
 test:
-    FROM +early-init
-    COPY +emacs-files/emacs/init.el /.config/emacs/
-    COPY +emacs-files/emacs/config.org /.config/emacs/
+    FROM +deps
+    COPY +emacs-files/emacs/early-init.el /root/.config/emacs/
+    COPY +emacs-files/emacs/init.el /root/.config/emacs/
+    COPY +emacs-files/emacs/config.org /root/.config/emacs/
     IF [ -f +emacs-files/emacs/custom.el ]
-        COPY +emacs-files/emacs/custom.el /.config/emacs/
+        COPY +emacs-files/emacs/custom.el /root/.config/emacs/
     END
     COPY test.el .
     RUN emacs --batch -l test.el
