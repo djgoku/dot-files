@@ -246,7 +246,10 @@
   :ensure t
   :after project
   :init (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
-  :bind (("C-x g" . magit-project-status)))
+  :bind (("C-x g" . magit-project-status))
+  :config
+  ;; setting to level 5 for gpg siging
+  (setq transient-default-level 5))
 
 (setq johnny5-package-list
       '(deadgrep
