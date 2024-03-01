@@ -269,6 +269,8 @@
         orgit
         ox-jira
         powerthesaurus
+        sideline-blame
+        sideline-flymake
         string-inflection
         transient))
 
@@ -552,8 +554,6 @@
   (setq buffer-name-relative-prefix '("<" . ">/"))
   (buffer-name-relative-mode))
 
-(use-package sideline-blame :ensure t)
-(use-package sideline-flymake :ensure t)
 (use-package sideline
   :ensure t
   :init
