@@ -2,32 +2,27 @@ VERSION 0.6
 
 emacs:
     FROM silex/emacs:master
-    WORKDIR /
+    WORKDIR /root/.config/emacs
 
 deps:
     FROM +emacs
     RUN apt update
     RUN DEBIAN_FRONTEND=noninteractive apt install git --yes
 
-build:
+init:
     FROM +deps
-    COPY +emacs-files/emacs/early-init.el /.config/emacs/
-
-early-init:
-    FROM +build
-    WORKDIR /
-    COPY early-init.el .
-    RUN emacs --batch -l early-init.el
+    COPY +emacs-files/emacs/early-init.el /root/.config/emacs/
+    COPY +emacs-files/emacs/init.el /root/.config/emacs/
+    RUN emacs --batch -l /root/.config/emacs/early-init.el
+    RUN emacs --batch -l /root/.config/emacs/init.el
 
 test:
-    FROM +early-init
-    COPY +emacs-files/emacs/init.el /.config/emacs/
-    COPY +emacs-files/emacs/config.org /.config/emacs/
+    FROM +init
+    COPY +emacs-files/emacs/config.org /root/.config/emacs/
     IF [ -f +emacs-files/emacs/custom.el ]
-        COPY +emacs-files/emacs/custom.el /.config/emacs/
+        COPY +emacs-files/emacs/custom.el /root/.config/emacs/
     END
-    COPY test.el .
-    RUN emacs --batch -l test.el
+    RUN EARTHLY=true emacs --batch -l /root/.config/emacs/init.el
 
 # https://github.com/earthly/earthly/issues/1221#issuecomment-925390672
 emacs-files:

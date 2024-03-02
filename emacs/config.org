@@ -10,7 +10,7 @@
   (guix-emacs-autoload-packages))
 
 (when (or (string-equal system-type "berkley-unix") (and (string-equal system-type "gnu/linux") (fboundp 'guix-emacs-autoload-packages)))
-  (use-package exwm)
+  (use-package exwm :ensure t)
   (require 'exwm)
   (require 'exwm-config)
   (require 'exwm-randr)
@@ -38,15 +38,14 @@
                (read-shell-command "$ ")))
              (start-process-shell-command command nil command))))))
 
-(use-package
-  emacs
-  :elpaca nil
+(use-package emacs
+  :ensure nil
   :config (recentf-mode t)
+  (setq history-length t)
   (setq recentf-max-menu-items 10000)
   (setq recentf-max-saved-items 10000)
   (show-paren-mode 1)
   (setq show-paren-style 'expression)
-  (set-face-attribute 'show-paren-match-expression nil :background "blue")
   (menu-bar-mode -1)
   (if (fboundp 'toggle-scroll-bar)
       (toggle-scroll-bar nil))
@@ -91,6 +90,10 @@
   (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
   (global-hl-line-mode 1)
   (global-display-line-numbers-mode 1)
+  (setq custom-file (locate-user-emacs-file "custom.el"))
+  (setq ring-bell-function 'ignore)
+  (setq desktop-save t)
+  (desktop-save-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
@@ -98,8 +101,8 @@
          ("s-a" . mark-whole-buffer)
          ("s-u" . revert-buffer)))
 
-(use-package
-  affe
+(use-package affe
+  :ensure t
   :after orderless
   :config
   (setq affe-count 10000)
@@ -112,6 +115,7 @@
 
 ;; Example configuration for Consult
 (use-package consult
+  :ensure t
   :bind (("C-c m" . consult-man)
          ("C-c i" . consult-info)
          ([remap Info-search] . consult-info)
@@ -129,7 +133,8 @@
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
   (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
+        register-preview-function #'consult-register-format
+        consult-async-min-input 1)
   (advice-add #'register-preview :override #'consult-register-window)
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
@@ -143,53 +148,55 @@
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<") ;; "C-+"
-)
+  )
 
-(use-package
-  marginalia
+(use-package marginalia
+  :ensure t
   :config (marginalia-mode)
   (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 
-(use-package
-  embark
+(use-package embark
+  :ensure t
   :bind ("M-a" . embark-act))
 
-(use-package
-  embark-consult
+(use-package embark-consult
+  :ensure t
   :after (embark consult)
   :demand t
   :hook (embark-collect-mode . embark-consult-preview-minor-mode))
 
 (use-package orderless
+  :ensure t
   :custom
-  (completion-styles '(orderless basic))
+  (completion-styles '(orderless partial-completion basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (use-package vertico
+  :ensure t
   :init
   (vertico-mode))
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
-  :elpaca nil
+  :ensure nil
   :init
   (savehist-mode))
 
-(use-package
-  default-text-scale
+(use-package default-text-scale
+  :ensure t
   :config
   :hook (after-init . default-text-scale-mode)
   :bind (("s-=" . default-text-scale-increase)
          ("s--" . default-text-scale-decrease)
          ("C-x C-0" . default-text-scale-reset)))
 
-(use-package
-  wgrep
+(use-package wgrep
+  :ensure t
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
 
-(use-package
-  rg
+(use-package rg
+  :ensure t
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
 
@@ -212,8 +219,7 @@
 
 ;; try to setup spell-fu on macOS so we can remove these guards.
 (when (string-equal system-type "gnu/linux")
-  (use-package
-    spell-fu))
+  (use-package spell-fu :ensure t))
 (when (string-equal system-type "gnu/linux")
   (add-hook 'org-mode-hook (lambda ()
                              (setq spell-fu-faces-exclude '(org-block-begin-line org-block-end-line
@@ -231,11 +237,14 @@
 (when (string-equal system-type "gnu/linux")
   (add-hook 'emacs-lisp-mode-hook (lambda () (spell-fu-mode))))
 
-(use-package
-  magit
+(use-package magit
+  :ensure t
   :after project
   :init (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
-  :bind (("C-x g" . magit-project-status)))
+  :bind (("C-x g" . magit-project-status))
+  :config
+  ;; setting to level 5 for gpg siging
+  (setq transient-default-level 5))
 
 (setq johnny5-package-list
       '(deadgrep
@@ -259,17 +268,16 @@
         orgit
         ox-jira
         powerthesaurus
-        string-inflection))
+        sideline-blame
+        sideline-flymake
+        string-inflection
+        transient))
 
 (dolist (package johnny5-package-list)
-  (eval `(use-package ,package) t))
+  (eval `(use-package ,package :ensure t) t))
 
-(use-package
-  git-timemachine
-  :straight (git-timemachine :type git :host "https://codeberg.org" :repo "pidu/git-timemachine"))
-
-(use-package
-  git-identity
+(use-package git-identity
+  :ensure t
   :after magit
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
@@ -277,9 +285,8 @@
 
 ;; (org-narrow-to-subtree) C-x n s
 ;; (widen) C-x n w
-(use-package
-  org
-  :elpaca nil
+(use-package org
+  :ensure nil
   :bind (("C-c c" . 'org-capture)
          ("C-c a" . 'org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
@@ -333,12 +340,12 @@
                                                          (ruby . t)))
 
 ;; just add :async to any org babel src blocks!
-(use-package
-  ob-async
+(use-package ob-async
+  :ensure t
   :config (require 'ob-async))
 
-(use-package
-  denote
+(use-package denote
+  :ensure t
   :config
   (setq denote-directory "~/dev/notes"))
 
@@ -360,15 +367,17 @@
 
 (setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-(use-package heex-ts-mode)
+(use-package heex-ts-mode :ensure t)
 
 (use-package elixir-ts-mode
-   :config (global-subword-mode t))
+  :ensure t
+  :config (global-subword-mode t))
 
 ;; M-. xref-find-definitions
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
+  :ensure t
   :config
   ;; else eglot + python will not work well
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
@@ -399,6 +408,7 @@
   (eglot-extend-to-xref t))
 
 (use-package company
+  :ensure t
   :hook
   (prog-mode . company-mode)
   :config
@@ -450,12 +460,12 @@
 ;;                ("/home/johnny/node_modules/@tailwindcss/language-server/bin/tailwindcss-language-server")))
 ;; npm install -g @tailwindcss/language-server
 
-(use-package
-  which-key
+(use-package which-key
+  :ensure t
   :config (which-key-mode))
 
-(use-package
-  switch-window
+(use-package switch-window
+  :ensure t
   :bind (("C-x o" . switch-window))
   :config (setq switch-window-shortcut-style 'qwerty)
   (setq switch-window-minibuffer-shortcut ?z))
@@ -468,8 +478,8 @@
 ;; ;;     (interactive)
 ;; ;;     (with-editor-async-shell-command "crontab -e"))
 
-(use-package
-  multiple-cursors
+(use-package multiple-cursors
+  :ensure t
   :config (setq mc/always-run-for-all 1)
   (define-key mc/keymap (kbd "<return>") nil)
   :bind (("s-d" . mc/mark-next-like-this)
@@ -477,18 +487,20 @@
          ("M-s-d" . mc/edit-beginnings-of-lines)))
 
 (use-package avy
+  :ensure t
   :bind (("M-j" . avy-goto-char-timer)))
 
-(when (executable-find "cmake")
-  (use-package
-  vterm
-  :config (setq vterm-buffer-name-string "vterm %s")
-  (setq vterm-kill-buffer-on-exit nil)
-  (setq vterm-max-scrollback 100000)
-  (setq vterm-use-vterm-prompt-detection-method t)
-  (setq vterm-always-compile-module t)
-  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                 (setq default-directory path))))))
+(unless (getenv "EARTHLY")
+  (use-package vterm
+    :ensure nil
+    :config (setq vterm-buffer-name-string "vterm %s")
+    (setq vterm-kill-buffer-on-exit nil)
+    (setq vterm-max-scrollback 100000)
+    (setq vterm-use-vterm-prompt-detection-method t)
+    (setq vterm-always-compile-module t)
+    (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                                   (setq default-directory path))))))
+
 
 (defun screenshot-svg ()
   "Save a screenshot of the current frame as an SVG image.
@@ -501,16 +513,17 @@
     (kill-new filename)
     (message filename)))
 
-(use-package
-  elisp-demos
+(use-package elisp-demos
+  :ensure t
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 
-(use-package
-  envrc
+(use-package envrc
+  :ensure t
   :config (envrc-global-mode))
 
 (use-package pdf-tools
+  :ensure t
   :defer t
   :magic ("%PDF" . pdf-view-mode) ;; https://github.com/jwiegley/use-package#magic-handlers
   :config
@@ -518,20 +531,22 @@
   (setq pdf-view-use-scaling t))
 
 (use-package inheritenv
-  :elpaca (:type git :host github :repo "purcell/inheritenv"))
+  :ensure (:type git :host github :repo "purcell/inheritenv"))
 
 (use-package buffer-env
+  :ensure t
   :hook (hack-local-variables . buffer-env-update)
-  :config (setq buffer-env-script-name '(".venv/bin/activate")))
+  :config (setq buffer-env-script-name '(".envrc" ".venv/bin/activate"))
+  (setq buffer-env-safe-files '(".venv/bin/activate")))
 
 (use-package buffer-name-relative
+  :ensure t
   :init
   (setq buffer-name-relative-prefix '("<" . ">/"))
   (buffer-name-relative-mode))
 
-(use-package sideline-blame)
-(use-package sideline-flymake)
 (use-package sideline
+  :ensure t
   :init
   (setq sideline-flymake-display-mode 'line
         sideline-backends-right '(sideline-flymake sideline-blame)
@@ -540,36 +555,48 @@
         sideline-format-right "   %s"          ; format for right aligment
         sideline-priority 100                  ; overlays' priority
         )
-  :hook (flymake-mode . sideline-mode))
+  :config
+  (global-sideline-mode 1))
 
 (use-package apheleia
+  :ensure t
   :config
   (apheleia-global-mode +1)
   (require 'cl-lib)
   ;; https://github.com/radian-software/apheleia/issues/153
   (cl-defun apheleia-indent-eglot-managed-buffer
-          (&key buffer scratch callback &allow-other-keys)
-        "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
-        (with-current-buffer scratch
-          (setq-local eglot--cached-server
-                      (with-current-buffer buffer
-                        (eglot-current-server)))
-          (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
-            (eglot-format-buffer))
-          (funcall callback)))
+      (&key buffer scratch callback &allow-other-keys)
+    "Copy BUFFER to SCRATCH, then format scratch, then call CALLBACK."
+    (with-current-buffer scratch
+      (setq-local eglot--cached-server
+                  (with-current-buffer buffer
+                    (eglot-current-server)))
+      (let ((buffer-file-name (buffer-local-value 'buffer-file-name buffer)))
+        (eglot-format-buffer))
+      (funcall callback)))
   (add-to-list 'apheleia-formatters
                '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
 
 (use-package yasnippet
+  :ensure t
   :config
   (yas-global-mode 1))
 
 (use-package burly
-  :elpaca (:type git :host github :repo "alphapapa/burly.el"))
+  :ensure (:type git :host github :repo "alphapapa/burly.el"))
 
-(elpaca-process-queues)
+(use-package winner
+  :ensure nil
+  :init
+  (setq winner-dont-bind-my-keys t)
+  (setq winner-boring-buffers '("*Completions*" "*Help*" "*Apropos*" "*Buffer List*" "*info*" "*Compile-Log*"))
+  :config
+  (winner-mode 1)
+  :bind (("M-s-<left>" . winner-undo)
+         ("M-s-<right>" . winner-redo)))
 
-(when (file-exists-p "~/.config/emacs/custom.el")
-  (setq custom-file "~/.config/emacs/custom.el")
+(elpaca-wait)
+
+(when (file-exists-p (locate-user-emacs-file "custom.el"))
   (load custom-file))
 #+end_src
