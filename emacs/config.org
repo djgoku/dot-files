@@ -90,6 +90,7 @@
   (global-hl-line-mode 1)
   (global-display-line-numbers-mode 1)
   (setq custom-file (locate-user-emacs-file "custom.el"))
+  (setq ring-bell-function 'ignore)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
