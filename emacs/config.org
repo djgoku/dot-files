@@ -583,6 +583,16 @@
 (use-package burly
   :ensure (:type git :host github :repo "alphapapa/burly.el"))
 
+(use-package winner
+  :ensure nil
+  :init
+  (setq winner-dont-bind-my-keys t)
+  (setq winner-boring-buffers '("*Completions*" "*Help*" "*Apropos*" "*Buffer List*" "*info*" "*Compile-Log*"))
+  :config
+  (winner-mode 1)
+  :bind (("M-s-<left>" . winner-undo)
+         ("M-s-<right>" . winner-redo)))
+
 (elpaca-wait)
 
 (when (file-exists-p (locate-user-emacs-file "custom.el"))
