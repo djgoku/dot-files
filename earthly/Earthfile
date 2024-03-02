@@ -9,16 +9,20 @@ deps:
     RUN apt update
     RUN DEBIAN_FRONTEND=noninteractive apt install git --yes
 
-test:
+init:
     FROM +deps
     COPY +emacs-files/emacs/early-init.el /root/.config/emacs/
     COPY +emacs-files/emacs/init.el /root/.config/emacs/
+    RUN emacs --batch -l /root/.config/emacs/early-init.el
+    RUN emacs --batch -l /root/.config/emacs/init.el
+
+test:
+    FROM +init
     COPY +emacs-files/emacs/config.org /root/.config/emacs/
     IF [ -f +emacs-files/emacs/custom.el ]
         COPY +emacs-files/emacs/custom.el /root/.config/emacs/
     END
-    COPY test.el .
-    RUN emacs --batch -l test.el
+    RUN EARTHLY=true emacs --batch -l /root/.config/emacs/init.el
 
 # https://github.com/earthly/earthly/issues/1221#issuecomment-925390672
 emacs-files:
