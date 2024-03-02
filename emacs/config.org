@@ -530,7 +530,8 @@
 (use-package buffer-env
   :ensure t
   :hook (hack-local-variables . buffer-env-update)
-  :config (setq buffer-env-script-name '(".venv/bin/activate")))
+  :config (setq buffer-env-script-name '(".envrc" ".venv/bin/activate"))
+  (setq buffer-env-safe-files '(".venv/bin/activate")))
 
 (use-package buffer-name-relative
   :ensure t
