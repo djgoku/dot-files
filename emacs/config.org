@@ -41,6 +41,7 @@
 (use-package emacs
   :ensure nil
   :config (recentf-mode t)
+  (setq history-length t)
   (setq recentf-max-menu-items 10000)
   (setq recentf-max-saved-items 10000)
   (show-paren-mode 1)
