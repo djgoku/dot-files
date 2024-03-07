@@ -38,6 +38,12 @@
                (read-shell-command "$ ")))
              (start-process-shell-command command nil command))))))
 
+
+; setup directories we need for emacs
+(dolist (directory '("auto-saves" "backups" "locks"))
+  (unless (file-directory-p (concat user-emacs-directory directory))
+    (mkdir (concat user-emacs-directory directory))))
+
 (use-package emacs
   :ensure nil
   :config (recentf-mode t)
