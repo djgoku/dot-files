@@ -114,10 +114,10 @@
   (setq affe-count 10000)
   (setq affe-regexp-function #'orderless-pattern-compiler
         affe-highlight-function #'orderless--highlight
-        affe-find-command "rg --color=never --files --hidden -g !.git/"
-        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ . --hidden -g !.git/")
-  :bind (("M-s af" . affe-find)
-         ("M-s ag" . affe-grep)))
+        affe-find-command "rg --color=never --files --hidden -g !.git -g !.venv"
+        affe-grep-command "rg --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden -g !.git -g !.venv")
+  :bind (("M-s a f" . affe-find)
+         ("M-s a g" . affe-grep)))
 
 ;; Example configuration for Consult
 (use-package consult
