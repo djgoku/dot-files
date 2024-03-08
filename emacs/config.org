@@ -373,11 +373,13 @@
 
 (setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-(use-package heex-ts-mode :ensure t)
-
-(use-package elixir-ts-mode
+(use-package treesit-auto
   :ensure t
-  :config (global-subword-mode t))
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 ;; M-. xref-find-definitions
 ;; M-, xref-go-back
