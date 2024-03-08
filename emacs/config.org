@@ -371,7 +371,7 @@
 ;;   :config
 ;;   (require 'org-download))
 
-(setq treesit-extra-load-path '("/Users/dj_goku/dev/github/casouri/tree-sitter-module/dist"))
+(setq treesit-extra-load-path '("~/dev/github/casouri/tree-sitter-module/dist"))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package treesit-auto
   :ensure t
