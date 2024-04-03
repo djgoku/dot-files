@@ -618,8 +618,7 @@ actually counts the lines and puts the value beside the counted line.
   :init
   (setq winner-dont-bind-my-keys t)
   (setq winner-boring-buffers '("*Completions*" "*Help*" "*Apropos*" "*Buffer List*" "*info*" "*Compile-Log*"))
-  :config
-  (winner-mode 1)
+  :hook (after-init . winner-mode)
   :bind (("M-s-<left>" . winner-undo)
          ("M-s-<right>" . winner-redo)))
 
