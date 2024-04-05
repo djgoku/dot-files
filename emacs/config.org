@@ -4,6 +4,25 @@
 (global-unset-key (kbd "C-x C-z"))
 #+end_src
 
+* ~count-duplicate-lines~
+
+This function is similar to ~delete-duplicate-lines~, but this
+actually counts the lines and puts the value beside the counted line.
+
+#+begin_src emacs-lisp
+(defun count-duplicate-lines ()
+  "count duplicate lines"
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eq (point) (point-max)))
+      (let* ((current-line-as-string (string-trim-right (thing-at-point 'line t)))
+             (current-line-as-string-count (+ 1 (string-width current-line-as-string))) ; adding one since we trim the newline
+             (counted (count-matches current-line-as-string))
+             (current-point (point)))
+        (flush-lines current-line-as-string)
+        (insert current-line-as-string (format ",%s" counted) ?\n)))))
+#+end_src
 #+begin_src emacs-lisp :results none
 (when (and (string-equal system-type "gnu/linux") (fboundp 'guix-emacs-autoload-packages))
   (add-to-list 'load-path "~/.guix-profile/share/emacs/site-lisp")
