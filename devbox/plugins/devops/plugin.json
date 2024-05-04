@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.10.1/.schema/devbox-plugin.schema.json",
+  "name": "devops",
+  "packages": {
+    "awscli2": "latest",
+    "chkcrontab": "latest",
+    "colima": "latest",
+    "curl": "latest",
+    "detect-secrets": "latest",
+    "direnv": "latest",
+    "docker": "latest",
+    "earthly": "latest",
+    "entr": "latest",
+    "gibberish-detector": "latest",
+    "git": "latest",
+    "gnupg": "2.3.7",
+    "go": "latest",
+    "jq": "latest",
+    "kubectl": "latest",
+    "pre-commit": "latest",
+    "ripgrep": "latest",
+    "sops": "latest",
+    "sqlite-interactive": "latest",
+    "tart": {
+      "version": "latest",
+      "excluded_platforms": ["x86_64-linux"]
+    },
+    "terraform": "latest",
+    "terraform-ls": "latest",
+    "texlive.combined.scheme-full": "latest",
+    "tmux": "latest",
+    "yamlfmt": "latest"
+  },
+  "shell": {
+    "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],
+    "scripts": {
+      "test": ["echo \"Error: no test specified\" && exit 1"]
+    }
+  }
+}
