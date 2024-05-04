@@ -622,8 +622,6 @@ actually counts the lines and puts the value beside the counted line.
   :bind (("M-s-<left>" . winner-undo)
          ("M-s-<right>" . winner-redo)))
 
-(elpaca-wait)
-
 (when (file-exists-p (locate-user-emacs-file "custom.el"))
   (load custom-file))
 #+end_src

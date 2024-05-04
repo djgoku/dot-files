@@ -45,8 +45,6 @@
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
 
-(elpaca-wait)
-
 (use-package modus-themes
   :ensure t
   :custom-face
@@ -66,8 +64,6 @@
   (global-undo-fu-session-mode)
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-
-(elpaca-wait)
 
 (when (file-readable-p (locate-user-emacs-file "config.org"))
   (org-babel-load-file (locate-user-emacs-file "config.org")))
