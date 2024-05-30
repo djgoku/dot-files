@@ -30,7 +30,7 @@ repos:
         args: [--baseline, .secrets.baseline]
         additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.89.1
+    rev: v1.90.0
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
