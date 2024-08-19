@@ -30,7 +30,7 @@ repos:
         args: [--baseline, .secrets.baseline]
         additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.90.0
+    rev: v1.92.2
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: python-safety-dependencies-check
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 24.8.0
     hooks:
       - id: black
   - repo: https://gitlab.com/jvenom/elixir-pre-commit-hooks
@@ -56,22 +56,22 @@ repos:
     hooks:
       - id: nixpkgs-fmt
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.2
+    rev: v3.17.0
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
-  - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.12.0
+  - repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.13.0
     hooks:
       - id: reorder-python-imports
         exclude: ^(pre_commit/resources/|testing/resources/python3_hooks_repo/)
         args: [--py310-plus, --add-import, 'from __future__ import annotations']
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.1.1
     hooks:
       - id: flake8
   - repo: https://github.com/google/yamlfmt
-    rev: v0.12.1
+    rev: v0.13.0
     hooks:
       - id: yamlfmt
   - repo: https://github.com/shellcheck-py/shellcheck-py
