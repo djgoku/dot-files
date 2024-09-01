@@ -4,6 +4,13 @@
 (global-unset-key (kbd "C-x C-z"))
 #+end_src
 
+* Unbind the ~mouse-wheel-text-scale~
+
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-<wheel-down>"))
+(global-unset-key (kbd "C-<wheel-up>"))
+#+end_src
+
 * ~count-duplicate-lines~
 
 This function is similar to ~delete-duplicate-lines~, but this
