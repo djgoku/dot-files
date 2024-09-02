@@ -11,6 +11,104 @@
 (global-unset-key (kbd "C-<wheel-up>"))
 #+end_src
 
+* johnny5-magit-clone
+
+This function has evolved a little after the initial need.
+
+Features:
+- If the repository is already clone switch to the repository
+  directory and run ~magit-status~
+- The behavior is the same if you input ~git clone
+  git@bitbucket.org:johnny-5-is-alive/dot-files.git~ or
+  ~git@bitbucket.org:johnny-5-is-alive/dot-files.git~ with
+  ~johnny5-magit-clone~
+- Clone to a consistent directory. The directory will contain the site
+  ~github~, ~github.com~ ~bitbucket~, or ~bitbucket.org~ (~(setq
+  johnny5-magit-clone-default-directory-remove-domain t)~ to remove
+  the domain name from the directory path); Next part of the directory
+  path will have the github/bitbucket org or github/bitbucket
+  username; With the last part of the directory is the repository
+  name; As an example input to ~johnny5-magit-clone~ of ~git clone
+  git@bitbucket.org:johnny-5-is-alive/dot-files.git~. The directory
+  path would be =~/dev/bitbucket.org/johnny-5-is-alive/dot-files=
+
+#+begin_src emacs-lisp :results none
+;; if you want to remove the domain from say github.com and use github as the directory, set the following:
+;; (setq johnny5-magit-clone-default-directory-remove-domain t)
+
+(setq johnny5-magit-clone-default-directory-remove-domain t)
+
+(defun johnny5-magit-clone-default-directory (git-clone-url)
+  (let* ((parsed-git-clone-url (johnny5-magit-clone-parse git-clone-url)))
+    (cond ((string-prefix-p "git@" parsed-git-clone-url)
+           (johnny5-git-url-parse (cadr (split-string parsed-git-clone-url "git@"))))
+          ((string-prefix-p "https://" parsed-git-clone-url)
+           (johnny5-git-https-url-parse parsed-git-clone-url)))))
+
+(defun johnny5-git-https-url-parse (git-https-url-parse)
+  (let* ((url (url-generic-parse-url git-https-url-parse))
+         (host (url-host url))
+         (user-or-workspace-and-repo (substring (url-filename url) 1)))
+    (johnny5-git-url-parse (format "%s:%s/" host user-or-workspace-and-repo))))
+
+(defun johnny5-git-url-parse (git-clone-url)
+  (let* ((git-url-path-and-repo-split (string-split git-clone-url ":"))
+         (uri (car git-url-path-and-repo-split))
+         (uri-without-domain (car (split-string uri "\\.")))
+         (user-or-workspace-and-repo-split (split-string (cadr git-url-path-and-repo-split) "/"))
+         (user-or-workspace (car user-or-workspace-and-repo-split))
+         (repository_name (car(split-string (cadr user-or-workspace-and-repo-split) ".git"))))
+    (if (and (boundp 'johnny5-magit-clone-default-directory-remove-domain) johnny5-magit-clone-default-directory-remove-domain)
+        (format "~/dev/%s/%s/" uri-without-domain user-or-workspace)
+      (format "~/dev/%s/%s/" uri user-or-workspace))))
+
+(defun johnny5-magit-clone ()
+  (interactive)
+  (unless (featurep 'magit)
+    (require 'magit))
+  (let* ((repo (magit-read-string "clone repo"))
+         (repo-url (johnny5-magit-clone-parse repo))
+         (repo-name (johnny5-magit-clone-url-to-name repo))
+         (clone-directory (johnny5-magit-clone-default-directory repo-url))
+         (clone-directory-with-repo-name (format "%s/%s" clone-directory repo-name)))
+    (if (file-directory-p clone-directory-with-repo-name)
+        (magit-status clone-directory-with-repo-name)
+      (magit-clone-internal repo-url clone-directory-with-repo-name nil))
+    (message "repo %s, repo-name %s, clone-directory %s, repo-url %s, clone-directory-with-repo-name %s" repo repo-name clone-directory repo-url clone-directory-with-repo-name)))
+
+(defun johnny5-magit-clone-url-to-name (url)
+  (and (string-match "\\([^/:]+?\\)\\(/?\\.git\\)?$" url)
+       (match-string 1 url)))
+
+(defun johnny5-magit-clone-parse (git-clone-url)
+  (cond
+   ((string-prefix-p "git@" git-clone-url) git-clone-url)
+   ((string-prefix-p "https://" git-clone-url) git-clone-url)
+   ((cadr (split-string git-clone-url "git clone ")))))
+
+(ert-deftest test-johnny5-magit-clone-parse ()
+  "test that magit-clone parse works"
+  (should (equal (johnny5-magit-clone-parse "git@github.com.com:djgoku/melpa.git") "git@github.com.com:djgoku/melpa.git"))
+  (should (equal (johnny5-magit-clone-parse "https://github.com/djgoku/melpa.git") "https://github.com/djgoku/melpa.git"))
+  (should (equal (johnny5-magit-clone-parse "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "git@bitbucket.org:johnny-5-is-alive/dot-files.git")))
+
+(ert-deftest test-johnny5-magit-clone-default-directory ()
+  "Tests that we return the correct magit-clone-default-directory."
+  (setq johnny5-magit-clone-default-directory-remove-domain nil)
+  (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github.com/djgoku/"))
+  (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github.com/djgoku/"))
+  (should (equal (johnny5-magit-clone-default-directory "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "git clone https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/")))
+
+(ert-deftest test-johnny5-magit-clone-default-directory-remove-domain ()
+  "Tests that we return the correct magit-clone-default-directory."
+  (setq johnny5-magit-clone-default-directory-remove-domain t)
+  (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github/djgoku/"))
+  (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
+  (should (equal (johnny5-magit-clone-default-directory "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "git clone https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/")))
+#+end_src
+
 * ~count-duplicate-lines~
 
 This function is similar to ~delete-duplicate-lines~, but this
