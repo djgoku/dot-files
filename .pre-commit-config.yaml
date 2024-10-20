@@ -7,7 +7,7 @@ ci:
   autofix_prs: false
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -30,7 +30,7 @@ repos:
         args: [--baseline, .secrets.baseline]
         additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.94.1
+    rev: v1.96.1
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: python-safety-dependencies-check
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.10.0
     hooks:
       - id: black
   - repo: https://gitlab.com/jvenom/elixir-pre-commit-hooks
@@ -56,12 +56,12 @@ repos:
     hooks:
       - id: nixpkgs-fmt
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.17.0
+    rev: v3.18.0
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.13.0
+    rev: v3.14.0
     hooks:
       - id: reorder-python-imports
         exclude: ^(pre_commit/resources/|testing/resources/python3_hooks_repo/)
