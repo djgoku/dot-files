@@ -285,7 +285,23 @@ actually counts the lines and puts the value beside the counted line.
 
 (use-package embark
   :ensure t
-  :bind ("M-a" . embark-act))
+  :bind ("M-a" . embark-act)
+  :config
+  (defun johnny5-git-link-homepage (file)
+    (interactive "f")
+    (let ((default-directory (project-root (project-current nil file))))
+      (browse-url (call-interactively #'git-link-homepage))))
+  (defvar-keymap embark-project-map
+    :doc "Keymap for Embark project actions."
+    :parent embark-file-map
+    "RET" #'project-switch-project
+    "b" #'johnny5-git-link-homepage)
+
+  (add-to-list 'embark-keymap-alist '(project-file embark-project-map))
+  (defun embark--keep-project-type(full-path)
+    (cons 'project-file (cdr full-path)))
+
+  (advice-add 'embark--project-file-full-path :filter-return #'embark--keep-project-type))
 
 (use-package embark-consult
   :ensure t
