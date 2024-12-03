@@ -64,6 +64,9 @@
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
 
+(setq use-package-compute-statistics t)
+(setq use-package-always-defer t)
+
 (when (file-readable-p (locate-user-emacs-file "config.org"))
   (org-babel-load-file (locate-user-emacs-file "config.org")))
 
