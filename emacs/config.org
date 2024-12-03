@@ -390,7 +390,9 @@ actually counts the lines and puts the value beside the counted line.
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
   (setq magit-bury-buffer-function 'magit-restore-window-configuration)
   ;; setting to level 5 for gpg siging
-  (setq transient-default-level 5))
+  (setq transient-default-level 5)
+  (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
+  :bind (("C-x g" . magit-project-status)))
 
 (setq johnny5-package-list
       '(deadgrep
