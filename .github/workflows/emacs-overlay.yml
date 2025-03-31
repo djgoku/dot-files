@@ -7,8 +7,8 @@ on:
         description: 'Branch used for building and committing updates around emacs-overlay'
         required: true
         type: string
-    schedule:
-      - cron: '30 8 * * *' # Run nightly at 8:30 UTC
+  schedule:
+    - cron: '30 2 * * *' # Run nightly at 2:30 UTC
 env:
   DEVBOX_API_TOKEN: ${{ secrets.DEVBOX_ACCESS_TOKEN }}
 jobs:
