@@ -582,15 +582,38 @@
 ;;; burly
 (use-package burly
   :ensure (:type git :host github :repo "alphapapa/burly.el"))
-;;; winner
-(use-package winner
+;;; tab-bar-history-mode:
+;; better than winnner, no tabs required
+;; https://www.reddit.com/r/emacs/comments/1kz57i5/comment/mv4zgji
+(defmacro my/repeat-it (group cmds)
+  (let ((map (intern (concat (symbol-name group) "-repeat-map"))))
+    `(progn
+       (defvar ,map (make-sparse-keymap))
+       (cl-loop for (key def) in ,cmds do
+                (define-key ,map (kbd key) def)
+                (put def 'repeat-map ',map)))))
+(defun my/tab-bar-history-report-position ()
+  (let* ((f (selected-frame))
+         (back (length (gethash f tab-bar-history-back)))
+         (forward (length (gethash f tab-bar-history-forward))))
+    (message (concat (format "Window undo (%d / %d)" forward (+ back forward))
+                     (when-let ((msg (current-message))) (format " <%s>" msg))))))
+(use-package tab-bar
   :ensure nil
+  :bind (("s-[" . tab-bar-history-back)
+         ("M-s-<left>" . tab-bar-history-back)
+         ("s-]" . tab-bar-history-forward)
+         ("M-s-<right>" . tab-bar-history-forward))
   :init
-  (setq winner-dont-bind-my-keys t)
-  (setq winner-boring-buffers '("*Completions*" "*Help*" "*Apropos*" "*Buffer List*" "*info*" "*Compile-Log*"))
-  :hook (after-init . winner-mode)
-  :bind (("M-s-<left>" . winner-undo)
-         ("M-s-<right>" . winner-redo)))
+  (setq tab-bar-history-limit 200)
+  :config
+  (tab-bar-history-mode 1)
+  (my/repeat-it tab-bar-history-mode '(("<left>" tab-bar-history-back)
+                                       ("M-s-<left>" tab-bar-history-back)
+                                       ("<right>" tab-bar-history-forward)
+                                       ("M-s-<right>" tab-bar-history-forward)))
+  (advice-add 'tab-bar-history-forward :after 'my/tab-bar-history-report-position)
+  (advice-add 'tab-bar-history-back :after 'my/tab-bar-history-report-position))
 ;;; ws-butler
 (use-package ws-butler
   :ensure t
