@@ -44,15 +44,13 @@
 (elpaca elpaca-use-package
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
-
+;;; modus-themes
 (use-package modus-themes
   :ensure t
-  :custom-face
-  (show-paren-match-expression ((t :background "#0000ff")))
   :config
-  (setq modus-themes-org-blocks 'gray-background)
-  (modus-themes-load-theme 'modus-vivendi-deuteranopia))
-
+  (setq modus-vivendi-tritanopia-palette-overrides
+        '((bg-paren-match unspecified) (fg-paren-match unspecified) (bg-paren-expression "#0000ff")))
+  (modus-themes-load-theme 'modus-vivendi-tritanopia))
 (use-package undo-fu
   :ensure t
   :bind (("C-z" . undo-fu-only-undo) ("C-S-z" . undo-fu-only-redo)))
