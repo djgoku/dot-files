@@ -51,9 +51,10 @@
   (setq modus-vivendi-tritanopia-palette-overrides
         '((bg-paren-match unspecified) (fg-paren-match unspecified) (bg-paren-expression "#0000ff")))
   (modus-themes-load-theme 'modus-vivendi-tritanopia))
+;;; undo-fu
 (use-package undo-fu
   :ensure t
-  :bind (("C-z" . undo-fu-only-undo) ("C-S-z" . undo-fu-only-redo)))
+  :bind (("C-z" . undo-fu-only-undo) ("s-z" . undo-fu-only-undo) ("C-S-z" . undo-fu-only-redo)))
 
 (use-package
   undo-fu-session
