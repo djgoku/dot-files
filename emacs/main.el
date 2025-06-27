@@ -631,6 +631,55 @@
   ([remap describe-function] . helpful-function)
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
+;;; indent-bars
+(use-package indent-bars
+  :ensure (indent-bars :type git :host github :repo "jdtsmith/indent-bars")
+  :init
+  (setq
+   indent-bars-pattern "."
+   indent-bars-width-frac 0.5
+   indent-bars-pad-frac 0.25
+   indent-bars-color-by-depth nil
+   indent-bars-highlight-current-depth '(:face default :blend 0.4))
+  :config
+  (require 'indent-bars-ts)             ; not needed with straight
+  :custom
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda ()
+              (setq-local
+               indent-tabs-mode t ; make sure tabs-based indenting is on, even if we disable it globally
+               indent-bars-no-descend-lists nil) ; elisp is mostly continued lists!  allow bars to descend inside
+              (indent-bars-mode 1)))
+  (indent-bars-treesit-support t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  ;; Add other languages as needed
+  (indent-bars-treesit-scope '((python function_definition class_definition for_statement
+                                       if_statement with_statement while_statement)))
+  ;; Note: wrap may not be needed if no-descend-list is enough
+  ;;(indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
+  ;;                                  list list_comprehension
+  ;;                                  dictionary dictionary_comprehension
+  ;;                                  parenthesized_expression subscript)))
+  :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
+;;; jinx
+(use-package jinx
+  :ensure t
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-,"   . jinx-previous)
+         ("C-."   . jinx-next)
+         ("C-M-$" . jinx-languages))
+  :config
+  (setq jinx--compile-flags (append jinx--compile-flags (list (format "-I%s/include/enchant-2" (getenv "DEVBOX_PACKAGES_DIR")) (format "-L%s/lib"  (getenv "DEVBOX_PACKAGES_DIR")))))
+  (unless (featurep 'jinx)
+    (require 'jinx)
+    (keymap-set jinx-repeat-map "RET" 'jinx-correct)
+    (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
+    (add-to-list 'embark-target-finders 'embark-target-jinx-at-point)
+    (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
+    (add-to-list 'embark-repeat-actions #'jinx-next)
+    (add-to-list 'embark-repeat-actions #'jinx-previous)
+    (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
 ;;; load custom.el
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)
