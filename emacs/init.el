@@ -110,8 +110,10 @@
 ;;; load main config
 (when (file-readable-p (locate-user-emacs-file "main.el"))
   (load (locate-user-emacs-file "main.el")))
+;;; local variables
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; no-native-compile: t
 ;; no-update-autoloads: t
+;; eval: (outline-hide-sublevels 3)
 ;; End:
