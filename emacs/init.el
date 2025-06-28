@@ -101,6 +101,12 @@
               ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
   :hook ((prog-mode text-mode) . outli-mode)
   :init (outli-mode 1))
+;;; init-file-debug
+(when init-file-debug
+  (setq use-package-verbose t
+        use-package-expand-minimally nil
+        use-package-compute-statistics t
+        debug-on-error t))
 ;;; load main config
 (when (file-readable-p (locate-user-emacs-file "main.el"))
   (load (locate-user-emacs-file "main.el")))
