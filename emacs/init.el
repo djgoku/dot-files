@@ -63,6 +63,44 @@
   (global-undo-fu-session-mode)
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+;;; default-text-scale
+;;;; default-text-scale
+(use-package default-text-scale
+  :ensure t
+  :config
+  :hook (emacs-startup . default-text-scale-mode)
+  :bind (("s-=" . default-text-scale-increase)
+         ("s--" . default-text-scale-decrease)
+         ("C-x C-0" . default-text-scale-reset)))
+;;;; unset keys that are related to suspending
+;; Unset suspend-frame and suspend-frame
+(global-unset-key (kbd "C-x C-z"))
+;;;; unset keys that are related to default-text-scale
+;; Unset mouse-wheel-text-scale
+(global-unset-key (kbd "C-<wheel-down>"))
+(global-unset-key (kbd "C-<wheel-up>"))
+;; Unset more things that scale up/down text
+(global-unset-key (kbd "<wheel-down>"))
+(global-unset-key (kbd "<wheel-up>"))
+(global-unset-key (kbd "<pinch>"))
+;;; outline
+;;;; outline
+(use-package outline
+  :ensure nil
+  :hook
+  (prog-mode-hook . outline-minor-mode)
+  :bind
+  (:map outline-minor-mode-map
+        ("C-<tab>" . outline-cycle-buffer)
+        ("M-p" . outline-previous-heading)
+        ("M-n" . outline-next-heading)))
+;;;; outli
+(use-package outli
+  :ensure (:host github :repo "jdtsmith/outli")
+  :bind (:map outli-mode-map ; convenience key to get back to containing heading
+              ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
+  :hook ((prog-mode text-mode) . outli-mode)
+  :init (outli-mode 1))
 ;;; load main config
 (when (file-readable-p (locate-user-emacs-file "main.el"))
   (load (locate-user-emacs-file "main.el")))
