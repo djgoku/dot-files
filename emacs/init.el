@@ -63,13 +63,9 @@
   (global-undo-fu-session-mode)
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-
-(setq use-package-compute-statistics t)
-(setq use-package-always-defer t)
-
-(when (file-readable-p (locate-user-emacs-file "config.org"))
-  (org-babel-load-file (locate-user-emacs-file "config.org")))
-
+;;; load main config
+(when (file-readable-p (locate-user-emacs-file "main.el"))
+  (load (locate-user-emacs-file "main.el")))
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; no-native-compile: t
