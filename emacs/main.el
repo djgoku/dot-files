@@ -173,6 +173,7 @@
   (global-visual-wrap-prefix-mode 1)
   (setq which-func-update-delay 1.0)
   (setq use-package-compute-statistics t)
+  (setq ripgrep--extra-args " -g !.venv -g !.pre-commit -g !.terraform")
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
@@ -225,8 +226,8 @@
   (setq affe-count 10000)
   (setq affe-regexp-function #'orderless-pattern-compiler
         affe-highlight-function #'orderless--highlight
-        affe-find-command "rga --color=never --files --hidden -g !.git -g !.venv"
-        affe-grep-command "rga --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden -g !.git -g !.venv")
+        affe-find-command (concat "rga --color=never --files --hidden" ripgrep--extra-args)
+        affe-grep-command (concat "rga --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden" ripgrep--extra-args))
   :bind (("M-s a f" . affe-find)
          ("M-s a g" . affe-grep)))
 ;;; consult
@@ -248,7 +249,7 @@
          ("s-f" . consult-line))
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
-  (setq consult-ripgrep-args "rga --null --line-buffered --color=never --max-columns=1000 --path-separator /   --smart-case --no-heading --with-filename --line-number --search-zip")
+  (setq consult-ripgrep-args (concat "rga --null --line-buffered --color=never --max-columns=1000 --path-separator / --smart-case --no-heading --with-filename --line-number --search-zip" ripgrep--extra-args))
   (setq register-preview-delay 0.5
         register-preview-function #'consult-register-format
         consult-async-min-input 1)
