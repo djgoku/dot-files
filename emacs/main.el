@@ -576,7 +576,7 @@
          (back (length (gethash f tab-bar-history-back)))
          (forward (length (gethash f tab-bar-history-forward))))
     (message (concat (format "Window undo (%d / %d)" forward (+ back forward))
-                     (when-let ((msg (current-message))) (format " <%s>" msg))))))
+                     (when-let* ((msg (current-message))) (format " <%s>" msg))))))
 (use-package tab-bar
   :ensure nil
   :bind (("s-[" . tab-bar-history-back)
