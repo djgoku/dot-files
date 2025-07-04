@@ -185,51 +185,50 @@
   ;; only scale when we are on the laptop
   (emacs-startup . scale-default-text-scale)
   (emacs-startup . setup-browse-url-browser-function))
-;;; package installs
-(setq johnny5-package-list
-      '(consult-denote
-        deadgrep
-        define-word
-        dired-preview
-        docker
-        elfeed
-        git-link
-        git-timemachine
-        htmlize
-        ipcalc
-        jeison
-        json-mode
-        kubel
-        markdown-mode
-        nix-mode
-        ob-elixir
-        ;; ob-mermaid
-        org-chef
-        org-contrib
-        org-jira
-        org-ql
-        orgit
-        ox-jira
-        powerthesaurus
-        sideline-blame
-        sideline-flymake
-        string-inflection
-        transient))
-
-(dolist (package johnny5-package-list)
-  (eval `(use-package ,package :ensure t) t))
-;;; affe
-(use-package affe
-  :ensure t
-  :after orderless
-  :config
-  (setq affe-count 10000)
-  (setq affe-regexp-function #'orderless-pattern-compiler
-        affe-highlight-function #'orderless--highlight
-        affe-find-command (concat "rga --color=never --files --hidden" ripgrep--extra-args)
-        affe-grep-command (concat "rga --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden" ripgrep--extra-args))
-  :bind (("M-s a f" . affe-find)
-         ("M-s a g" . affe-grep)))
+;;; transient
+(use-package transient
+  :ensure t)
+;;; string-inflection
+(use-package string-inflection
+  :ensure t)
+;;; powerthesaurus
+(use-package powerthesaurus
+  :ensure t)
+;;; nix-mode
+(use-package nix-mode
+  :ensure t)
+;;; markdown-mode
+(use-package markdown-mode
+  :ensure t)
+;;; json-mode
+(use-package json-mode
+  :ensure t)
+;;; jeison
+(use-package jeison
+  :ensure t)
+;;; ipcalc
+(use-package ipcalc
+  :ensure t)
+;;; htmlize
+(use-package htmlize
+  :ensure t)
+;;; elfeed
+(use-package elfeed
+  :ensure t)
+;;; docker
+(use-package docker
+  :ensure t)
+;;; dired-preview
+(use-package dired-preview
+  :ensure t)
+;;; define-word
+(use-package define-word
+  :ensure t)
+;;; kubel
+(use-package kubel
+  :preface (setq-default kubectl-command (executable-find "kubectl"))
+  :if kubectl-command
+  :ensure t)
 ;;; consult
 (use-package consult
   :ensure t
@@ -319,16 +318,32 @@
   :ensure nil
   :init
   (savehist-mode))
-;;; wgrep
-(use-package wgrep
+;;; ripgrep
+;;;; affe
+(use-package affe
   :ensure t
-  :config (setq wgrep-auto-save-buffer t)
-  (setq wgrep-enable-key "r"))
-;;; rg
+  :after orderless
+  :config
+  (setq affe-count 10000)
+  (setq affe-regexp-function #'orderless-pattern-compiler
+        affe-highlight-function #'orderless--highlight
+        affe-find-command (concat "rga --color=never --files --hidden" ripgrep--extra-args)
+        affe-grep-command (concat "rga --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden" ripgrep--extra-args))
+  :bind (("M-s a f" . affe-find)
+         ("M-s a g" . affe-grep)))
+;;;; deadgrep
+(use-package deadgrep
+  :ensure t)
+;;;; rg
 (use-package rg
   :ensure t
   :config (rg-enable-default-bindings)
   (rg-enable-menu))
+;;;; wgrep
+(use-package wgrep
+  :ensure t
+  :config (setq wgrep-auto-save-buffer t)
+  (setq wgrep-enable-key "r"))
 ;;; magit
 (use-package magit
   :ensure t
@@ -349,6 +364,12 @@
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
+;;; git-link
+(use-package git-link
+  :ensure t)
+;;; git-timemachine
+(use-package git-timemachine
+  :ensure t)
 ;;; org
 ;; (org-narrow-to-subtree) C-x n s
 ;; (widen) C-x n w
@@ -408,14 +429,39 @@
                                                          (sqlite . t)
                                                          (ruby . t)))
 ;; just add :async to any org babel src blocks!
+;;;; ob-async
 (use-package ob-async
   :ensure t
   :config (require 'ob-async))
+;;;; org-chef
+(use-package org-chef
+  :ensure t)
+;;;; org-contrib
+(use-package org-contrib
+  :ensure t)
+;;;; ob-elixir
+(use-package ob-elixir
+  :ensure t)
+;;;; orgit
+(use-package orgit
+  :ensure t)
+;;;; org-jira
+(use-package org-jira
+  :ensure t)
+;;;; ox-jira
+(use-package ox-jira
+  :ensure t)
+;;;; org-ql
+(use-package org-ql
+  :ensure t)
 ;;; denote
 (use-package denote
   :ensure t
   :config
   (setq denote-directory "~/dev/notes"))
+;;;; consult-denote
+(use-package consult-denote
+  :ensure t)
 ;;; programming
 (use-package elixir-ts-mode
   :ensure t)
@@ -556,6 +602,12 @@
         )
   :config
   (global-sideline-mode 1))
+;;;; sideline-blame
+(use-package sideline-blame
+  :ensure t)
+;;;; sideline-flymake
+(use-package sideline-flymake
+  :ensure t)
 ;;; apheleia
 (use-package apheleia
   :ensure t
