@@ -63,26 +63,6 @@
   (global-undo-fu-session-mode)
   (setq undo-fu-session-incompatible-files
         '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-;;; default-text-scale
-;;;; default-text-scale
-(use-package default-text-scale
-  :ensure t
-  :config
-  :hook (emacs-startup . default-text-scale-mode)
-  :bind (("s-=" . default-text-scale-increase)
-         ("s--" . default-text-scale-decrease)
-         ("C-x C-0" . default-text-scale-reset)))
-;;;; unset keys that are related to suspending
-;; Unset suspend-frame and suspend-frame
-(global-unset-key (kbd "C-x C-z"))
-;;;; unset keys that are related to default-text-scale
-;; Unset mouse-wheel-text-scale
-(global-unset-key (kbd "C-<wheel-down>"))
-(global-unset-key (kbd "C-<wheel-up>"))
-;; Unset more things that scale up/down text
-(global-unset-key (kbd "<wheel-down>"))
-(global-unset-key (kbd "<wheel-up>"))
-(global-unset-key (kbd "<pinch>"))
 ;;; outline
 ;;;; outline
 (use-package outline
@@ -101,6 +81,99 @@
               ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
   :hook ((prog-mode text-mode) . outli-mode)
   :init (outli-mode 1))
+;;; emacs
+(use-package emacs
+  :ensure nil
+  :config (recentf-mode t)
+  (setq history-length t)
+  (setq recentf-max-menu-items 10000)
+  (setq recentf-max-saved-items 10000)
+  (show-paren-mode 1)
+  (setq show-paren-style 'expression)
+  (menu-bar-mode -1)
+  (if (fboundp 'toggle-scroll-bar)
+      (toggle-scroll-bar nil))
+  (tool-bar-mode -1)
+  (ido-mode -1)
+  (setq auto-revert-interval 1)
+  (global-auto-revert-mode 1)
+  (setq make-backup-files nil)
+  (setq markdown-command "pandoc")
+  (setq-default indent-tabs-mode nil)
+  (setq auto-save-no-message t)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (electric-pair-mode t)
+  (display-time-mode 1)
+  (setq display-time-default-load-average nil)
+  (setq display-time-format "%F %H:%M - %a")
+  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
+  (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
+  (setq delete-by-moving-to-trash t)
+  (setq initial-major-mode #'org-mode)
+  (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
+  (setq window-combination-resize t)
+  (setq use-short-answers t)
+  (delete-selection-mode 1)
+  (setq-default mode-line-buffer-identification
+                (list
+                 'buffer-file-name
+                 (propertized-buffer-identification "%12f")
+                 (propertized-buffer-identification "%12b")))
+  ;; this allows for Copying or Renaming across dired buffers
+  (setq dired-dwim-target t)
+  (setq native-comp-async-report-warnings-errors 'silent)
+  (pixel-scroll-precision-mode 1)
+  (setq pixel-scroll-precision-use-momentum t)
+  (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
+  (global-hl-line-mode 1)
+  (global-display-line-numbers-mode 1)
+  (setq ring-bell-function 'ignore)
+  (global-visual-wrap-prefix-mode 1)
+  (setq which-func-update-delay 1.0)
+  (setq use-package-compute-statistics t)
+  (setq ripgrep--extra-args " -g !.venv -g !.pre-commit -g !.terraform")
+  :bind (;; Better than default - from /u/zck
+         ("M-c" . capitalize-dwim)
+         ("M-l" . downcase-dwim)
+         ("M-u" . upcase-dwim)
+         ("s-a" . mark-whole-buffer)
+         ("s-u" . revert-buffer)
+         ("s--" . global-text-scale-adjust)
+         ("s-=" . global-text-scale-adjust)
+         ("s-0" . global-text-scale-adjust))
+  :hook
+  (emacs-startup . toggle-frame-maximized)
+  ;; only scale when we are on the laptop
+  (emacs-startup . scale-default-text-scale)
+  (emacs-startup . setup-browse-url-browser-function))
+;;;; unset keys that are related to suspending
+;; Unset suspend-frame and suspend-frame
+(global-unset-key (kbd "C-x C-z"))
+;;;; unset keys that are related to default-text-scale
+;; Unset mouse-wheel-text-scale
+(global-unset-key (kbd "C-<wheel-down>"))
+(global-unset-key (kbd "C-<wheel-up>"))
+;; text-scale-adjust
+(global-unset-key (kbd "s-+"))
+(global-unset-key (kbd "C-x C--"))
+(global-unset-key (kbd "C-x C-0"))
+(global-unset-key (kbd "C-x C-="))
+;; Unset more things that scale up/down text
+(global-unset-key (kbd "<wheel-down>"))
+(global-unset-key (kbd "<wheel-up>"))
+(global-unset-key (kbd "<pinch>"))
+;;;; setup-browse-url-browser-function
+(defun setup-browse-url-browser-function ()
+  (if (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
+      (setq browse-url-browser-function 'browse-url-generic
+            browse-url-generic-program "nyxt")
+    (setq browse-url-browser-function 'browse-url-default-macosx-browser)))
+;;;; scale-default-text-scale
+(defun scale-default-text-scale ()
+  (when (and (eql (display-pixel-height) 1934) (eql (display-pixel-width) 2992))
+    (global-text-scale-adjust 5)))
 ;;; init-file-debug
 (when init-file-debug
   (setq use-package-verbose t
