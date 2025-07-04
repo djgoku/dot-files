@@ -471,15 +471,32 @@
   :ensure t
   :bind (("M-j" . avy-goto-char-timer)))
 ;;; vterm
-(use-package vterm
-  :ensure t
-  :config (setq vterm-buffer-name-string "vterm %s")
+(defun setup-vterm-init ()
+  "This might be hacky, but this allows me to use devbox vterm or compile
+with cmake."
+  (setq vterm-buffer-name-string "vterm %s")
   (setq vterm-kill-buffer-on-exit nil)
-  (setq vterm-max-scrollback 100000)
+  (setq vterm-max-scrollback 1000000)
   (setq vterm-use-vterm-prompt-detection-method t)
-  (setq vterm-always-compile-module t)
-  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                 (setq default-directory path)))))
+  (setq vterm--maybe-compile nil)
+  (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "DEVBOX_PACKAGES_DIR") "/share/emacs/site-lisp/elpa/vterm*")))))
+    (if maybe-load-path
+        (progn
+          (add-to-list 'load-path maybe-load-path)
+          (message "----- using devbox vterm -----"))
+      (setq vterm--maybe-compile t)
+      (setq vterm-always-compile-module t)
+      (message "----- downloading and compiling vterm -----"))))
+(setup-vterm-init)
+(if vterm--maybe-compile
+    (progn
+      (use-package vterm
+        :ensure t))
+  (use-package vterm
+    :ensure nil))
+;; add-to-list after vterm is installed so we don't duplicate this
+(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                               (setq default-directory path))))
 ;;; elisp-demos
 (use-package elisp-demos
   :ensure t
