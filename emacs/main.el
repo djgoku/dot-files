@@ -119,52 +119,42 @@ Return nil if test execution fails."
       (call-process command)
     (error (warn (format "Testing executable '%s' failed with '%s'" command err)) nil)))
 ;;; transient
-(use-package transient
-  :ensure t)
+(use-package transient)
 ;;; string-inflection
-(use-package string-inflection
-  :ensure t)
+(use-package string-inflection)
 ;;; powerthesaurus
-(use-package powerthesaurus
-  :ensure t)
+(use-package powerthesaurus)
 ;;; nix-mode
-(use-package nix-mode
-  :ensure t)
+(use-package nix-mode)
 ;;; markdown-mode
-(use-package markdown-mode
-  :ensure t)
+(use-package markdown-mode)
 ;;; json-mode
-(use-package json-mode
-  :ensure t)
+(use-package json-mode)
 ;;; jeison
-(use-package jeison
-  :ensure t)
+(use-package jeison)
 ;;; ipcalc
-(use-package ipcalc
-  :ensure t)
+(use-package ipcalc)
 ;;; htmlize
-(use-package htmlize
-  :ensure t)
+(use-package htmlize)
 ;;; elfeed
-(use-package elfeed
-  :ensure t)
+(use-package elfeed)
 ;;; docker
-(use-package docker
-  :ensure t)
-;;; dired-preview
-(use-package dired-preview
-  :ensure t)
+(use-package docker)
+;;; dired
+;;;; dired-preview
+(use-package dired-preview)
+;;;; dired-x
+;; adds F to dired buffers 'dired-do-find-marked-files'
+(unless (featurep 'dired-x)
+  (require 'dired-x))
 ;;; define-word
-(use-package define-word
-  :ensure t)
+(use-package define-word)
 ;;; kubel
 (use-package kubel
   :preface (setq-default kubectl-command (executable-find "kubectl"))
-  :if kubectl-command
-  :ensure t)
+  :if kubectl-command)
 ;;; consult
 (use-package consult
-  :ensure t
   :if johnny--maybe-ripgrep-executable
   :bind (("C-c m" . consult-man)
          ("C-c i" . consult-info)
@@ -201,12 +191,10 @@ Return nil if test execution fails."
   (setq consult-narrow-key "<")) ;; "C-+"
 ;;; marginalia
 (use-package marginalia
-  :ensure t
   :config (marginalia-mode)
   (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 ;;; embark
 (use-package embark
-  :ensure t
   :bind ("M-a" . embark-act)
   :config
   (defun johnny5-git-link-homepage (file)
@@ -232,18 +220,15 @@ Return nil if test execution fails."
   (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target)))
 
 (use-package embark-consult
-  :ensure t
   :after (embark consult)
   :hook (embark-collect-mode . embark-consult-preview-minor-mode))
 ;;; orderless
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(orderless partial-completion basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 ;;; vertico
 (use-package vertico
-  :ensure t
   :init
   (vertico-mode))
 ;;; savehist
@@ -262,7 +247,6 @@ Return nil if test execution fails."
 (johnny--maybe-ripgrep-executable)
 ;;;; affe
 (use-package affe
-  :ensure t
   :if johnny--maybe-ripgrep-executable
   :after orderless
   :config
@@ -275,25 +259,21 @@ Return nil if test execution fails."
          ("M-s a g" . affe-grep)))
 ;;;; deadgrep
 (use-package deadgrep
-  :ensure t
   :if johnny--maybe-ripgrep-executable
   :config
   (setq deadgrep-executable johnny--maybe-ripgrep-executable))
 ;;;; rg
 (use-package rg
-  :ensure t
   :if johnny--maybe-ripgrep-executable
   :config (rg-enable-default-bindings)
   (rg-enable-menu)
   (setq rg-executable johnny--maybe-ripgrep-executable))
 ;;;; wgrep
 (use-package wgrep
-  :ensure t
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
 ;;; magit
 (use-package magit
-  :ensure t
   :after project
   :init
   (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
@@ -306,17 +286,14 @@ Return nil if test execution fails."
   :bind (("C-x g" . magit-project-status)))
 ;;; git-identity
 (use-package git-identity
-  :ensure t
   :after magit
   :config (git-identity-magit-mode 1)
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
 ;;; git-link
-(use-package git-link
-  :ensure t)
+(use-package git-link)
 ;;; git-timemachine
-(use-package git-timemachine
-  :ensure t)
+(use-package git-timemachine)
 ;;; org
 ;; (org-narrow-to-subtree) C-x n s
 ;; (widen) C-x n w
@@ -378,46 +355,34 @@ Return nil if test execution fails."
 ;; just add :async to any org babel src blocks!
 ;;;; ob-async
 (use-package ob-async
-  :ensure t
   :config (require 'ob-async))
 ;;;; org-chef
-(use-package org-chef
-  :ensure t)
+(use-package org-chef)
 ;;;; org-contrib
-(use-package org-contrib
-  :ensure t)
+(use-package org-contrib)
 ;;;; ob-elixir
 (use-package ob-elixir
   :ensure t)
 ;;;; orgit
-(use-package orgit
-  :ensure t)
+(use-package orgit)
 ;;;; org-jira
-(use-package org-jira
-  :ensure t)
+(use-package org-jira)
 ;;;; ox-jira
-(use-package ox-jira
-  :ensure t)
+(use-package ox-jira)
 ;;;; org-ql
-(use-package org-ql
-  :ensure t)
+(use-package org-ql)
 ;;; denote
 (use-package denote
-  :ensure t
   :config
   (setq denote-directory "~/dev/notes"))
 ;;;; consult-denote
-(use-package consult-denote
-  :ensure t)
+(use-package consult-denote)
 ;;; programming
-(use-package elixir-ts-mode
-  :ensure t)
-(use-package elixir-mode
-  :ensure t)
+(use-package elixir-ts-mode)
+(use-package elixir-mode)
 (setq treesit-extra-load-path (list (expand-file-name "~/dev/github/casouri/tree-sitter-module/dist")))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package treesit-auto
-  :ensure t
   :custom
   (treesit-auto-install 'prompt)
   :config
@@ -471,17 +436,14 @@ Return nil if test execution fails."
         company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
 ;;; which-key
 (use-package which-key
-  :ensure t
   :config (which-key-mode))
 ;;; switch-window
 (use-package switch-window
-  :ensure t
   :bind (("C-x o" . switch-window))
   :config (setq switch-window-shortcut-style 'qwerty)
   (setq switch-window-minibuffer-shortcut ?z))
 ;;; multiple-cursors
 (use-package multiple-cursors
-  :ensure t
   :config (setq mc/always-run-for-all 1)
   (define-key mc/keymap (kbd "<return>") nil)
   :bind (("s-d" . mc/mark-next-like-this)
@@ -489,8 +451,10 @@ Return nil if test execution fails."
          ("M-s-d" . mc/edit-beginnings-of-lines)))
 ;;; avy
 (use-package avy
-  :ensure t
-  :bind (("M-j" . avy-goto-char-timer)))
+  :bind (("M-j" . avy-goto-char-timer)
+         ("C-c C-j" .   avy-resume)
+         :map isearch-mode-map
+         ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
   "This might be hacky, but this allows me to use devbox vterm or compile
@@ -510,9 +474,7 @@ with cmake."
       (message "----- downloading and compiling vterm -----"))))
 (setup-vterm-init)
 (if vterm--maybe-compile
-    (progn
-      (use-package vterm
-        :ensure t))
+    (use-package vterm)
   (use-package vterm
     :ensure nil))
 ;; add-to-list after vterm is installed so we don't duplicate this
@@ -520,20 +482,18 @@ with cmake."
                                                (setq default-directory path))))
 ;;; elisp-demos
 (use-package elisp-demos
-  :ensure t
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
 ;;; envrc
 (use-package envrc
-  :ensure t
   :config (envrc-global-mode))
 ;;; pdf-tools
 (use-package pdf-tools
-  :ensure t
   :defer t
   :magic ("%PDF" . pdf-view-mode) ;; https://github.com/jwiegley/use-package#magic-handlers
   :config
   (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (add-hook 'pdf-view-mode-hook (lambda () (pdf-view-midnight-minor-mode 1)))
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
 ;;; inheritenv
@@ -541,7 +501,6 @@ with cmake."
   :ensure (:type git :host github :repo "purcell/inheritenv"))
 ;;; buffer-env
 (use-package buffer-env
-  :ensure t
   :hook (hack-local-variables . buffer-env-update)
   :config
   (add-to-list 'buffer-env-command-alist '("/devbox\\.json\\'" . "devbox run  -- \"env -0\""))
@@ -549,13 +508,11 @@ with cmake."
                                  )))
 ;;; buffer-name-relative
 (use-package buffer-name-relative
-  :ensure t
   :init
   (setq buffer-name-relative-prefix '("<" . ">/"))
   (buffer-name-relative-mode))
 ;;; sideline
 (use-package sideline
-  :ensure t
   :init
   (setq sideline-flymake-display-mode 'line
         sideline-backends-right '(sideline-flymake sideline-blame)
@@ -567,14 +524,11 @@ with cmake."
   :config
   (global-sideline-mode 1))
 ;;;; sideline-blame
-(use-package sideline-blame
-  :ensure t)
+(use-package sideline-blame)
 ;;;; sideline-flymake
-(use-package sideline-flymake
-  :ensure t)
+(use-package sideline-flymake)
 ;;; apheleia
 (use-package apheleia
-  :ensure t
   :config
   (apheleia-global-mode +1)
   (require 'cl-lib)
@@ -593,7 +547,6 @@ with cmake."
                '(eglot-managed . apheleia-indent-eglot-managed-buffer)))
 ;;; yasnippet
 (use-package yasnippet
-  :ensure t
   :config
   (yas-global-mode 1))
 ;;; burly
@@ -633,7 +586,6 @@ with cmake."
   (advice-add 'tab-bar-history-back :after 'my/tab-bar-history-report-position))
 ;;; ws-butler
 (use-package ws-butler
-  :ensure t
   :config (ws-butler-global-mode 1))
 ;;; whitespace
 (use-package whitespace
@@ -643,7 +595,6 @@ with cmake."
   (text-mode . whitespace-mode))
 ;;; helpful
 (use-package helpful
-  :ensure t
   :bind
   ([remap describe-function] . helpful-function)
   ([remap describe-variable] . helpful-variable)
@@ -680,7 +631,6 @@ with cmake."
   :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
 ;;; jinx
 (use-package jinx
-  :ensure t
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-,"   . jinx-previous)
