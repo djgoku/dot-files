@@ -151,9 +151,14 @@ Return nil if test execution fails."
 ;;; docker
 (use-package docker
   :ensure t)
-;;; dired-preview
+;;; dired
+;;;; dired-preview
 (use-package dired-preview
   :ensure t)
+;;;; dired-x
+;; adds F to dired buffers 'dired-do-find-marked-files'
+(unless (featurep 'dired-x)
+  (require 'dired-x))
 ;;; define-word
 (use-package define-word
   :ensure t)
