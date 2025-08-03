@@ -119,53 +119,40 @@ Return nil if test execution fails."
       (call-process command)
     (error (warn (format "Testing executable '%s' failed with '%s'" command err)) nil)))
 ;;; transient
-(use-package transient
-  :ensure t)
+(use-package transient)
 ;;; string-inflection
-(use-package string-inflection
-  :ensure t)
+(use-package string-inflection)
 ;;; powerthesaurus
-(use-package powerthesaurus
-  :ensure t)
+(use-package powerthesaurus)
 ;;; nix-mode
-(use-package nix-mode
-  :ensure t)
+(use-package nix-mode)
 ;;; markdown-mode
-(use-package markdown-mode
-  :ensure t)
+(use-package markdown-mode)
 ;;; json-mode
-(use-package json-mode
+(use-package json-mode)
 ;;; jeison
-(use-package jeison
-  :ensure t)
+(use-package jeison)
 ;;; ipcalc
-(use-package ipcalc
-  :ensure t)
+(use-package ipcalc)
 ;;; htmlize
-(use-package htmlize
-  :ensure t)
+(use-package htmlize)
 ;;; elfeed
-(use-package elfeed
-  :ensure t)
+(use-package elfeed)
 ;;; docker
-(use-package docker
-  :ensure t)
+(use-package docker)
 ;;; dired
 ;;;; dired-preview
-(use-package dired-preview
-  :ensure t)
+(use-package dired-preview)
 ;;;; dired-x
 ;; adds F to dired buffers 'dired-do-find-marked-files'
 (unless (featurep 'dired-x)
   (require 'dired-x))
 ;;; define-word
-(use-package define-word
-  :ensure t)
+(use-package define-word)
 ;;; kubel
 (use-package kubel
   :preface (setq-default kubectl-command (executable-find "kubectl"))
-  :if kubectl-command
-  :ensure t)
+  :if kubectl-command)
 ;;; consult
 (use-package consult
   :if johnny--maybe-ripgrep-executable
@@ -304,11 +291,9 @@ Return nil if test execution fails."
   (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
   :custom (git-identity-verify t))
 ;;; git-link
-(use-package git-link
-  :ensure t)
+(use-package git-link)
 ;;; git-timemachine
-(use-package git-timemachine
-  :ensure t)
+(use-package git-timemachine)
 ;;; org
 ;; (org-narrow-to-subtree) C-x n s
 ;; (widen) C-x n w
@@ -372,38 +357,29 @@ Return nil if test execution fails."
 (use-package ob-async
   :config (require 'ob-async))
 ;;;; org-chef
-(use-package org-chef
-  :ensure t)
+(use-package org-chef)
 ;;;; org-contrib
-(use-package org-contrib
-  :ensure t)
+(use-package org-contrib)
 ;;;; ob-elixir
 (use-package ob-elixir
   :ensure t)
 ;;;; orgit
-(use-package orgit
-  :ensure t)
+(use-package orgit)
 ;;;; org-jira
-(use-package org-jira
-  :ensure t)
+(use-package org-jira)
 ;;;; ox-jira
-(use-package ox-jira
-  :ensure t)
+(use-package ox-jira)
 ;;;; org-ql
-(use-package org-ql
-  :ensure t)
+(use-package org-ql)
 ;;; denote
 (use-package denote
   :config
   (setq denote-directory "~/dev/notes"))
 ;;;; consult-denote
-(use-package consult-denote
-  :ensure t)
+(use-package consult-denote)
 ;;; programming
-(use-package elixir-ts-mode
-  :ensure t)
-(use-package elixir-mode
-  :ensure t)
+(use-package elixir-ts-mode)
+(use-package elixir-mode)
 (setq treesit-extra-load-path (list (expand-file-name "~/dev/github/casouri/tree-sitter-module/dist")))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package treesit-auto
@@ -498,9 +474,7 @@ with cmake."
       (message "----- downloading and compiling vterm -----"))))
 (setup-vterm-init)
 (if vterm--maybe-compile
-    (progn
-      (use-package vterm
-        :ensure t))
+    (use-package vterm)
   (use-package vterm
     :ensure nil))
 ;; add-to-list after vterm is installed so we don't duplicate this
@@ -550,11 +524,9 @@ with cmake."
   :config
   (global-sideline-mode 1))
 ;;;; sideline-blame
-(use-package sideline-blame
-  :ensure t)
+(use-package sideline-blame)
 ;;;; sideline-flymake
-(use-package sideline-flymake
-  :ensure t)
+(use-package sideline-flymake)
 ;;; apheleia
 (use-package apheleia
   :config
