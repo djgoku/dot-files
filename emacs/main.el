@@ -182,7 +182,7 @@ Return nil if test execution fails."
          ("s-f" . consult-line))
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
-  (setq consult-ripgrep-args (concat "rga --null --line-buffered --color=never --max-columns=1000 --path-separator / --smart-case --no-heading --with-filename --line-number --search-zip" ripgrep--extra-args))
+  (setq consult-ripgrep-args (concat johnny--maybe-ripgrep-executable " --null --line-buffered --color=never --max-columns=1000 --path-separator / --smart-case --no-heading --with-filename --line-number --search-zip" ripgrep--extra-args))
   (setq register-preview-delay 0.5
         register-preview-function #'consult-register-format
         consult-async-min-input 1)
@@ -253,26 +253,39 @@ Return nil if test execution fails."
   :init
   (savehist-mode))
 ;;; ripgrep
+(defun johnny--maybe-ripgrep-executable ()
+  "Determine if ripgrep 'rg' or ripgrep-all 'rga' is installed"
+  (let* ((maybe-executable (or (executable-find "rga") (executable-find "rg"))))
+    (if (and maybe-executable (johnny-test-executable maybe-executable))
+        (setq johnny--maybe-ripgrep-executable maybe-executable)
+      (warn "ripgrep 'rg' nor ripgrep-all 'rga' were found in PATH"))))
+(johnny--maybe-ripgrep-executable)
 ;;;; affe
 (use-package affe
   :ensure t
+  :if johnny--maybe-ripgrep-executable
   :after orderless
   :config
   (setq affe-count 10000)
   (setq affe-regexp-function #'orderless-pattern-compiler
         affe-highlight-function #'orderless--highlight
-        affe-find-command (concat "rga --color=never --files --hidden" ripgrep--extra-args)
-        affe-grep-command (concat "rga --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden" ripgrep--extra-args))
+        affe-find-command (concat johnny--maybe-ripgrep-executable " --color=never --files --hidden" ripgrep--extra-args)
+        affe-grep-command (concat johnny--maybe-ripgrep-executable " --null --color=never --max-columns=1000 --no-heading --line-number -v ^$ --hidden" ripgrep--extra-args))
   :bind (("M-s a f" . affe-find)
          ("M-s a g" . affe-grep)))
 ;;;; deadgrep
 (use-package deadgrep
-  :ensure t)
+  :ensure t
+  :if johnny--maybe-ripgrep-executable
+  :config
+  (setq deadgrep-executable johnny--maybe-ripgrep-executable))
 ;;;; rg
 (use-package rg
   :ensure t
+  :if johnny--maybe-ripgrep-executable
   :config (rg-enable-default-bindings)
-  (rg-enable-menu))
+  (rg-enable-menu)
+  (setq rg-executable johnny--maybe-ripgrep-executable))
 ;;;; wgrep
 (use-package wgrep
   :ensure t

@@ -134,6 +134,7 @@
   (setq which-func-update-delay 1.0)
   (setq use-package-compute-statistics t)
   (setq ripgrep--extra-args " -g !.venv -g !.pre-commit -g !.terraform")
+  (setq johnny--maybe-ripgrep-executable nil)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)
