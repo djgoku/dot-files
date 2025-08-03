@@ -490,7 +490,10 @@ Return nil if test execution fails."
 ;;; avy
 (use-package avy
   :ensure t
-  :bind (("M-j" . avy-goto-char-timer)))
+  :bind (("M-j" . avy-goto-char-timer)
+         ("C-c C-j" .   avy-resume)
+         :map isearch-mode-map
+         ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
   "This might be hacky, but this allows me to use devbox vterm or compile
