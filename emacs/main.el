@@ -111,6 +111,13 @@
   "Run `crontab-edit' in a emacs buffer."
   (interactive)
   (with-editor-async-shell-command "crontab -e"))
+;;;; johnny-test-executable
+(defun johnny-test-executable (command)
+  "Test we can execute a executable.
+Return nil if test execution fails."
+  (condition-case err
+      (call-process command)
+    (error (warn (format "Testing executable '%s' failed with '%s'" command err)) nil)))
 ;;; transient
 (use-package transient
   :ensure t)
@@ -158,6 +165,7 @@
 ;;; consult
 (use-package consult
   :ensure t
+  :if johnny--maybe-ripgrep-executable
   :bind (("C-c m" . consult-man)
          ("C-c i" . consult-info)
          ([remap Info-search] . consult-info)
