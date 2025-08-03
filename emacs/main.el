@@ -534,6 +534,7 @@ with cmake."
   :magic ("%PDF" . pdf-view-mode) ;; https://github.com/jwiegley/use-package#magic-handlers
   :config
   (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (add-hook 'pdf-view-mode-hook (lambda () (pdf-view-midnight-minor-mode 1)))
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
 ;;; inheritenv
