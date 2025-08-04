@@ -1,0 +1,16 @@
+[tools]
+# aws-cli = "2.28.1" -- x86 only
+# ripgrep-all = "latest" -- x86 only
+"nix:git" = "2.50.0"
+"nix:gnupg" = "2.4.8"
+sops = "3.10.2"
+watchexec = "2.3.2"
+pandoc = "3.7.0.2"
+docker-compose = "2.39.1"
+colima = "0.8.2"
+docker-cli = "28.3.3"
+"nix:stow" = "latest"
+
+[settings]
+experimental = true
+lockfile = true
