@@ -105,7 +105,7 @@
   (interactive)
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
-(define-key global-map "\M-Q" 'unfill-paragraph)
+(define-key global-map "\M-Q" #'unfill-paragraph)
 ;;;; crontab-edit
 (defun crontab-edit ()
   "Run `crontab-edit' in a emacs buffer."
@@ -189,6 +189,8 @@ Return nil if test execution fails."
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<")) ;; "C-+"
+;;;; consult-dir
+(use-package consult-dir)
 ;;; marginalia
 (use-package marginalia
   :config (marginalia-mode)
@@ -278,8 +280,8 @@ Return nil if test execution fails."
   :init
   (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   (setq magit-clone-set-remote.pushDefault t)
-  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
-  (setq magit-bury-buffer-function 'magit-restore-window-configuration)
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1)
+  (setq magit-bury-buffer-function #'magit-restore-window-configuration)
   ;; setting to level 5 for gpg siging
   (setq transient-default-level 5)
   (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
@@ -288,7 +290,7 @@ Return nil if test execution fails."
 (use-package git-identity
   :after magit
   :config (git-identity-magit-mode 1)
-  (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
+  (define-key magit-status-mode-map (kbd "I") #'git-identity-info)
   :custom (git-identity-verify t))
 ;;; git-link
 (use-package git-link)
@@ -301,8 +303,8 @@ Return nil if test execution fails."
 ;; M-x org-babel-execute-buffer will execute all src blocks in a buffer
 (use-package org
   :ensure nil
-  :bind (("C-c c" . 'org-capture)
-         ("C-c a" . 'org-agenda))
+  :bind (("C-c c" . org-capture)
+         ("C-c a" . org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
@@ -457,13 +459,12 @@ Return nil if test execution fails."
          ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use devbox vterm or compile
-with cmake."
-  (setq vterm-buffer-name-string "vterm %s")
-  (setq vterm-kill-buffer-on-exit nil)
-  (setq vterm-max-scrollback 1000000)
-  (setq vterm-use-vterm-prompt-detection-method t)
-  (setq vterm--maybe-compile nil)
+  "This might be hacky, but this allows me to use devbox vterm or compile with cmake."
+  (setq vterm-buffer-name-string "vterm %s"
+        vterm-kill-buffer-on-exit nil
+        vterm-max-scrollback 1000000
+        vterm-use-vterm-prompt-detection-method t
+        vterm--maybe-compile nil)
   (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "DEVBOX_PACKAGES_DIR") "/share/emacs/site-lisp/elpa/vterm*")))))
     (if maybe-load-path
         (progn
@@ -472,14 +473,17 @@ with cmake."
       (setq vterm--maybe-compile t)
       (setq vterm-always-compile-module t)
       (message "----- downloading and compiling vterm -----"))))
+
 (setup-vterm-init)
+
 (if vterm--maybe-compile
     (use-package vterm)
   (use-package vterm
     :ensure nil))
-;; add-to-list after vterm is installed so we don't duplicate this
-(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                               (setq default-directory path))))
+
+(eval-after-load 'vterm
+  '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                                  (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init
@@ -630,6 +634,8 @@ with cmake."
   ;;                                  parenthesized_expression subscript)))
   :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
 ;;; jinx
+;; If this errors when loading and enchant is installed try
+;; elpaca-delete jinx
 (use-package jinx
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
