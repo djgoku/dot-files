@@ -99,8 +99,8 @@
   (setq markdown-command "pandoc")
   (setq-default indent-tabs-mode nil)
   (setq auto-save-no-message t)
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-window-setup-function #'ediff-setup-windows-plain)
+  (setq ediff-split-window-function #'split-window-horizontally)
   (electric-pair-mode t)
   (display-time-mode 1)
   (setq display-time-default-load-average nil)
@@ -127,7 +127,7 @@
   (setq native-comp-jit-compilation-deny-list '("git-timemachine"))
   (global-hl-line-mode 1)
   (global-display-line-numbers-mode 1)
-  (setq ring-bell-function 'ignore)
+  (setq ring-bell-function #'ignore)
   (global-visual-wrap-prefix-mode 1)
   (setq which-func-update-delay 1.0)
   (setq use-package-compute-statistics t)
@@ -166,9 +166,9 @@
 ;;;; setup-browse-url-browser-function
 (defun setup-browse-url-browser-function ()
   (if (or (string-equal system-type "berkley-unix") (string-equal system-type "gnu/linux"))
-      (setq browse-url-browser-function 'browse-url-generic
+      (setq browse-url-browser-function #'browse-url-generic
             browse-url-generic-program "nyxt")
-    (setq browse-url-browser-function 'browse-url-default-macosx-browser)))
+    (setq browse-url-browser-function #'browse-url-default-macosx-browser)))
 ;;;; scale-default-text-scale
 (defun scale-default-text-scale ()
   (when (and (eql (display-pixel-height) 1934) (eql (display-pixel-width) 2992))

@@ -105,7 +105,7 @@
   (interactive)
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
-(define-key global-map "\M-Q" 'unfill-paragraph)
+(define-key global-map "\M-Q" #'unfill-paragraph)
 ;;;; crontab-edit
 (defun crontab-edit ()
   "Run `crontab-edit' in a emacs buffer."
@@ -278,8 +278,8 @@ Return nil if test execution fails."
   :init
   (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   (setq magit-clone-set-remote.pushDefault t)
-  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
-  (setq magit-bury-buffer-function 'magit-restore-window-configuration)
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1)
+  (setq magit-bury-buffer-function #'magit-restore-window-configuration)
   ;; setting to level 5 for gpg siging
   (setq transient-default-level 5)
   (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
@@ -288,7 +288,7 @@ Return nil if test execution fails."
 (use-package git-identity
   :after magit
   :config (git-identity-magit-mode 1)
-  (define-key magit-status-mode-map (kbd "I") 'git-identity-info)
+  (define-key magit-status-mode-map (kbd "I") #'git-identity-info)
   :custom (git-identity-verify t))
 ;;; git-link
 (use-package git-link)
@@ -301,8 +301,8 @@ Return nil if test execution fails."
 ;; M-x org-babel-execute-buffer will execute all src blocks in a buffer
 (use-package org
   :ensure nil
-  :bind (("C-c c" . 'org-capture)
-         ("C-c a" . 'org-agenda))
+  :bind (("C-c c" . org-capture)
+         ("C-c a" . org-agenda))
   :config (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
