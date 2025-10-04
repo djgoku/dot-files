@@ -459,13 +459,12 @@ Return nil if test execution fails."
          ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use devbox vterm or compile
-with cmake."
-  (setq vterm-buffer-name-string "vterm %s")
-  (setq vterm-kill-buffer-on-exit nil)
-  (setq vterm-max-scrollback 1000000)
-  (setq vterm-use-vterm-prompt-detection-method t)
-  (setq vterm--maybe-compile nil)
+  "This might be hacky, but this allows me to use devbox vterm or compile with cmake."
+  (setq vterm-buffer-name-string "vterm %s"
+        vterm-kill-buffer-on-exit nil
+        vterm-max-scrollback 1000000
+        vterm-use-vterm-prompt-detection-method t
+        vterm--maybe-compile nil)
   (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "DEVBOX_PACKAGES_DIR") "/share/emacs/site-lisp/elpa/vterm*")))))
     (if maybe-load-path
         (progn
@@ -474,14 +473,17 @@ with cmake."
       (setq vterm--maybe-compile t)
       (setq vterm-always-compile-module t)
       (message "----- downloading and compiling vterm -----"))))
+
 (setup-vterm-init)
+
 (if vterm--maybe-compile
     (use-package vterm)
   (use-package vterm
     :ensure nil))
-;; add-to-list after vterm is installed so we don't duplicate this
-(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                               (setq default-directory path))))
+
+(eval-after-load 'vterm
+  '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+                                                  (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init
