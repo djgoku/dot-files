@@ -189,6 +189,8 @@ Return nil if test execution fails."
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<")) ;; "C-+"
+;;;; consult-dir
+(use-package consult-dir)
 ;;; marginalia
 (use-package marginalia
   :config (marginalia-mode)
