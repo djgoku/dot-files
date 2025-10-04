@@ -634,6 +634,8 @@ Return nil if test execution fails."
   ;;                                  parenthesized_expression subscript)))
   :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
 ;;; jinx
+;; If this errors when loading and enchant is installed try
+;; elpaca-delete jinx
 (use-package jinx
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
