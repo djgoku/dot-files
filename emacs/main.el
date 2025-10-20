@@ -153,6 +153,9 @@ Return nil if test execution fails."
 (use-package kubel
   :preface (setq-default kubectl-command (executable-find "kubectl"))
   :if kubectl-command)
+;;; toml-mode
+(use-package toml-mode
+  :config (setq toml-ts-mode-indent-offset 0))
 ;;; consult
 (use-package consult
   :if johnny--maybe-ripgrep-executable
@@ -228,7 +231,8 @@ Return nil if test execution fails."
 (use-package orderless
   :custom
   (completion-styles '(orderless partial-completion basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
 ;;; vertico
 (use-package vertico
   :init
@@ -400,22 +404,34 @@ Return nil if test execution fails."
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
   (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
-  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ("devbox" "run" ".devbox/nix/profile/default/lib/language_server.sh")))
+  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ,(eglot-alternatives
+                                                                                      '(("devbox" "run" ".devbox/nix/profile/default/lib/language_server.sh")
+                                                                                        ("mise" "exec" "--" "elixir-ls")
+                                                                                        ("/Users/dj_goku/bin/expert_darwin_arm64")))))
   ;; (with-eval-after-load 'eglot
   ;;   (add-to-list 'eglot-server-programs
   ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
   ;;                  ("nextls" "--stdio=true" :initializationOptions (:experimental (:completions (:enable t)))))))
   ;; (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
   (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
+               '((python-mode python-ts-mode) "devbox" "run" "--" "pyright-langserver" "--stdio"))
+  (add-to-list 'eglot-server-programs
+               `((json-mode json-ts-mode) . ,(eglot-alternatives
+                                              '(("devbox" "global" "run" "--" "pnpm" "vscode-json-languageserver" "--stdio")
+                                                ("mise" "x" "--" "pnpm" "vscode-json-languageserver" "--stdio")))))
   (add-to-list 'eglot-server-programs '(terraform-mode "terraform-ls" "serve"))
+  (add-to-list 'eglot-server-programs '(toml-ts-mode "mise" "x" "--" "taplo" "lsp" "stdio"))
+  (add-to-list 'eglot-server-programs '(yaml-ts-mode "devbox"  "global" "run" "--" "pnpm" "yaml-language-server" "--stdio"))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          (nix-mode . eglot-ensure)
-         (terraform-mode . eglot-ensure))
+         (terraform-mode . eglot-ensure)
+         (toml-mode . eglog-ensure)
+         (toml-ts-mode . eglot-ensure)
+         (yaml-ts-mode . eglot-ensure))
   :bind(:map eglot-mode-map
              ("C-c l r" . eglot-rename)
              ("C-c l a" . eglot-code-actions)
@@ -426,16 +442,50 @@ Return nil if test execution fails."
   (eglot-autoshutdown t)
   ;; Enable eglot in code external to project
   (eglot-extend-to-xref t))
-(use-package company
-  :ensure t
-  :hook
-  (prog-mode . company-mode)
-  :config
-  (setq company-minimum-prefix-length 1
-        company-idle-delay 0.0
-        company-backends '((company-capf company-dabbrev-code))
-        company-dabbrev-minimum-length 2
-        company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
+(let* ((json-object-type 'plist)
+       (json-array-type  'vector)
+       (json-key-type    'keyword)
+       (json-schemas     (plist-get (json-read-file (locate-user-emacs-file "schema-store-catalog.json")) :schemas)))
+  (setq-default eglot-workspace-configuration
+                `(;; https://github.com/microsoft/vscode/blob/main/extensions/json-language-features/server/README.md
+                  :json
+                  (:validate (:enable t)
+                             :schemas ,json-schemas)
+                  :yaml (:schemas ,json-schemas)
+                  :toml (:validate (:enable t)
+                                   :schemas ,json-schemas))))
+(advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
+;;; Corfu
+;; A modern and minimal completion UI.
+(use-package corfu
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-separator ?\s)          ;; Use space as a separator for orderless
+  (corfu-quit-at-boundary 'separator)
+  (corfu-quit-no-match 'separator)
+  :init
+  ;; Enable Corfu globally
+  (global-corfu-mode))
+;; ;;; Cape
+;; Provides additional completion backends (Completion-At-Point-Functions).
+(use-package cape
+  :init
+  ;; Add useful completion backends.
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  :bind ("C-c p" . cape-prefix-map))
+;; (use-package company
+;;   ;;   :hook
+;;   (prog-mode . company-mode)
+;;   :config
+;;   (setq company-minimum-prefix-length 1
+;;         company-idle-delay 0.0
+;;         company-backends '((company-capf company-dabbrev-code))
+;;         company-dabbrev-minimum-length 2
+;;         company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
 ;;; which-key
 (use-package which-key
   :config (which-key-mode))
@@ -508,6 +558,7 @@ Return nil if test execution fails."
   :hook (hack-local-variables . buffer-env-update)
   :config
   (add-to-list 'buffer-env-command-alist '("/devbox\\.json\\'" . "devbox run  -- \"env -0\""))
+  (add-to-list 'buffer-env-command-alist '("/mise\\.toml\\'" . "eval \"$(/Users/dj_goku/.local/bin/mise activate zsh)\""))
   (setq buffer-env-script-name '(".envrc" ;; ".venv/bin/activate"
                                  )))
 ;;; buffer-name-relative
@@ -553,6 +604,7 @@ Return nil if test execution fails."
 (use-package yasnippet
   :config
   (yas-global-mode 1))
+(use-package yasnippet-snippets)
 ;;; burly
 (use-package burly
   :ensure (:type git :host github :repo "alphapapa/burly.el"))

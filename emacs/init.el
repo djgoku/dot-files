@@ -147,7 +147,14 @@
   (emacs-startup . toggle-frame-maximized)
   ;; only scale when we are on the laptop
   (emacs-startup . scale-default-text-scale)
-  (emacs-startup . setup-browse-url-browser-function))
+  (emacs-startup . setup-browse-url-browser-function)
+  :custom   ;; Emacs 30 and newer: Disable Ispell completion function.
+  ;; Try `cape-dict' as an alternative.
+  (text-mode-ispell-word-completion nil)
+  ;; Hide commands in M-x which do not apply to the current mode.  Corfu
+  ;; commands are hidden, since they are not used via M-x. This setting is
+  ;; useful beyond Corfu.
+  (read-extended-command-predicate #'command-completion-default-include-p))
 ;;;; unset keys that are related to suspending
 ;; Unset suspend-frame and suspend-frame
 (global-unset-key (kbd "C-x C-z"))
