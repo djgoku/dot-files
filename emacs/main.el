@@ -594,9 +594,6 @@ Press 'q' to exit and edit manually."
 (use-package elisp-demos
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
-;;; envrc
-(use-package envrc
-  :config (envrc-global-mode))
 ;;; pdf-tools
 (use-package pdf-tools
   :defer t
@@ -606,16 +603,13 @@ Press 'q' to exit and edit manually."
   (add-hook 'pdf-view-mode-hook (lambda () (pdf-view-midnight-minor-mode 1)))
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
-;;; inheritenv
-(use-package inheritenv
-  :ensure (:type git :host github :repo "purcell/inheritenv"))
-;;; buffer-env
-(use-package buffer-env
-  :hook (hack-local-variables . buffer-env-update)
+;;; mise
+(use-package mise
+  :hook ((after-init .  global-mise-mode))
   :config
-  (add-to-list 'buffer-env-command-alist '("/devbox\\.json\\'" . "devbox run  -- \"env -0\""))
-  (setq buffer-env-script-name '(".envrc" ;; ".venv/bin/activate"
-                                 )))
+  (add-to-list 'mise-auto-propagate-commands 'vterm)
+  (add-to-list 'mise-auto-propagate-commands 'claude-code-ide--detect-cli)
+  (add-to-list 'mise-auto-propagate-commands 'claude-code-ide-check-status))
 ;;; buffer-name-relative
 (use-package buffer-name-relative
   :init
