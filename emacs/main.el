@@ -508,15 +508,10 @@ Press 'q' to exit and edit manually."
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
   (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
-  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ("devbox" "run" ".devbox/nix/profile/default/lib/language_server.sh")))
   ;; (with-eval-after-load 'eglot
   ;;   (add-to-list 'eglot-server-programs
   ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
   ;;                  ("nextls" "--stdio=true" :initializationOptions (:experimental (:completions (:enable t)))))))
-  ;; (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
-  (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
-  (add-to-list 'eglot-server-programs '(terraform-mode "terraform-ls" "serve"))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
