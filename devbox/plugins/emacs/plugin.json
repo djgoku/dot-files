@@ -1,8 +1,0 @@
-{
-  "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.10.1/.schema/devbox-plugin.schema.json",
-  "name": "emacs",
-  "packages": [
-    "github:nix-community/emacs-overlay/65297336c6db39d94adb8156d811d800b253fded#emacs-git",
-    "emacsPackages.vterm@latest"
-  ]
-}
