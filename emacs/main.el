@@ -567,17 +567,17 @@ Press 'q' to exit and edit manually."
          ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use devbox vterm or compile with cmake."
+  "This might be hacky, but this allows me to use mise vterm or compile with cmake."
   (setq vterm-buffer-name-string "vterm %s"
         vterm-kill-buffer-on-exit nil
         vterm-max-scrollback 1000000
         vterm-use-vterm-prompt-detection-method t
         vterm--maybe-compile nil)
-  (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "DEVBOX_PACKAGES_DIR") "/share/emacs/site-lisp/elpa/vterm*")))))
+  (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "MISE_VTERM_PATH") "/share/emacs/site-lisp/elpa/vterm*")))))
     (if maybe-load-path
         (progn
           (add-to-list 'load-path maybe-load-path)
-          (message "----- using devbox vterm -----"))
+          (message "----- using mise vterm -----"))
       (setq vterm--maybe-compile t)
       (setq vterm-always-compile-module t)
       (message "----- downloading and compiling vterm -----"))))
@@ -751,7 +751,17 @@ Press 'q' to exit and edit manually."
          ("C-."   . jinx-next)
          ("C-M-$" . jinx-languages))
   :config
-  (setq jinx--compile-flags (append jinx--compile-flags (list (format "-I%s/include/enchant-2" (getenv "DEVBOX_PACKAGES_DIR")) (format "-L%s/lib"  (getenv "DEVBOX_PACKAGES_DIR")))))
+  (defun jinx--get-paths ()
+    "Get paths to configure jinx from mise environment."
+    (let ((enchant-include-path (getenv "MISE_ENCHANT_INCLUDE_PATH"))
+          (enchant-lib-path (getenv "MISE_ENCHANT_LIB_PATH")))
+      (when (and enchant-include-path (file-directory-p enchant-include-path)
+                 enchant-lib-path (file-directory-p enchant-lib-path))
+        (setq jinx--compile-flags
+              (append jinx--compile-flags
+                      (list (format "-I%s/include/enchant-2" enchant-include-path)
+                            (format "-L%s/lib" enchant-lib-path)))))))
+  (jinx--get-paths)
   (unless (featurep 'jinx)
     (require 'jinx)
     (keymap-set jinx-repeat-map "RET" 'jinx-correct)
