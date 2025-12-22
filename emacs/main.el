@@ -414,7 +414,7 @@ Return nil if test execution fails."
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
-  :ensure (:depth 1)
+  :ensure nil
   :config
   ;; else eglot + python will not work well
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
