@@ -518,7 +518,10 @@ Press 'q' to exit and edit manually."
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          (nix-mode . eglot-ensure)
-         (terraform-mode . eglot-ensure))
+         (terraform-mode . eglot-ensure)
+         (toml-ts-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (yaml-ts-mode . eglot-ensure))
   :bind(:map eglot-mode-map
              ("C-c l r" . eglot-rename)
              ("C-c l a" . eglot-code-actions)
