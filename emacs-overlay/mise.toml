@@ -1,0 +1,27 @@
+[settings]
+experimental = true
+
+[tools]
+"nix" = "latest"
+
+[tasks.update]
+description = "Update flake inputs and commit if changed"
+run = """
+nix flake update
+
+if git diff --quiet flake.lock; then
+  echo "No changes"
+  exit 0
+fi
+
+git config user.name "github-actions[bot]"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+git commit -m "Updated flake inputs for latest emacs-overlay" flake.lock
+git pull --rebase --autostash
+git push
+echo "CHANGES_EXIST=true"
+"""
+
+[tasks.build]
+description = "Build emacs-git-pgtk from emacs-overlay"
+run = "nix build --print-build-logs"
