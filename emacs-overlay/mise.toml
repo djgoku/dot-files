@@ -1,9 +1,6 @@
 [settings]
 experimental = true
 
-[tools]
-"nix" = "latest"
-
 [tasks.update]
 description = "Update flake inputs and commit if changed"
 run = """
