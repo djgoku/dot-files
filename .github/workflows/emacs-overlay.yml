@@ -27,6 +27,7 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           working_directory: emacs-overlay
+          install: false
 
       - name: Install mise nix plugin
         run: mise plugins install nix https://github.com/jbadeau/mise-nix.git
@@ -60,6 +61,7 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           working_directory: emacs-overlay
+          install: false
 
       - name: Install mise nix plugin
         run: mise plugins install nix https://github.com/jbadeau/mise-nix.git
