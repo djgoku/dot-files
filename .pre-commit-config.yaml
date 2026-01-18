@@ -6,7 +6,7 @@ ci:
   autofix_prs: false
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -28,7 +28,7 @@ repos:
         args: [--baseline, .secrets.baseline]
         additional_dependencies: ['gibberish-detector']
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.96.1
+    rev: v1.105.0
     hooks:
       - id: infracost_breakdown
       - id: terraform_fmt
@@ -36,11 +36,11 @@ repos:
       - id: terraform_validate
       - id: terrascan
   - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.3.3
+    rev: v1.4.2
     hooks:
       - id: python-safety-dependencies-check
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 26.1.0
     hooks:
       - id: black
   - repo: https://gitlab.com/jvenom/elixir-pre-commit-hooks
@@ -53,25 +53,25 @@ repos:
     hooks:
       - id: nixpkgs-fmt
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.18.0
+    rev: v3.21.2
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.14.0
+    rev: v3.16.0
     hooks:
       - id: reorder-python-imports
         exclude: ^(pre_commit/resources/|testing/resources/python3_hooks_repo/)
         args: [--py310-plus, --add-import, 'from __future__ import annotations']
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+    rev: 7.3.0
     hooks:
       - id: flake8
   - repo: https://github.com/google/yamlfmt
-    rev: v0.13.0
+    rev: v0.21.0
     hooks:
       - id: yamlfmt
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
