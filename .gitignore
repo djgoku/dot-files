@@ -1,0 +1,66 @@
+# OS
+.DS_Store
+
+# Root level
+docs/
+flake.lock
+flake.nix
+main/
+mise.toml~
+setup.el-original-maybe
+setup.zsh
+
+# Node
+node_modules/
+package.json
+pnpm-lock.yaml
+
+# Emacs - desktop and state
+emacs/.emacs.desktop
+emacs/.mc-lists.el
+emacs/.org-id-locations
+emacs/.time-zones.el
+emacs/bookmarks
+emacs/custom.el
+emacs/history
+emacs/places.eld
+emacs/projects
+emacs/recentf
+emacs/recall
+emacs/tramp
+
+# Emacs - auto-saves and backups
+emacs/auto-save-list/
+emacs/auto-saves/
+emacs/init.el~
+
+# Emacs - packages
+emacs/elpa/
+emacs/elpaca/
+
+# Emacs - databases and caches
+emacs/cl-defstruct-compilation-history.db
+emacs/compilation-history.db
+emacs/compilations.db
+emacs/forge-database.sqlite
+emacs/exec-log.dat
+emacs/ielm-history.eld
+emacs/schema-store-catalog.json
+
+# Emacs - directories
+emacs/detached/
+emacs/docs/
+emacs/eshell/
+emacs/locks/
+emacs/request/
+emacs/snippets/
+emacs/transient/
+emacs/tree-sitter/
+emacs/tutorial/
+emacs/undo-fu-session/
+emacs/url/
+
+# Emacs - other files
+emacs/count-duplicate-lines.el
+emacs/elfeed.opml
+emacs/test-count-duplicate-lines.el
