@@ -4,100 +4,120 @@
   (unless (file-directory-p (concat user-emacs-directory directory))
     (mkdir (concat user-emacs-directory directory))))
 ;;; functions
-;;;; johnny5-magit-clone
-;; This function has evolved a little after the initial need.
-
-;; Features:
-;; - If the repository is already clone switch to the repository
-;;   directory and run ~magit-status~
-;; - The behavior is the same if you input ~git clone
-;;   git@bitbucket.org:johnny-5-is-alive/dot-files.git~ or
-;;   ~git@bitbucket.org:johnny-5-is-alive/dot-files.git~ with
-;;   ~johnny5-magit-clone~
-;; - Clone to a consistent directory. The directory will contain the site
-;;   ~github~, ~github.com~ ~bitbucket~, or ~bitbucket.org~ (~(setq
-;;   johnny5-magit-clone-default-directory-remove-domain t)~ to remove
-;;   the domain name from the directory path); Next part of the directory
-;;   path will have the GitHub/Bitbucket org or GitHub/Bitbucket
-;;   username; With the last part of the directory is the repository
-;;   name; As an example input to ~johnny5-magit-clone~ of ~git clone
-;;   git@bitbucket.org:johnny-5-is-alive/dot-files.git~. The directory
-;;   path would be =~/dev/bitbucket.org/johnny-5-is-alive/dot-files=
-;;;;; functions
-;; if you want to remove the domain from say github.com and use github as the directory, set the following:
-;; (setq johnny5-magit-clone-default-directory-remove-domain t)
+;;;; johnny5-magit-clone - magit-clone integration
+;; Integrates with magit-clone via advice to provide:
+;; - Automatic directory calculation: ~/dev/{site}/{org-or-user}/{repo}
+;; - "git clone " prefix stripping when pasting full clone commands
+;; - Jump to magit-status if repository already exists locally
+;;
+;; Set johnny5-magit-clone-default-directory-remove-domain to t to use
+;; "github" instead of "github.com" in the directory path.
 
 (setq johnny5-magit-clone-default-directory-remove-domain t)
 
 (defun johnny5-magit-clone-default-directory (git-clone-url)
-  (let* ((parsed-git-clone-url (johnny5-magit-clone-parse git-clone-url)))
-    (cond ((string-prefix-p "git@" parsed-git-clone-url)
-           (johnny5-git-url-parse (cadr (split-string parsed-git-clone-url "git@"))))
-          ((string-prefix-p "https://" parsed-git-clone-url)
-           (johnny5-git-https-url-parse parsed-git-clone-url)))))
+  "Calculate the parent directory for cloning a git repository.
+Returns a path like ~/dev/github/djgoku/ for git@github.com:djgoku/repo.git"
+  (cond ((string-prefix-p "git@" git-clone-url)
+         (johnny5-git-url-parse (cadr (split-string git-clone-url "git@"))))
+        ((string-prefix-p "https://" git-clone-url)
+         (johnny5-git-https-url-parse git-clone-url))))
 
-(defun johnny5-git-https-url-parse (git-https-url-parse)
-  (let* ((url (url-generic-parse-url git-https-url-parse))
+(defun johnny5-git-https-url-parse (url-string)
+  "Parse HTTPS git URL and return the clone directory path.
+Converts URL to a format suitable for `johnny5-git-url-parse'."
+  (let* ((url (url-generic-parse-url url-string))
          (host (url-host url))
          (user-or-workspace-and-repo (substring (url-filename url) 1)))
     (johnny5-git-url-parse (format "%s:%s/" host user-or-workspace-and-repo))))
 
 (defun johnny5-git-url-parse (git-clone-url)
+  "Parse git URL (host:user/repo format) and return the clone directory path.
+Returns ~/dev/{site}/{user}/ or ~/dev/{site-without-domain}/{user}/
+depending on `johnny5-magit-clone-default-directory-remove-domain'."
   (let* ((git-url-path-and-repo-split (string-split git-clone-url ":"))
          (uri (car git-url-path-and-repo-split))
          (uri-without-domain (car (split-string uri "\\.")))
          (user-or-workspace-and-repo-split (split-string (cadr git-url-path-and-repo-split) "/"))
-         (user-or-workspace (car user-or-workspace-and-repo-split))
-         (repository_name (car(split-string (cadr user-or-workspace-and-repo-split) ".git"))))
-    (if (and (boundp 'johnny5-magit-clone-default-directory-remove-domain) johnny5-magit-clone-default-directory-remove-domain)
+         (user-or-workspace (car user-or-workspace-and-repo-split)))
+    (if johnny5-magit-clone-default-directory-remove-domain
         (format "~/dev/%s/%s/" uri-without-domain user-or-workspace)
       (format "~/dev/%s/%s/" uri user-or-workspace))))
 
-(defun johnny5-magit-clone ()
-  (interactive)
-  (unless (featurep 'magit)
-    (require 'magit))
-  (let* ((repo (magit-read-string "clone repo"))
-         (repo-url (johnny5-magit-clone-parse repo))
-         (repo-name (johnny5-magit-clone-url-to-name repo))
-         (clone-directory (johnny5-magit-clone-default-directory repo-url))
-         (clone-directory-with-repo-name (format "%s/%s" clone-directory repo-name)))
-    (if (file-directory-p clone-directory-with-repo-name)
-        (magit-status clone-directory-with-repo-name)
-      (magit-clone-internal repo-url clone-directory-with-repo-name nil))
-    (message "repo %s, repo-name %s, clone-directory %s, repo-url %s, clone-directory-with-repo-name %s" repo repo-name clone-directory repo-url clone-directory-with-repo-name)))
+;;;;; advice: strip "git clone " prefix and allow pasting full commands
+(defun johnny5-magit-clone-clean-url (url)
+  "Strip 'git clone ' prefix if present.
+Allows pasting full clone commands like 'git clone git@github.com:user/repo.git'."
+  (if (and url (string-prefix-p "git clone " url))
+      (substring url 10)
+    url))
 
-(defun johnny5-magit-clone-url-to-name (url)
-  (and (string-match "\\([^/:]+?\\)\\(/?\\.git\\)?$" url)
-       (match-string 1 url)))
+(defun johnny5-magit-clone-read-repository (orig-fun)
+  "Wrap magit-clone-read-repository to allow pasting 'git clone URL' commands.
+Magit's default uses magit-read-string-ns which rejects whitespace."
+  (magit-read-char-case "Clone from " nil
+    (?u "[u]rl or name"
+        (let* ((input (read-string "Clone from url or name: "))
+               (str (johnny5-magit-clone-clean-url (string-trim input))))
+          (if (string-match-p "\\(://\\|@\\)" str)
+              str
+            (magit-clone--name-to-url str))))
+    (?p "[p]ath"
+        (magit-convert-filename-for-git
+         (read-directory-name "Clone repository: ")))
+    (?l "[l]ocal url"
+        (concat "file://"
+                (magit-convert-filename-for-git
+                 (read-directory-name "Clone repository: file://"))))
+    (?b "[b]undle"
+        (magit-convert-filename-for-git
+         (read-file-name "Clone from bundle: ")))))
 
-(defun johnny5-magit-clone-parse (git-clone-url)
-  (cond
-   ((string-prefix-p "git@" git-clone-url) git-clone-url)
-   ((string-prefix-p "https://" git-clone-url) git-clone-url)
-   ((cadr (split-string git-clone-url "git clone ")))))
+(advice-add 'magit-clone-read-repository :around #'johnny5-magit-clone-read-repository)
+
+;;;;; advice: jump to existing repos
+(defun johnny5-magit-clone-maybe-status (orig-fun)
+  "If repo already exists locally, open magit-status instead of cloning."
+  (let* ((repo (magit-clone-read-repository))
+         (repo-name (magit-clone--url-to-name repo))
+         (default-dir (johnny5-magit-clone-default-directory repo))
+         (full-path (and default-dir repo-name
+                         (expand-file-name repo-name default-dir))))
+    (if (and full-path (file-directory-p full-path))
+        (progn
+          (magit-status full-path)
+          (keyboard-quit))
+      (list repo
+            (read-directory-name "Clone to: " default-dir nil nil repo-name)
+            (transient-args 'magit-clone)))))
+
+(advice-add 'magit-clone-read-args :around #'johnny5-magit-clone-maybe-status)
+
 ;;;;; tests
-(ert-deftest test-johnny5-magit-clone-parse ()
-  "test that magit-clone parse works"
-  (should (equal (johnny5-magit-clone-parse "git@github.com.com:djgoku/melpa.git") "git@github.com.com:djgoku/melpa.git"))
-  (should (equal (johnny5-magit-clone-parse "https://github.com/djgoku/melpa.git") "https://github.com/djgoku/melpa.git"))
-  (should (equal (johnny5-magit-clone-parse "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "git@bitbucket.org:johnny-5-is-alive/dot-files.git")))
+(ert-deftest test-johnny5-magit-clone-clean-url ()
+  "Test that 'git clone ' prefix is stripped."
+  (should (equal (johnny5-magit-clone-clean-url "git clone git@github.com:djgoku/melpa.git")
+                 "git@github.com:djgoku/melpa.git"))
+  (should (equal (johnny5-magit-clone-clean-url "git@github.com:djgoku/melpa.git")
+                 "git@github.com:djgoku/melpa.git"))
+  (should (equal (johnny5-magit-clone-clean-url "https://github.com/djgoku/melpa.git")
+                 "https://github.com/djgoku/melpa.git")))
 
 (ert-deftest test-johnny5-magit-clone-default-directory ()
   "Tests that we return the correct magit-clone-default-directory."
   (setq johnny5-magit-clone-default-directory-remove-domain nil)
   (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github.com/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github.com/djgoku/"))
-  (should (equal (johnny5-magit-clone-default-directory "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/"))
-  (should (equal (johnny5-magit-clone-default-directory "git clone https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/")))
+  (should (equal (johnny5-magit-clone-default-directory "git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/")))
 
 (ert-deftest test-johnny5-magit-clone-default-directory-remove-domain ()
   "Tests that we return the correct magit-clone-default-directory."
   (setq johnny5-magit-clone-default-directory-remove-domain t)
   (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
-  (should (equal (johnny5-magit-clone-default-directory "git clone git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
-  (should (equal (johnny5-magit-clone-default-directory "git clone https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/")))
+  (should (equal (johnny5-magit-clone-default-directory "git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/")))
 ;;;; unfill-paragraph
 ;; It is the opposite of fill-paragraph
 (defun unfill-paragraph ()
