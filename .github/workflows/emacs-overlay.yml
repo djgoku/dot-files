@@ -36,10 +36,16 @@ jobs:
         id: update
         working-directory: emacs-overlay
         run: |
-          OUTPUT=$(mise run update)
+          echo "=== Running mise update task ==="
+          OUTPUT=$(mise run update 2>&1) || true
+          echo "=== Task output ==="
+          echo "$OUTPUT"
+          echo "=== Checking for changes ==="
           if echo "$OUTPUT" | grep -q "CHANGES_EXIST=true"; then
+            echo "Changes detected, build will be triggered"
             echo "changes_exist=true" >> $GITHUB_OUTPUT
           else
+            echo "No changes detected, build will be skipped"
             echo "changes_exist=false" >> $GITHUB_OUTPUT
           fi
 
