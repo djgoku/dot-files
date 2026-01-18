@@ -28,6 +28,9 @@ jobs:
         with:
           working_directory: emacs-overlay
 
+      - name: Install mise nix plugin
+        run: mise plugins install nix https://github.com/jbadeau/mise-nix.git
+
       - name: Update flake inputs
         id: update
         working-directory: emacs-overlay
@@ -57,6 +60,9 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           working_directory: emacs-overlay
+
+      - name: Install mise nix plugin
+        run: mise plugins install nix https://github.com/jbadeau/mise-nix.git
 
       - name: Build Emacs
         working-directory: emacs-overlay
