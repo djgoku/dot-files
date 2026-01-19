@@ -673,6 +673,12 @@ Return nil if test execution fails."
     (add-to-list 'embark-repeat-actions #'jinx-next)
     (add-to-list 'embark-repeat-actions #'jinx-previous)
     (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
+;;; emacs-env
+;; Manage dated Emacs environments for testing emacs-overlay updates
+(let ((env-file (locate-user-emacs-file "emacs-env/emacs-env.el")))
+  (when (file-exists-p env-file)
+    (load env-file)))
+
 ;;; load custom.el
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)

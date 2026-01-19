@@ -1,0 +1,146 @@
+#+TITLE: emacs-env
+#+AUTHOR: Jonathan Carroll Otsuka
+
+Create and manage versioned Emacs environments for testing emacs-overlay updates.
+Provides easy rollback by maintaining date-based environment directories.
+
+* Directory Structure
+
+#+begin_example
+~/.config/
+  dot-files-main/        <- fallback source (emacs-env-main-dir)
+  dot-files-2026-01-17/  <- dated environments
+  dot-files-2026-01-16/
+  ...
+#+end_example
+
+* Commands
+
+| Command                | Description                                       |
+|------------------------+---------------------------------------------------|
+| =M-x emacs-env-create= | Create new dated environment (progress in buffer) |
+| =M-x emacs-env-launch= | Launch existing environment                       |
+| =M-x emacs-env-status= | Show git status for all environments (vtable)     |
+| =M-x emacs-env-select= | Standalone selector for terminal use              |
+
+* GUI vs Terminal Mode
+
+Commands behave differently depending on display mode because Emacs cannot exec into another process, and terminal Emacs needs a TTY which background processes don't have.
+
+| Command          | GUI Mode             | Terminal Mode                  |
+|------------------+----------------------+--------------------------------|
+| emacs-env-create | Create + launch      | Create only, print command     |
+| emacs-env-launch | Launch in background | Print command to run           |
+| emacs-env-select | Launch + exit        | Print command (or use wrapper) |
+| emacs-env-status | Works normally       | Works normally                 |
+
+In terminal mode, commands always use emacs-nw (prefix arg ignored).
+In GUI mode, prefix arg (C-u) switches to emacs-nw.
+
+* Status Buffer (emacs-env-status)
+
+Displays a vtable with the following columns:
+
+| Column    | Description                   |
+|-----------+-------------------------------|
+| Directory | Environment directory name    |
+| *         | Current environment indicator |
+| SHA       | Last commit hash (7 chars)    |
+| Date      | Last commit date (YYYY-MM-DD) |
+| Staged    | Number of staged files        |
+| Unstaged  | Number of modified files      |
+| Untracked | Number of untracked files     |
+| Branch    | Current git branch            |
+
+** Keybindings
+
+| Key | Action                                                     |
+|-----+------------------------------------------------------------|
+| RET | Open git status for environment at point (magit or vc-dir) |
+| l   | Launch environment at point                                |
+| g   | Refresh display (re-fetch git status, update theme colors) |
+| D   | Delete environment (double confirm if dirty/unmerged)      |
+| q   | Close buffer and window                                    |
+
+* Terminal Wrapper Script
+
+For seamless terminal environment selection, use a wrapper script:
+
+#+begin_src bash
+#!/bin/bash
+# Save as: ~/bin/emacs-env-select
+emacs -nw -l /path/to/emacs-env.el \
+      --eval '(emacs-env-select-for-wrapper)'
+CMD_FILE="${TMPDIR:-/tmp}/tmp/emacs-env-cmd"
+[ -f "$CMD_FILE" ] && eval "$(cat "$CMD_FILE")" && rm "$CMD_FILE"
+#+end_src
+
+This opens a selector, writes the command to a temp file, exits, then the shell execs the command. This works because the shell (not Emacs) does the exec.
+
+* Environment Creation (emacs-env-create)
+
+Runs asynchronously (non-blocking) with progress in =*emacs-env-create*= buffer:
+
+1. *[1/4] Copy* latest dated dir (or dot-files-main) to dot-files-YYYY-MM-DD
+2. *[2/4] Fetch* from remote and get latest SHA
+3. *[3/4] Update* mise.toml:
+   - Replace emacs-overlay rev with new SHA
+   - Update --name flags: emacs -> emacs-YYYY-MM-DD, etc.
+4. *[4/4] Trust* mise config to allow mise.toml execution
+
+Then launch (GUI mode only) or print command (terminal mode).
+All command output is captured in the progress buffer.
+
+* Delete Safety Checks
+
+When pressing =D= in emacs-env-status:
+
+- *Double confirmation* if staged/unstaged changes exist
+- *Double confirmation* if branch not merged into main/master
+- *Single confirmation* for clean, merged directories
+
+* Customization
+
+| Variable                | Default               | Description                     |
+|-------------------------+-----------------------+---------------------------------|
+| =emacs-env-config-base= | =~/.config=           | Base directory for environments |
+| =emacs-env-main-dir=    | =dot-files-main=      | Fallback source directory       |
+| =emacs-env-git-branch=  | =build-emacs-overlay= | Branch to track for updates     |
+| =emacs-env-git-remote=  | =https=               | Remote name to fetch from       |
+
+* Dependencies
+
+- *vtable* (built-in Emacs 29+) - for status display
+- *magit* (optional) - for enhanced git status via RET key (falls back to vc-dir)
+
+* Design Rationale
+
+** Why dated directories?
+
+Each dot-files-YYYY-MM-DD is a complete, isolated Emacs config. If an emacs-overlay update breaks something, simply launch an older dated environment. No git stashing or branch switching.
+
+** Why vtable for status display?
+
+Built into Emacs 29+, no external dependencies. Provides column alignment, row selection, and action bindings (RET, l, d, etc.) out of the box. Limitation: no row separators/grid borders.
+
+** Why async environment creation?
+
+Nix builds can take several minutes. The copy step runs synchronously using Emacs' =copy-directory= for portability. Subsequent steps (fetch, trust, launch) use make-process with sentinels to avoid blocking Emacs during longer operations like git fetch and Nix builds. User can continue working while the environment builds. All output captured via :filter and :stderr.
+
+** Why :connection-type 'pipe for launch?
+
+The mise task backgrounds Emacs with '&'. Using 'pipe allows the backgrounded process to properly detach while still capturing mise's build output (which goes to stderr before fork).
+
+** Why terminal mode behaves differently?
+
+Emacs cannot exec into another process from Elisp. Terminal Emacs needs a TTY, which background processes don't have. Solution: print the command for user to run, or use wrapper script that reads command from temp file after Emacs exits.
+
+** Why double confirmation for delete?
+
+Deleting a directory with uncommitted work or unmerged branches is destructive. Single confirmation for clean dirs, double for dirty or unmerged to prevent accidents.
+
+** Why use Emacs APIs over shell commands?
+
+- =copy-directory= instead of =cp -R=: BSD and GNU cp have different semantics. Emacs' built-in is portable and avoids shell quoting issues.
+- =call-process= with exit codes instead of parsing stdout for "fatal|error": Exit codes are reliable; output text can vary by locale or git version.
+- Process sentinels check =process-exit-status= instead of matching "finished" string: Event strings are locale-dependent and don't catch all failure modes.
