@@ -368,21 +368,24 @@ Returns TEXT with faces applied for dirty/clean and current status."
 
 (defun emacs-env--status-data ()
   "Build status data for all dated directories plus main directory.
-Returns list of plists with :dir, :current, :branch, :sha, :date,
+Returns list of plists with :index, :dir, :current, :branch, :sha, :date,
 :staged, :unstaged, :untracked."
-  (let ((base (expand-file-name emacs-env-config-base)))
+  (let ((base (expand-file-name emacs-env-config-base))
+        (index 0))
     (mapcar
      (lambda (dir-name)
        (let* ((full-path (expand-file-name dir-name base))
               (status (emacs-env--get-git-status full-path)))
-         (list :dir dir-name
-               :current (emacs-env--current-env-p dir-name)
-               :branch (plist-get status :branch)
-               :sha (plist-get status :sha)
-               :date (plist-get status :date)
-               :staged (plist-get status :staged)
-               :unstaged (plist-get status :unstaged)
-               :untracked (plist-get status :untracked))))
+         (prog1
+             (list :index (setq index (1+ index))
+                   :dir dir-name
+                   :current (emacs-env--current-env-p dir-name)
+                   :branch (plist-get status :branch)
+                   :sha (plist-get status :sha)
+                   :date (plist-get status :date)
+                   :staged (plist-get status :staged)
+                   :unstaged (plist-get status :unstaged)
+                   :untracked (plist-get status :untracked)))))
      (emacs-env--all-dirs))))
 
 (defun emacs-env--status-open-magit (object)
@@ -492,8 +495,7 @@ OBJECT is a plist with :dir key."
 (define-derived-mode emacs-env-status-mode special-mode "Emacs-Env"
   "Major mode for emacs-env status buffer."
   :group 'emacs-env
-  (setq-local header-line-format
-              "RET: git status  l: launch  D: delete  g: refresh  q: quit"))
+  (display-line-numbers-mode -1))
 
 (defun emacs-env-status-delete-at-point ()
   "Delete the environment at point."
@@ -777,10 +779,13 @@ Keybindings:
          (total (length data))
          (dirty (seq-count #'emacs-env--dirty-p data)))
     (with-current-buffer buf
+      (emacs-env-status-mode)
       (let ((inhibit-read-only t))
         (erase-buffer)
         (make-vtable
-         :columns '((:name "Directory" :width 25)
+         :use-header-line t
+         :columns '((:name "#" :width 2)
+                    (:name "Directory" :width 25)
                     (:name "*" :width 1)
                     (:name "SHA" :width 7)
                     (:name "Date" :width 10)
@@ -791,6 +796,7 @@ Keybindings:
          :objects data
          :getter (lambda (object column vtable)
                    (let ((value (pcase (vtable-column vtable column)
+                                  ("#" (number-to-string (plist-get object :index)))
                                   ("Directory" (plist-get object :dir))
                                   ("*" (if (plist-get object :current) "*" ""))
                                   ("SHA" (plist-get object :sha))
@@ -807,10 +813,9 @@ Keybindings:
          :divider-width 1
          :row-colors (emacs-env--row-colors))
         (goto-char (point-max))
-        (insert (format "\n %d environments: %d dirty, %d clean"
+        (insert (format "\n %d environments: %d dirty, %d clean\n\n RET: git status  l: launch  D: delete  g: refresh  q: quit"
                         total dirty (- total dirty)))
-        (goto-char (point-min)))
-      (emacs-env-status-mode))
+        (goto-char (point-min))))
     (pop-to-buffer buf)))
 
 (provide 'emacs-env)
