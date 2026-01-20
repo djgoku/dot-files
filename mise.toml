@@ -1,0 +1,95 @@
+[settings]
+experimental = true
+lockfile = true
+
+# Enchant requires both outputs. Run in order:
+#   mise use 'nix:enchant@nixos/nixpkgs#enchant^dev' (headers)
+#   mise use 'nix:enchant@nixos/nixpkgs#enchant'     (library)
+# Last command wins for "nix:enchant" value; env vars query both.
+#
+# texlive.combined.scheme-full # pdf2latex
+# poppler_utils # pdftotext
+[tools]
+"aqua:ripgrep" = "latest"
+"aqua:ripgrep-all" = "latest"
+"nix:emacsPackages.vterm" = "latest"
+"nix:enchant" = "nixos/nixpkgs#enchant^dev"
+"nix:git" = "latest"
+"nix:github+djgoku/dot-files?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec" = "latest"
+"nix:gnupg" = "latest"
+"nix:poppler_utils" = "latest"
+"nix:stow" = "latest"
+"nix:texlive.combined.scheme-full" = "latest"
+age = "latest"
+aqua = "latest"
+aws-cli = "latest"
+colima = "latest"
+docker-cli = "latest"
+fnox = "latest"
+lima = "latest"
+node = "24"
+pandoc = "latest"
+sops = "latest"
+tombi = "latest"
+
+# Emacs tool (vterm, enchant) paths - resolved once at mise activation, not during Emacs init
+[env]
+MISE_ENCHANT_INCLUDE_PATH = "{{exec(command='mise where nix:enchant@nixos/nixpkgs#enchant^dev')}}"
+MISE_ENCHANT_LIB_PATH = "{{exec(command='mise where nix:enchant@nixos/nixpkgs#enchant')}}"
+MISE_VTERM_PATH = "{{exec(command='mise where nix:emacsPackages.vterm')}}"
+TOMBI_OFFLINE = "true"
+
+[tasks.emacs]
+usage = 'flag "--nw" help="Run in terminal mode (no window)"'
+run = """
+export EMACS_DATE="2026-01-19"
+export GPG_TTY="$(tty)"
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
+if [ "$usage_nw" = "true" ]; then
+  `mise which Emacs` --debug-init --init-directory={{config_root}}/emacs -nw --name emacs-nw-$EMACS_DATE
+else
+  `mise which Emacs` --debug-init --init-directory={{config_root}}/emacs --name emacs-$EMACS_DATE &
+fi
+"""
+
+[tasks.emacs-paths]
+description = "Show paths used by Emacs configuration"
+run = """
+echo "=== Emacs Tool Paths ==="
+echo "VTERM_PATH: $(mise where 'nix:emacsPackages.vterm')"
+echo "ENCHANT_INCLUDE_PATH: $(mise where 'nix:enchant')"
+echo "ENCHANT_LIB_PATH: $(mise where 'nix:enchant-lib')"
+echo ""
+echo "=== Verify structures ==="
+echo "vterm elisp: $(ls -d $(mise where 'nix:emacsPackages.vterm')/share/emacs/site-lisp/elpa/vterm* 2>/dev/null || echo 'NOT FOUND')"
+echo "enchant include: $(ls -d $(mise where 'nix:enchant@nixos/nixpkgs#enchant^dev')/include/enchant-2 2>/dev/null || echo 'NOT FOUND')"
+echo "enchant lib: $(ls $(mise where 'nix:enchant@nixos/nixpkgs#enchant')/lib/libenchant-2.dylib 2>/dev/null || echo 'NOT FOUND')"
+"""
+
+[tasks.emacs-env]
+description = "Show environment variables available to Emacs"
+run = "mise env | grep -E 'MISE_|VTERM|ENCHANT|PATH'"
+
+[tasks.emacs-env-select]
+description = "Select and launch an Emacs environment"
+usage = '''
+flag "--nw" help="Force terminal mode"
+'''
+raw = true
+run = """
+#!/bin/bash
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ]; then
+  MODE="terminal"
+elif [ "${usage_nw:-false}" = "true" ]; then
+  MODE="terminal"
+else
+  MODE="gui"
+fi
+
+emacs -nw -l ~/dev/github/djgoku/dot-files/emacs/emacs-env/emacs-env.el \
+      --eval '(emacs-env-unified-select "'"$MODE"'")'
+
+CMD_FILE="${TMPDIR:-/tmp}/emacs-env-cmd"
+[ -f "$CMD_FILE" ] && eval "$(cat "$CMD_FILE")" && rm "$CMD_FILE"
+"""
