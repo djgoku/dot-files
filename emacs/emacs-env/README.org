@@ -21,21 +21,21 @@ Provides easy rollback by maintaining date-based environment directories.
 | =M-x emacs-env-create= | Create new dated environment (progress in buffer) |
 | =M-x emacs-env-launch= | Launch existing environment                       |
 | =M-x emacs-env-status= | Show git status for all environments (vtable)     |
-| =M-x emacs-env-select= | Standalone selector for terminal use              |
 
 * GUI vs Terminal Mode
 
 Commands behave differently depending on display mode because Emacs cannot exec into another process, and terminal Emacs needs a TTY which background processes don't have.
 
-| Command          | GUI Mode             | Terminal Mode                  |
-|------------------+----------------------+--------------------------------|
-| emacs-env-create | Create + launch      | Create only, print command     |
-| emacs-env-launch | Launch in background | Print command to run           |
-| emacs-env-select | Launch + exit        | Print command (or use wrapper) |
-| emacs-env-status | Works normally       | Works normally                 |
+| Command          | GUI Mode             | Terminal Mode              |
+|------------------+----------------------+----------------------------|
+| emacs-env-create | Create + launch      | Create only, print command |
+| emacs-env-launch | Launch in background | Print command to run       |
+| emacs-env-status | Works normally       | Works normally             |
 
 In terminal mode, commands always use emacs-nw (prefix arg ignored).
 In GUI mode, prefix arg (C-u) switches to emacs-nw.
+
+For terminal/SSH environment selection, use =mise run emacs-env-select= (see below).
 
 * Status Buffer (emacs-env-status)
 
@@ -62,20 +62,55 @@ Displays a vtable with the following columns:
 | D   | Delete environment (double confirm if dirty/unmerged)      |
 | q   | Close buffer and window                                    |
 
-* Terminal Wrapper Script
+* Unified Environment Selector (mise task)
 
-For seamless terminal environment selection, use a wrapper script:
+For seamless environment selection that works in any context (local, SSH, with or without --nw flag), use a mise task. The task automatically detects SSH sessions and the --nw flag to choose between GUI and terminal Emacs.
 
-#+begin_src bash
+** Usage
+
+#+begin_example
+mise run emacs-env-select       # GUI on local, terminal on SSH
+mise run emacs-env-select --nw  # Force terminal mode
+#+end_example
+
+** Mise Task Definition
+
+Add this to =~/.config/mise/mise.toml=:
+
+#+begin_src toml
+[tasks.emacs-env-select]
+description = "Select and launch an Emacs environment"
+usage = '''
+flag "--nw" help="Force terminal mode"
+'''
+raw = true
+run = """
 #!/bin/bash
-# Save as: ~/bin/emacs-env-select
-emacs -nw -l /path/to/emacs-env.el \
-      --eval '(emacs-env-select-for-wrapper)'
-CMD_FILE="${TMPDIR:-/tmp}/tmp/emacs-env-cmd"
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ]; then
+  MODE="terminal"
+elif [ "${usage_nw:-false}" = "true" ]; then
+  MODE="terminal"
+else
+  MODE="gui"
+fi
+
+emacs -nw -l ~/dev/github/djgoku/dot-files/emacs/emacs-env/emacs-env.el \
+      --eval '(emacs-env-unified-select "'"$MODE"'")'
+
+CMD_FILE="${TMPDIR:-/tmp}/emacs-env-cmd"
 [ -f "$CMD_FILE" ] && eval "$(cat "$CMD_FILE")" && rm "$CMD_FILE"
+"""
 #+end_src
 
-This opens a selector, writes the command to a temp file, exits, then the shell execs the command. This works because the shell (not Emacs) does the exec.
+** How It Works
+
+1. Mise task detects mode (SSH → terminal, --nw → terminal, otherwise → GUI)
+2. Launches selector Emacs with the detected mode
+3. User selects environment via =completing-read=
+4. GUI mode: spawns Emacs in background and exits
+5. Terminal mode: writes command to temp file, exits, shell execs the command
+
+The shell (not Emacs) does the exec, so terminal mode gets a proper TTY.
 
 * Environment Creation (emacs-env-create)
 
