@@ -15,7 +15,10 @@
 ;;   M-x emacs-env-create  - Create new dated environment
 ;;   M-x emacs-env-launch  - Launch existing environment
 ;;   M-x emacs-env-status  - Show status for all environments
-;;   M-x emacs-env-select  - Standalone selector for terminal use
+;;
+;; Terminal/SSH selection:
+;;   mise run emacs-env-select      - Select environment (GUI or terminal)
+;;   mise run emacs-env-select --nw - Force terminal mode
 ;;
 ;; Customization:
 ;;   emacs-env-config-base  - Base directory (default: ~/.config)
@@ -24,7 +27,7 @@
 ;;   emacs-env-git-remote   - Remote name (default: https)
 ;;
 ;; See README.org for detailed documentation, design rationale, and
-;; terminal wrapper script examples.
+;; the mise task for unified terminal/GUI selection.
 
 ;;; Code:
 
@@ -680,60 +683,14 @@ With prefix ARG in GUI mode, launch terminal Emacs (-nw)."
            (emacs-type (emacs-env--emacs-type arg)))
       (emacs-env--launch-or-message dir emacs-type))))
 
-;;;###autoload
-(defun emacs-env-select (arg)
-  "Select and launch an Emacs environment, then exit.
-Meant to be used as a standalone selector invoked via:
-  emacs -nw --load emacs-env.el --eval \\='(emacs-env-select nil)\\='
-
-Presents dated environments with newest as default.
-
-In GUI mode: launches selected environment in background, exits selector.
-In terminal mode: prints the command to run (Emacs can't exec into another
-process). See Commentary for wrapper script to automate this.
-
-ARG is ignored in terminal mode (always uses emacs-nw).
-In GUI mode, prefix ARG launches terminal Emacs instead of GUI."
-  (interactive "P")
-  (let ((orig-default-fg (face-attribute 'default :foreground))
-        (orig-default-bg (face-attribute 'default :background))
-        (orig-prompt-fg (face-attribute 'minibuffer-prompt :foreground))
-        (orig-prompt-weight (face-attribute 'minibuffer-prompt :weight)))
-    (unwind-protect
-        (progn
-          ;; Make the selector readable in terminal
-          (set-face-attribute 'default nil :foreground "white" :background "black")
-          (set-face-attribute 'minibuffer-prompt nil :foreground "cyan" :weight 'bold)
-          (let ((all-dirs (emacs-env--all-dirs)))
-            (unless all-dirs
-              (user-error "No environments found in %s" emacs-env-config-base))
-            (let* ((newest (car all-dirs))
-                   (selection (completing-read
-                               (format "Select environment [%s]: " newest)
-                               all-dirs nil t nil nil newest))
-                   (dir (expand-file-name selection emacs-env-config-base))
-                   (emacs-type (emacs-env--emacs-type arg)))
-              (if (display-graphic-p)
-                  ;; GUI: launch in background and exit selector
-                  (progn
-                    (message "Launching Emacs from %s..." selection)
-                    (emacs-env--launch dir emacs-type)
-                    (kill-emacs))
-                ;; Terminal: print command and exit
-                (let ((cmd (emacs-env--launch dir emacs-type)))
-                  (send-string-to-terminal (format "\033[2J\033[HRun:\n  %s\n" cmd))
-                  (kill-emacs))))))
-      ;; Restore faces on C-g or error
-      (set-face-attribute 'default nil :foreground orig-default-fg :background orig-default-bg)
-      (set-face-attribute 'minibuffer-prompt nil :foreground orig-prompt-fg :weight orig-prompt-weight))))
-
 (defvar emacs-env-select-cmd-file
   (expand-file-name "emacs-env-cmd" temporary-file-directory)
-  "Temp file for wrapper script to read the selected command.")
+  "Temp file for mise task to read the selected command.")
 
-(defun emacs-env-select-for-wrapper ()
-  "Select environment and write command to temp file, then exit.
-For use in a wrapper script - see README.org for example."
+(defun emacs-env-unified-select (mode)
+  "Select and launch an Emacs environment.
+MODE is \"gui\" or \"terminal\", passed from the mise task.
+The mise task handles SSH/--nw detection."
   (let ((orig-default-fg (face-attribute 'default :foreground))
         (orig-default-bg (face-attribute 'default :background))
         (orig-prompt-fg (face-attribute 'minibuffer-prompt :foreground))
@@ -750,12 +707,16 @@ For use in a wrapper script - see README.org for example."
                    (selection (completing-read
                                (format "Select environment [%s]: " newest)
                                all-dirs nil t nil nil newest))
-                   (dir (expand-file-name selection emacs-env-config-base))
-                   (cmd (format "cd %s && exec mise run emacs --nw"
-                                (shell-quote-argument dir))))
-              (with-temp-file emacs-env-select-cmd-file
-                (insert cmd))
-              (kill-emacs 0))))
+                   (dir (expand-file-name selection emacs-env-config-base)))
+              ;; Write command for mise task to exec
+              (let ((cmd (if (string= mode "gui")
+                             (format "cd %s && mise run emacs &"
+                                     (shell-quote-argument dir))
+                           (format "cd %s && exec mise run emacs --nw"
+                                   (shell-quote-argument dir)))))
+                (with-temp-file emacs-env-select-cmd-file
+                  (insert cmd))
+                (kill-emacs 0)))))
       ;; Restore faces on C-g or error
       (set-face-attribute 'default nil :foreground orig-default-fg :background orig-default-bg)
       (set-face-attribute 'minibuffer-prompt nil :foreground orig-prompt-fg :weight orig-prompt-weight))))
