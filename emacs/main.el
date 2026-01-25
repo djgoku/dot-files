@@ -316,6 +316,79 @@ Return nil if test execution fails."
 (use-package git-link)
 ;;; git-timemachine
 (use-package git-timemachine)
+;;; smerge
+;;;; smerge-nav
+;; Provides a simple navigation mode for smerge conflicts.
+;; When a file with conflict markers is opened, smerge-nav-mode activates
+;; automatically, providing single-key bindings for resolving conflicts.
+;; Press 'q' to exit and edit manually.
+
+(require 'smerge-mode)
+
+(defvar-local smerge-nav-mode--old-header-line nil
+  "Previous header-line-format before smerge-nav-mode was enabled.")
+
+(defun smerge-nav-mode-quit ()
+  "Exit smerge-nav-mode."
+  (interactive)
+  (smerge-nav-mode -1))
+
+(defun smerge-nav--goto-first-conflict ()
+  "Move to first conflict, or message if none found."
+  (goto-char (point-min))
+  (condition-case nil
+      (smerge-next)
+    (error (message "No conflicts found in buffer"))))
+
+(defvar smerge-nav-mode-map
+  (define-keymap
+    :suppress t
+    "n" #'smerge-next
+    "p" #'smerge-prev
+    "u" #'smerge-keep-upper
+    "l" #'smerge-keep-lower
+    "b" #'smerge-keep-base
+    "a" #'smerge-keep-all
+    "RET" #'smerge-keep-current
+    "E" #'smerge-ediff
+    "r" #'smerge-resolve
+    "q" #'smerge-nav-mode-quit)
+  "Keymap for `smerge-nav-mode'.")
+
+(define-minor-mode smerge-nav-mode
+  "Navigate smerge conflicts with single-key bindings.
+Press 'q' to exit and edit manually."
+  :lighter " SMergeNav"
+  :keymap smerge-nav-mode-map
+  (if smerge-nav-mode
+      (progn
+        (setq-local smerge-nav-mode--old-header-line header-line-format)
+        (setq-local header-line-format
+                    (propertize
+                     " n:next  p:prev  u:upper  l:lower  b:base  a:all  RET:current  r:resolve  E:ediff  q:quit"
+                     'face 'mode-line-highlight))
+        ;; Defer goto so it runs after save-place restores position
+        (run-with-timer 0 nil #'smerge-nav--goto-first-conflict))
+    (setq-local header-line-format smerge-nav-mode--old-header-line)))
+
+(defun smerge-nav--on-smerge-mode ()
+  "Enable or disable smerge-nav-mode when smerge is enabled or disabled."
+  (if smerge-mode
+      (smerge-nav-mode 1)
+    (smerge-nav-mode -1)))
+
+(defun smerge-nav--maybe-enable-smerge ()
+  "Enable smerge-mode if the buffer contains conflict markers."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward smerge-begin-re nil t)
+      (smerge-mode 1))))
+;;;; smerge
+(use-package smerge-mode
+  :ensure nil
+  :hook
+  (find-file . smerge-nav--maybe-enable-smerge)
+  (smerge-mode . smerge-nav--on-smerge-mode))
 ;;; org
 ;; (org-narrow-to-subtree) C-x n s
 ;; (widen) C-x n w
