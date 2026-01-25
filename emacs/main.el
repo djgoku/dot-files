@@ -306,12 +306,6 @@ Return nil if test execution fails."
   (setq transient-default-level 5)
   (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
   :bind (("C-x g" . magit-project-status)))
-;;; git-identity
-(use-package git-identity
-  :after magit
-  :config (git-identity-magit-mode 1)
-  (define-key magit-status-mode-map (kbd "I") #'git-identity-info)
-  :custom (git-identity-verify t))
 ;;; git-link
 (use-package git-link)
 ;;; git-timemachine
