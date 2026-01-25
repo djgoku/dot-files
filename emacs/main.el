@@ -305,7 +305,28 @@ Return nil if test execution fails."
   ;; setting to level 5 for gpg siging
   (setq transient-default-level 5)
   (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
+  (setq magit-repolist-columns
+        '(("Name" 25 magit-repolist-column-ident nil)
+          ("Version" 25 magit-repolist-column-version ((:sort magit-repolist-version<)))
+          ("B<U" 3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
+          ("B>U" 3 magit-repolist-column-unpushed-to-upstream ((:right-align t) (:sort <)))
+          ("Path" 75 magit-repolist-column-path nil)
+          ("Branch" 99 magit-repolist-column-branch)))
   :bind (("C-x g" . magit-project-status)))
+;;;; project-populate-magit-repository-directories
+(defvar project-populate-magit-repository-directories-exclude-contains
+  '("elpaca/repos" "/deps/")
+  "Patterns to exclude using `s-contains-p'")
+(defun project-populate-magit-repository-directories ()
+  "Populate `magit-repository-directories' from project.el's known projects."
+  (interactive)
+  (let (repository-directories)
+    (dolist (dir (project-known-project-roots) repository-directories)
+      (cond ((s-starts-with-p "/ssh" dir) (message (format "excluded '/ssh' git dir: %s" dir)))
+            ((seq-some (lambda (pattern) (s-contains-p pattern dir)) project-populate-magit-repository-directories-exclude-contains) (message (format "excluded by contains git dir: %s" dir)))
+            ((not (file-directory-p dir)) (message (format "excluded git dir as it doesn't exist: %s" dir)))
+            (t (message (format "git dir: %s" dir)) (push (cons dir 0) repository-directories))))
+    (setq magit-repository-directories repository-directories)))
 ;;; git-link
 (use-package git-link)
 ;;; git-timemachine
