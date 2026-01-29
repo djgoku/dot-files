@@ -76,6 +76,9 @@ setup_mise_plugins() {
 install_tools() {
   log_info "Installing tools via mise..."
 
+  log_info "Trusting mise configuration in dot-files..."
+  ~/.local/bin/mise trust
+
   log_info "Running mise install..."
   ~/.local/bin/mise install
 
