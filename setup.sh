@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
-set -euo pipefail
+#set -euo pipefail
+set -x
 
 # Configuration - can be overridden via environment variables
 REPO_BRANCH="${REPO_BRANCH:-}"  # Empty = use default branch
