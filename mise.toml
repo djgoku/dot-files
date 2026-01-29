@@ -2,11 +2,6 @@
 experimental = true
 lockfile = true
 
-# Enchant requires both outputs. Run in order:
-#   mise use 'nix:enchant@nixos/nixpkgs#enchant^dev' (headers)
-#   mise use 'nix:enchant@nixos/nixpkgs#enchant'     (library)
-# Last command wins for "nix:enchant" value; env vars query both.
-#
 # texlive.combined.scheme-full # pdf2latex
 # poppler_utils # pdftotext
 [tools]
@@ -34,18 +29,27 @@ tombi = "latest"
 
 # Emacs tool (vterm, enchant) paths - resolved once at mise activation, not during Emacs init
 [env]
-MISE_ENCHANT_INCLUDE_PATH = "{{exec(command='mise where nix:enchant@nixos/nixpkgs#enchant^dev')}}"
-MISE_ENCHANT_LIB_PATH = "{{exec(command='mise where nix:enchant@nixos/nixpkgs#enchant')}}"
-MISE_VTERM_PATH = "{{exec(command='mise where nix:emacsPackages.vterm')}}"
 TOMBI_OFFLINE = "true"
+
+# Enchant requires both outputs. Run in order:
+#   mise use 'nix:enchant@nixos/nixpkgs#enchant^dev' (headers)
+#   mise use 'nix:enchant@nixos/nixpkgs#enchant'     (library)
+# Last command wins for "nix:enchant" value; env vars query both.
+[tasks.install-enchant]
+run = """
+  mise use 'nix:enchant@nixos/nixpkgs#enchant^dev'
+  mise use 'nix:enchant@nixos/nixpkgs#enchant'
+"""
 
 [tasks.emacs]
 usage = 'flag "--nw" help="Run in terminal mode (no window)"'
+env = { _.file = '.env' }
+depends = "install-enchant"
 run = """
 export EMACS_DATE="2026-01-19"
-export GPG_TTY="$(tty)"
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-gpgconf --launch gpg-agent
+# export GPG_TTY="$(tty)"
+# export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+# gpgconf --launch gpg-agent
 if [ "$usage_nw" = "true" ]; then
   `mise which Emacs` --debug-init --init-directory={{config_root}}/emacs -nw --name emacs-nw-$EMACS_DATE
 else
@@ -55,21 +59,18 @@ fi
 
 [tasks.emacs-paths]
 description = "Show paths used by Emacs configuration"
+depends = "install-enchant"
 run = """
 echo "=== Emacs Tool Paths ==="
-echo "VTERM_PATH: $(mise where 'nix:emacsPackages.vterm')"
-echo "ENCHANT_INCLUDE_PATH: $(mise where 'nix:enchant')"
-echo "ENCHANT_LIB_PATH: $(mise where 'nix:enchant-lib')"
+echo "MISE_VTERM_PATH=$(mise where 'nix:emacsPackages.vterm')" > .env
+echo "MISE_ENCHANT_INCLUDE_PATH=$(mise where 'nix:enchant@nixos/nixpkgs#enchant^dev')" >> .env
+echo "MISE_ENCHANT_LIB_PATH=$(mise where 'nix:enchant@nixos/nixpkgs#enchant')" >> .env
 echo ""
 echo "=== Verify structures ==="
 echo "vterm elisp: $(ls -d $(mise where 'nix:emacsPackages.vterm')/share/emacs/site-lisp/elpa/vterm* 2>/dev/null || echo 'NOT FOUND')"
 echo "enchant include: $(ls -d $(mise where 'nix:enchant@nixos/nixpkgs#enchant^dev')/include/enchant-2 2>/dev/null || echo 'NOT FOUND')"
 echo "enchant lib: $(ls $(mise where 'nix:enchant@nixos/nixpkgs#enchant')/lib/libenchant-2.dylib 2>/dev/null || echo 'NOT FOUND')"
 """
-
-[tasks.emacs-env]
-description = "Show environment variables available to Emacs"
-run = "mise env | grep -E 'MISE_|VTERM|ENCHANT|PATH'"
 
 [tasks.emacs-env-select]
 description = "Select and launch an Emacs environment"
