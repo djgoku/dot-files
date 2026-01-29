@@ -10,6 +10,7 @@ lockfile = true
 "nix:emacsPackages.vterm" = "latest"
 "nix:enchant" = "nixos/nixpkgs#enchant^dev"
 "nix:git" = "latest"
+# Custom Emacs build from overlay with native compilation and additional features
 "nix:github+djgoku/dot-files?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec" = "latest"
 "nix:gnupg" = "latest"
 "nix:poppler_utils" = "latest"
@@ -31,10 +32,11 @@ tombi = "latest"
 [env]
 TOMBI_OFFLINE = "true"
 
-# Enchant requires both outputs. Run in order:
-#   mise use 'nix:enchant@nixos/nixpkgs#enchant^dev' (headers)
-#   mise use 'nix:enchant@nixos/nixpkgs#enchant'     (library)
-# Last command wins for "nix:enchant" value; env vars query both.
+# Enchant spell-checking requires both outputs for compilation and runtime:
+#   1. ^dev output: C headers for compiling enchant.el native module
+#   2. default output: libenchant-2 library for runtime
+# The install-enchant task handles both installations.
+# Last 'mise use' wins for the "nix:enchant" key; env vars query both outputs.
 [tasks.install-enchant]
 run = """
   mise use 'nix:enchant@nixos/nixpkgs#enchant^dev'
@@ -95,7 +97,7 @@ else
   MODE="gui"
 fi
 
-emacs -nw -l ~/dev/github/djgoku/dot-files/emacs/emacs-env/emacs-env.el \
+emacs -Q -nw -l {{config_root}}/emacs/emacs-env/emacs-env.el \
       --eval '(emacs-env-unified-select "'"$MODE"'")'
 
 CMD_FILE="${TMPDIR:-/tmp}/emacs-env-cmd"

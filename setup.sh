@@ -1,6 +1,11 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 
+# Configuration - can be overridden via environment variables
+GITHUB_USER="${GITHUB_USER:-djgoku}"
+REPO_NAME="${REPO_NAME:-dot-files}"
+REPO_BRANCH="${REPO_BRANCH:-}"  # Empty = use default branch
+
 # Logging functions
 log_info() { echo "[INFO] $*"; }
 log_warn() { echo "[WARN] $*" >&2; }
@@ -13,24 +18,33 @@ is_macos() { [[ "$(uname -s)" == "Darwin" ]]; }
 # Bootstrap functions
 setup_directories() {
   log_info "Setting up directories..."
+  log_info "Repository: ${GITHUB_USER}/${REPO_NAME}${REPO_BRANCH:+ (branch: $REPO_BRANCH)}"
 
-  if [[ ! -d ~/dev/github/djgoku ]]; then
-    log_info "Creating ~/dev/github/djgoku directory..."
-    mkdir -p ~/dev/github/djgoku
+  local base_dir="$HOME/dev/github/${GITHUB_USER}"
+  local repo_dir="${base_dir}/${REPO_NAME}"
+
+  if [[ ! -d "$base_dir" ]]; then
+    log_info "Creating ${base_dir} directory..."
+    mkdir -p "$base_dir"
   else
-    log_info "Directory ~/dev/github/djgoku already exists"
+    log_info "Directory ${base_dir} already exists"
   fi
 
-  if [[ ! -d ~/dev/github/djgoku/dot-files ]]; then
-    log_info "Cloning dot-files repository..."
-    cd ~/dev/github/djgoku
-    git clone -b chore/switch-completely-to-mise --depth 1 https://github.com/djgoku/dot-files.git
+  if [[ ! -d "$repo_dir" ]]; then
+    log_info "Cloning ${REPO_NAME} repository..."
+    cd "$base_dir"
+
+    local clone_cmd="git clone --depth 1"
+    [[ -n "$REPO_BRANCH" ]] && clone_cmd+=" -b ${REPO_BRANCH}"
+    clone_cmd+=" https://github.com/${GITHUB_USER}/${REPO_NAME}.git"
+
+    eval "$clone_cmd"
   else
-    log_info "dot-files repository already exists"
+    log_info "${REPO_NAME} repository already exists"
   fi
 
-  log_info "Changing to dot-files directory..."
-  cd ~/dev/github/djgoku/dot-files
+  log_info "Changing to ${REPO_NAME} directory..."
+  cd "$repo_dir"
 }
 
 install_nix() {
@@ -164,11 +178,6 @@ setup_global() {
   log_info "Setting up global mise configuration..."
 
   ~/.local/bin/mise run setup-global
-
-  log_info "Next steps:"
-  log_info "  1. Source mise: eval \"\$(~/.local/bin/mise activate zsh)\""
-  log_info "  2. Test global access: mise which git"
-  log_info "  3. Launch Emacs: mise run emacs"
 }
 
 main() {
@@ -184,7 +193,7 @@ main() {
   setup_global
 
   log_info "Setup complete! Next steps:"
-  log_info "  1. Source mise: eval \"\$(~/.local/bin/mise activate bash)\""
+  log_info "  1. Source mise: eval \"\$(~/.local/bin/mise activate zsh)\""
   log_info "  2. Test global access: mise which git"
   log_info "  3. Launch Emacs: mise run emacs"
 }
