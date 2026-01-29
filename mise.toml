@@ -47,9 +47,16 @@ env = { _.file = '.env' }
 depends = "install-enchant"
 run = """
 export EMACS_DATE="2026-01-19"
-# export GPG_TTY="$(tty)"
-# export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-# gpgconf --launch gpg-agent
+
+# Setup GPG only if available
+if command -v gpgconf >/dev/null 2>&1; then
+  export GPG_TTY="$(tty)"
+  export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+  gpgconf --launch gpg-agent || echo "Warning: Could not launch gpg-agent"
+else
+  echo "Info: gpgconf not found, skipping GPG setup"
+fi
+
 if [ "$usage_nw" = "true" ]; then
   `mise which Emacs` --debug-init --init-directory={{config_root}}/emacs -nw --name emacs-nw-$EMACS_DATE
 else
