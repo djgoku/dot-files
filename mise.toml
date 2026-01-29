@@ -94,3 +94,24 @@ emacs -nw -l ~/dev/github/djgoku/dot-files/emacs/emacs-env/emacs-env.el \
 CMD_FILE="${TMPDIR:-/tmp}/emacs-env-cmd"
 [ -f "$CMD_FILE" ] && eval "$(cat "$CMD_FILE")" && rm "$CMD_FILE"
 """
+
+[tasks.setup-global]
+description = "Install mise config globally"
+run = """
+  echo "Installing mise globally..."
+  mkdir -p ~/.config/mise
+  cp mise.toml ~/.config/mise/config.toml
+  echo "Global mise config installed at ~/.config/mise/config.toml"
+
+  # Add mise activation to ~/.zshrc if not already present
+  if ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
+    echo '' >> ~/.zshrc
+    echo '# mise activation' >> ~/.zshrc
+    echo 'eval "$(~/.local/bin/mise activate zsh)"' >> ~/.zshrc
+    echo "Added mise activation to ~/.zshrc"
+  else
+    echo "mise activation already in ~/.zshrc"
+  fi
+
+  echo "Setup complete! Restart your shell or run: source ~/.zshrc"
+"""
