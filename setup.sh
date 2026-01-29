@@ -2,8 +2,6 @@
 set -euo pipefail
 
 # Configuration - can be overridden via environment variables
-GITHUB_USER="${GITHUB_USER:-djgoku}"
-REPO_NAME="${REPO_NAME:-dot-files}"
 REPO_BRANCH="${REPO_BRANCH:-}"  # Empty = use default branch
 
 # Logging functions
@@ -18,33 +16,30 @@ is_macos() { [[ "$(uname -s)" == "Darwin" ]]; }
 # Bootstrap functions
 setup_directories() {
   log_info "Setting up directories..."
-  log_info "Repository: ${GITHUB_USER}/${REPO_NAME}${REPO_BRANCH:+ (branch: $REPO_BRANCH)}"
+  log_info "Repository: djgoku/dot-files${REPO_BRANCH:+ (branch: $REPO_BRANCH)}"
 
-  local base_dir="$HOME/dev/github/${GITHUB_USER}"
-  local repo_dir="${base_dir}/${REPO_NAME}"
-
-  if [[ ! -d "$base_dir" ]]; then
-    log_info "Creating ${base_dir} directory..."
-    mkdir -p "$base_dir"
+  if [[ ! -d ~/dev/github/djgoku ]]; then
+    log_info "Creating ~/dev/github/djgoku directory..."
+    mkdir -p ~/dev/github/djgoku
   else
-    log_info "Directory ${base_dir} already exists"
+    log_info "Directory ~/dev/github/djgoku already exists"
   fi
 
-  if [[ ! -d "$repo_dir" ]]; then
-    log_info "Cloning ${REPO_NAME} repository..."
-    cd "$base_dir"
+  if [[ ! -d ~/dev/github/djgoku/dot-files ]]; then
+    log_info "Cloning dot-files repository..."
+    cd ~/dev/github/djgoku
 
     local clone_cmd="git clone --depth 1"
     [[ -n "$REPO_BRANCH" ]] && clone_cmd+=" -b ${REPO_BRANCH}"
-    clone_cmd+=" https://github.com/${GITHUB_USER}/${REPO_NAME}.git"
+    clone_cmd+=" https://github.com/djgoku/dot-files.git"
 
     eval "$clone_cmd"
   else
-    log_info "${REPO_NAME} repository already exists"
+    log_info "dot-files repository already exists"
   fi
 
-  log_info "Changing to ${REPO_NAME} directory..."
-  cd "$repo_dir"
+  log_info "Changing to dot-files directory..."
+  cd ~/dev/github/djgoku/dot-files
 }
 
 install_nix() {
