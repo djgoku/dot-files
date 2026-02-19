@@ -52,7 +52,7 @@ Allows pasting full clone commands like 'git clone git@github.com:user/repo.git'
       (substring url 10)
     url))
 
-(defun johnny5-magit-clone-read-repository (orig-fun)
+(defun johnny5-magit-clone-read-repository ()
   "Wrap magit-clone-read-repository to allow pasting 'git clone URL' commands.
 Magit's default uses magit-read-string-ns which rejects whitespace."
   (magit-read-char-case "Clone from " nil
@@ -73,12 +73,14 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
         (magit-convert-filename-for-git
          (read-file-name "Clone from bundle: ")))))
 
-(advice-add 'magit-clone-read-repository :around #'johnny5-magit-clone-read-repository)
+;; :override intentionally replaces the original — our implementation is a
+;; complete replacement that adds "git clone " prefix stripping.
+(advice-add 'magit-clone-read-repository :override #'johnny5-magit-clone-read-repository)
 
 ;;;;; advice: jump to existing repos
-(defun johnny5-magit-clone-maybe-status (orig-fun)
+(defun johnny5-magit-clone-maybe-status ()
   "If repo already exists locally, open magit-status instead of cloning."
-  (let* ((repo (magit-clone-read-repository))
+  (let* ((repo (johnny5-magit-clone-read-repository))
          (repo-name (magit-clone--url-to-name repo))
          (default-dir (johnny5-magit-clone-default-directory repo))
          (full-path (and default-dir repo-name
@@ -86,12 +88,14 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
     (if (and full-path (file-directory-p full-path))
         (progn
           (magit-status full-path)
-          (keyboard-quit))
+          ;; user-error aborts the clone after opening magit-status
+          (user-error "Repository already cloned at %s, opened magit-status" full-path))
       (list repo
             (read-directory-name "Clone to: " default-dir nil nil repo-name)
             (transient-args 'magit-clone)))))
 
-(advice-add 'magit-clone-read-args :around #'johnny5-magit-clone-maybe-status)
+;; :override intentionally replaces the original — adds existing-repo detection.
+(advice-add 'magit-clone-read-args :override #'johnny5-magit-clone-maybe-status)
 
 ;;;;; tests
 (ert-deftest test-johnny5-magit-clone-clean-url ()
@@ -125,14 +129,9 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
   (interactive)
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
-(define-key global-map "\M-Q" #'unfill-paragraph)
-;;;; crontab-edit
-(defun crontab-edit ()
-  "Run `crontab-edit' in a emacs buffer."
-  (interactive)
-  (with-editor-async-shell-command "crontab -e"))
-;;;; johnny-test-executable
-(defun johnny-test-executable (command)
+(keymap-set global-map "M-Q" #'unfill-paragraph)
+;;;; johnny5-test-executable
+(defun johnny5-test-executable (command)
   "Test we can execute a executable.
 Return nil if test execution fails."
   (condition-case err
@@ -152,6 +151,13 @@ Return nil if test execution fails."
 (use-package json-mode)
 ;;; jeison
 (use-package jeison)
+;;; toml
+(use-package toml-ts-mode
+  :ensure nil
+  :config
+  (setq toml-ts-mode-indent-offset 0))
+;;; pkl
+(use-package pkl-mode)
 ;;; ipcalc
 (use-package ipcalc)
 ;;; htmlize
@@ -165,8 +171,7 @@ Return nil if test execution fails."
 (use-package dired-preview)
 ;;;; dired-x
 ;; adds F to dired buffers 'dired-do-find-marked-files'
-(unless (featurep 'dired-x)
-  (require 'dired-x))
+(require 'dired-x)
 ;;; define-word
 (use-package define-word)
 ;;; kubel
@@ -202,10 +207,10 @@ Return nil if test execution fails."
   :config
   (consult-customize
    consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
+   consult-ripgrep consult-git-grep consult-grep consult-man
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
+   consult-source-bookmark consult-source-file-register
+   consult-source-recent-file consult-source-project-recent-file
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<")) ;; "C-+"
@@ -213,11 +218,15 @@ Return nil if test execution fails."
 (use-package consult-dir)
 ;;; marginalia
 (use-package marginalia
-  :config (marginalia-mode)
-  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
+  :init
+  (marginalia-mode)
+  :bind (:map minibuffer-local-map
+              ("M-A" . marginalia-cycle)))
 ;;; embark
 (use-package embark
-  :bind ("M-a" . embark-act)
+  :bind (("M-a" . embark-act)
+         ("M-." . embark-dwim)
+         ("C-h B" . embark-bindings))
   :config
   (defun johnny5-git-link-homepage (file)
     (interactive "f")
@@ -234,12 +243,13 @@ Return nil if test execution fails."
     (cons 'project-file (cdr full-path)))
 
   (advice-add 'embark--project-file-full-path :filter-return #'embark--keep-project-type)
-  (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
-  (add-to-list 'embark-target-finders 'embark-target-jinx-at-point)
-  (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
-  (add-to-list 'embark-repeat-actions #'jinx-next)
-  (add-to-list 'embark-repeat-actions #'jinx-previous)
-  (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target)))
+  (with-eval-after-load 'jinx
+    (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
+    (add-to-list 'embark-target-finders 'embark-target-jinx-at-point)
+    (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
+    (add-to-list 'embark-repeat-actions #'jinx-next)
+    (add-to-list 'embark-repeat-actions #'jinx-previous)
+    (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
 
 (use-package embark-consult
   :after (embark consult)
@@ -260,13 +270,13 @@ Return nil if test execution fails."
   :init
   (savehist-mode))
 ;;; ripgrep
-(defun johnny--maybe-ripgrep-executable ()
+(defun johnny--setup-ripgrep ()
   "Determine if ripgrep 'rg' or ripgrep-all 'rga' is installed"
-  (let* ((maybe-executable (or (executable-find "rga") (executable-find "rg"))))
-    (if (and maybe-executable (johnny-test-executable maybe-executable))
+  (let ((maybe-executable (or (executable-find "rga") (executable-find "rg"))))
+    (if (and maybe-executable (johnny5-test-executable maybe-executable))
         (setq johnny--maybe-ripgrep-executable maybe-executable)
       (warn "ripgrep 'rg' nor ripgrep-all 'rga' were found in PATH"))))
-(johnny--maybe-ripgrep-executable)
+(johnny--setup-ripgrep)
 ;;;; affe
 (use-package affe
   :if johnny--maybe-ripgrep-executable
@@ -287,7 +297,8 @@ Return nil if test execution fails."
 ;;;; rg
 (use-package rg
   :if johnny--maybe-ripgrep-executable
-  :config (rg-enable-default-bindings)
+  :config
+  (rg-enable-default-bindings)
   (rg-enable-menu)
   (setq rg-executable johnny--maybe-ripgrep-executable))
 ;;;; wgrep
@@ -299,31 +310,30 @@ Return nil if test execution fails."
   :after project
   :init
   (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
-  (setq magit-clone-set-remote.pushDefault t)
-  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1)
-  (setq magit-bury-buffer-function #'magit-restore-window-configuration)
-  ;; setting to level 5 for gpg siging
-  (setq transient-default-level 5)
-  (setq magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n")
-  (setq magit-repolist-columns
-        '(("Name" 25 magit-repolist-column-ident nil)
-          ("Version" 25 magit-repolist-column-version ((:sort magit-repolist-version<)))
-          ("B<U" 3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
-          ("B>U" 3 magit-repolist-column-unpushed-to-upstream ((:right-align t) (:sort <)))
-          ("Path" 75 magit-repolist-column-path nil)
-          ("Branch" 99 magit-repolist-column-branch)))
+  (setq magit-clone-set-remote.pushDefault t
+        magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1
+        magit-bury-buffer-function #'magit-restore-window-configuration
+        ;; setting to level 5 for gpg siging
+        transient-default-level 5
+        magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n"
+        magit-repolist-columns '(("Name" 25 magit-repolist-column-ident nil)
+                                 ("Version" 25 magit-repolist-column-version ((:sort magit-repolist-version<)))
+                                 ("B<U" 3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
+                                 ("B>U" 3 magit-repolist-column-unpushed-to-upstream ((:right-align t) (:sort <)))
+                                 ("Path" 75 magit-repolist-column-path nil)
+                                 ("Branch" 99 magit-repolist-column-branch)))
   :bind (("C-x g" . magit-project-status)))
 ;;;; project-populate-magit-repository-directories
 (defvar project-populate-magit-repository-directories-exclude-contains
   '("elpaca/repos" "/deps/")
-  "Patterns to exclude using `s-contains-p'")
+  "Patterns to exclude using `string-match-p'.")
 (defun project-populate-magit-repository-directories ()
   "Populate `magit-repository-directories' from project.el's known projects."
   (interactive)
   (let (repository-directories)
     (dolist (dir (project-known-project-roots) repository-directories)
-      (cond ((s-starts-with-p "/ssh" dir) (message (format "excluded '/ssh' git dir: %s" dir)))
-            ((seq-some (lambda (pattern) (s-contains-p pattern dir)) project-populate-magit-repository-directories-exclude-contains) (message (format "excluded by contains git dir: %s" dir)))
+      (cond ((string-prefix-p "/ssh" dir) (message (format "excluded '/ssh' git dir: %s" dir)))
+            ((seq-some (lambda (pattern) (string-match-p (regexp-quote pattern) dir)) project-populate-magit-repository-directories-exclude-contains) (message (format "excluded by contains git dir: %s" dir)))
             ((not (file-directory-p dir)) (message (format "excluded git dir as it doesn't exist: %s" dir)))
             (t (message (format "git dir: %s" dir)) (push (cons dir 0) repository-directories))))
     (setq magit-repository-directories repository-directories)))
@@ -337,8 +347,6 @@ Return nil if test execution fails."
 ;; When a file with conflict markers is opened, smerge-nav-mode activates
 ;; automatically, providing single-key bindings for resolving conflicts.
 ;; Press 'q' to exit and edit manually.
-
-(require 'smerge-mode)
 
 (defvar-local smerge-nav-mode--old-header-line nil
   "Previous header-line-format before smerge-nav-mode was enabled.")
@@ -396,7 +404,8 @@ Press 'q' to exit and edit manually."
   "Enable smerge-mode if the buffer contains conflict markers."
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward smerge-begin-re nil t)
+    (when (re-search-forward "^<<<<<<< " nil t)
+      (require 'smerge-mode)
       (smerge-mode 1))))
 ;;;; smerge
 (use-package smerge-mode
@@ -413,66 +422,54 @@ Press 'q' to exit and edit manually."
   :ensure nil
   :bind (("C-c c" . org-capture)
          ("C-c a" . org-agenda))
-  :config (setq org-confirm-babel-evaluate nil)
-  (setq org-src-fontify-natively t)
-  (setq org-src-preserve-indentation t)
-  (setq org-edit-src-content-indentation t)
-  (setq org-log-into-drawer t)
-  ;; NOT-RETAINED - will not continue in the application process
-  (setq org-todo-keywords '((sequence "TODO(t!)" "IN-PROGRESS(i!)" "WAIT(w!)" "APPLIED(a!)" "|" "DONE(d@)"
-                                      "CANCELED(@)" "WITHDRAWN(@)" "FILLED" "HIRED" "NOT-RETAINED(n@)")))
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
-  (setq org-agenda-files '("~/dev/org" "~/dev/notes"))
-  ;; (setq org-agenda-include-inactive-timestamps 't)
-  (setq org-log-refile 'note)
-  (setq org-refile-use-outline-path 'file)
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-startup-indented t)
+  :config (setq org-confirm-babel-evaluate nil
+                org-src-fontify-natively t
+                org-src-preserve-indentation t
+                org-edit-src-content-indentation t
+                org-log-into-drawer t
+                ;; NOT-RETAINED - will not continue in the application process
+                org-todo-keywords '((sequence "TODO(t!)" "IN-PROGRESS(i!)" "WAIT(w!)" "APPLIED(a!)" "|" "DONE(d@)"
+                                              "CANCELED(@)" "WITHDRAWN(@)" "FILLED" "HIRED" "NOT-RETAINED(n@)"))
+                org-refile-targets '((org-agenda-files :maxlevel . 2))
+                org-agenda-files '("~/dev/org" "~/dev/notes")
+                ;; org-agenda-include-inactive-timestamps 't
+                org-log-refile 'note
+                org-refile-use-outline-path 'file
+                org-outline-path-complete-in-steps nil
+                org-refile-allow-creating-parent-nodes 'confirm
+                org-startup-indented t)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
-  (progn
-    (defun imalison:org-inline-css-hook (exporter)
-      "Insert custom inline css to automatically set the
-  background of code to whatever theme I'm using's background"
-      (when (eq exporter 'html)
-        (let* ((my-pre-bg (face-background 'default))
-               (my-pre-fg (face-foreground 'default)))
-          (setq org-html-head-extra (concat org-html-head-extra (format
-                                                                 "<style type=\"text/css\">\n pre.src {background-color: %s; color: %s;}</style>\n"
-                                                                 my-pre-bg my-pre-fg))))))
-    (add-hook 'org-export-before-processing-hook 'imalison:org-inline-css-hook))
+  (setq org-capture-templates '(("t" "Todo" entry (file "~/dev/org/inbox.org")
+                                 "* TODO %? [/]\n:PROPERTIES:\n:Created: %U\nEND:\n %i\n %a")
+                                ("c" "Cookbook" entry (file "~/dev/org/cookbook.org")
+                                 "%(org-chef-get-recipe-from-url)"
+                                 :empty-lines 1)
+                                ("m" "Manual Cookbook" entry (file "~/dev/org/cookbook.org")
+                                 "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
+  (require 'ox-md nil t)
+  (org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
+                                                           (emacs-lisp . t)
+                                                           (eshell . t)
+                                                           ;; (elixir . t)
+                                                           (perl . t)
+                                                           (python . t)
+                                                           ;; (mermaid . t)
+                                                           (sed . t)
+                                                           (shell . t)
+                                                           (sql . t)
+                                                           (sqlite . t)
+                                                           (ruby . t)))
   :mode (("\\.org$" . org-mode)))
-(setq org-capture-templates '(("t" "Todo" entry (file "~/dev/org/inbox.org")
-                               "* TODO %? [/]\n:PROPERTIES:\n:Created: %U\nEND:\n %i\n %a")
-                              ("c" "Cookbook" entry (file "~/dev/org/cookbook.org")
-                               "%(org-chef-get-recipe-from-url)"
-                               :empty-lines 1)
-                              ("m" "Manual Cookbook" entry (file "~/dev/org/cookbook.org")
-                               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
-(require 'ox-md nil t)
-(org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
-                                                         (emacs-lisp . t)
-                                                         (eshell . t)
-                                                         ;; (elixir . t)
-                                                         (perl . t)
-                                                         (python . t)
-                                                         ;; (mermaid . t)
-                                                         (sed . t)
-                                                         (shell . t)
-                                                         (sql . t)
-                                                         (sqlite . t)
-                                                         (ruby . t)))
-;; just add :async to any org babel src blocks!
 ;;;; ob-async
+;; just add :async to any org babel src blocks!
 (use-package ob-async
-  :config (require 'ob-async))
+  :after org)
 ;;;; org-chef
 (use-package org-chef)
 ;;;; org-contrib
 (use-package org-contrib)
 ;;;; ob-elixir
-(use-package ob-elixir
-  :ensure t)
+(use-package ob-elixir)
 ;;;; orgit
 (use-package orgit)
 ;;;; org-jira
@@ -498,7 +495,7 @@ Press 'q' to exit and edit manually."
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
-;; M-. xref-find-definitions
+;; M-. embark-dwim (rebound from xref-find-definitions)
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
@@ -508,22 +505,20 @@ Press 'q' to exit and edit manually."
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
   (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
-  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ("devbox" "run" ".devbox/nix/profile/default/lib/language_server.sh")))
   ;; (with-eval-after-load 'eglot
   ;;   (add-to-list 'eglot-server-programs
   ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
   ;;                  ("nextls" "--stdio=true" :initializationOptions (:experimental (:completions (:enable t)))))))
-  ;; (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
-  (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode) "pyright-langserver" "--stdio"))
-  (add-to-list 'eglot-server-programs '(terraform-mode "terraform-ls" "serve"))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          (nix-mode . eglot-ensure)
-         (terraform-mode . eglot-ensure))
+         (terraform-mode . eglot-ensure)
+         (toml-ts-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (yaml-ts-mode . eglot-ensure))
   :bind(:map eglot-mode-map
              ("C-c l r" . eglot-rename)
              ("C-c l a" . eglot-code-actions)
@@ -534,16 +529,29 @@ Press 'q' to exit and edit manually."
   (eglot-autoshutdown t)
   ;; Enable eglot in code external to project
   (eglot-extend-to-xref t))
-(use-package company
-  :ensure t
-  :hook
-  (prog-mode . company-mode)
+;;; Corfu
+;;
+;; A modern and minimal completion UI.
+(use-package corfu
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-quit-at-boundary 'separator)
+  :init
+  ;; Enable Corfu globally
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)
   :config
-  (setq company-minimum-prefix-length 1
-        company-idle-delay 0.0
-        company-backends '((company-capf company-dabbrev-code))
-        company-dabbrev-minimum-length 2
-        company-occurrence-weight-function #'company-occurrence-prefer-any-closest))
+  (defun corfu-move-to-minibuffer ()
+    (interactive)
+    (pcase completion-in-region--data
+      (`(,beg ,end ,table ,pred ,extras)
+       (let ((completion-extra-properties extras)
+             completion-cycle-threshold completion-cycling)
+         (consult-completion-in-region beg end table pred)))))
+  (keymap-set corfu-map "M-m" #'corfu-move-to-minibuffer)
+  (add-to-list 'corfu-continue-commands #'corfu-move-to-minibuffer))
 ;;; which-key
 (use-package which-key
   :config (which-key-mode))
@@ -567,20 +575,20 @@ Press 'q' to exit and edit manually."
          ("C-'" . avy-isearch)))
 ;;; vterm
 (defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use devbox vterm or compile with cmake."
+  "This might be hacky, but this allows me to use mise vterm or compile with cmake."
   (setq vterm-buffer-name-string "vterm %s"
         vterm-kill-buffer-on-exit nil
         vterm-max-scrollback 1000000
         vterm-use-vterm-prompt-detection-method t
         vterm--maybe-compile nil)
-  (let* ((maybe-load-path (car (file-expand-wildcards (concat (getenv "DEVBOX_PACKAGES_DIR") "/share/emacs/site-lisp/elpa/vterm*")))))
-    (if maybe-load-path
-        (progn
-          (add-to-list 'load-path maybe-load-path)
-          (message "----- using devbox vterm -----"))
-      (setq vterm--maybe-compile t)
-      (setq vterm-always-compile-module t)
-      (message "----- downloading and compiling vterm -----"))))
+  (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
+            (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
+      (progn
+        (add-to-list 'load-path maybe-load-path)
+        (message "----- using mise vterm -----"))
+    (setq vterm--maybe-compile t)
+    (setq vterm-always-compile-module t)
+    (message "----- downloading and compiling vterm -----")))
 
 (setup-vterm-init)
 
@@ -596,9 +604,6 @@ Press 'q' to exit and edit manually."
 (use-package elisp-demos
   :init
   (advice-add 'describe-function-1 :after #'elisp-demos-advice-describe-function-1))
-;;; envrc
-(use-package envrc
-  :config (envrc-global-mode))
 ;;; pdf-tools
 (use-package pdf-tools
   :defer t
@@ -608,16 +613,13 @@ Press 'q' to exit and edit manually."
   (add-hook 'pdf-view-mode-hook (lambda () (pdf-view-midnight-minor-mode 1)))
   (pdf-loader-install)
   (setq pdf-view-use-scaling t))
-;;; inheritenv
-(use-package inheritenv
-  :ensure (:type git :host github :repo "purcell/inheritenv"))
-;;; buffer-env
-(use-package buffer-env
-  :hook (hack-local-variables . buffer-env-update)
+;;; mise
+(use-package mise
+  :hook ((elpaca-after-init . global-mise-mode))
   :config
-  (add-to-list 'buffer-env-command-alist '("/devbox\\.json\\'" . "devbox run  -- \"env -0\""))
-  (setq buffer-env-script-name '(".envrc" ;; ".venv/bin/activate"
-                                 )))
+  (add-to-list 'mise-auto-propagate-commands 'vterm)
+  (add-to-list 'mise-auto-propagate-commands 'claude-code-ide--detect-cli)
+  (add-to-list 'mise-auto-propagate-commands 'claude-code-ide-check-status))
 ;;; buffer-name-relative
 (use-package buffer-name-relative
   :init
@@ -667,14 +669,14 @@ Press 'q' to exit and edit manually."
 ;;; tab-bar-history-mode:
 ;; better than winnner, no tabs required
 ;; https://www.reddit.com/r/emacs/comments/1kz57i5/comment/mv4zgji
-(defmacro my/repeat-it (group cmds)
+(defmacro johnny5-repeat-it (group cmds)
   (let ((map (intern (concat (symbol-name group) "-repeat-map"))))
     `(progn
        (defvar ,map (make-sparse-keymap))
        (cl-loop for (key def) in ,cmds do
                 (define-key ,map (kbd key) def)
                 (put def 'repeat-map ',map)))))
-(defun my/tab-bar-history-report-position ()
+(defun johnny5-tab-bar-history-report-position ()
   (let* ((f (selected-frame))
          (back (length (gethash f tab-bar-history-back)))
          (forward (length (gethash f tab-bar-history-forward))))
@@ -690,12 +692,12 @@ Press 'q' to exit and edit manually."
   (setq tab-bar-history-limit 200)
   :config
   (tab-bar-history-mode 1)
-  (my/repeat-it tab-bar-history-mode '(("<left>" tab-bar-history-back)
-                                       ("M-s-<left>" tab-bar-history-back)
-                                       ("<right>" tab-bar-history-forward)
-                                       ("M-s-<right>" tab-bar-history-forward)))
-  (advice-add 'tab-bar-history-forward :after 'my/tab-bar-history-report-position)
-  (advice-add 'tab-bar-history-back :after 'my/tab-bar-history-report-position))
+  (johnny5-repeat-it tab-bar-history-mode '(("<left>" tab-bar-history-back)
+                                            ("M-s-<left>" tab-bar-history-back)
+                                            ("<right>" tab-bar-history-forward)
+                                            ("M-s-<right>" tab-bar-history-forward)))
+  (advice-add 'tab-bar-history-forward :after 'johnny5-tab-bar-history-report-position)
+  (advice-add 'tab-bar-history-back :after 'johnny5-tab-bar-history-report-position))
 ;;; ws-butler
 (use-package ws-butler
   :config (ws-butler-global-mode 1))
@@ -745,22 +747,24 @@ Press 'q' to exit and edit manually."
 ;; If this errors when loading and enchant is installed try
 ;; elpaca-delete jinx
 (use-package jinx
-  :hook (emacs-startup . global-jinx-mode)
+  :hook (elpaca-after-init . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-,"   . jinx-previous)
          ("C-."   . jinx-next)
          ("C-M-$" . jinx-languages))
   :config
-  (setq jinx--compile-flags (append jinx--compile-flags (list (format "-I%s/include/enchant-2" (getenv "DEVBOX_PACKAGES_DIR")) (format "-L%s/lib"  (getenv "DEVBOX_PACKAGES_DIR")))))
-  (unless (featurep 'jinx)
-    (require 'jinx)
-    (keymap-set jinx-repeat-map "RET" 'jinx-correct)
-    (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
-    (add-to-list 'embark-target-finders 'embark-target-jinx-at-point)
-    (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
-    (add-to-list 'embark-repeat-actions #'jinx-next)
-    (add-to-list 'embark-repeat-actions #'jinx-previous)
-    (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
+  (defun johnny5-jinx-get-paths ()
+    "Get paths to configure jinx from mise environment."
+    (let ((enchant-include-path (getenv "MISE_ENCHANT_INCLUDE_PATH"))
+          (enchant-lib-path (getenv "MISE_ENCHANT_LIB_PATH")))
+      (when (and enchant-include-path (file-directory-p enchant-include-path)
+                 enchant-lib-path (file-directory-p enchant-lib-path))
+        (setq jinx--compile-flags
+              (append jinx--compile-flags
+                      (list (format "-I%s/include/enchant-2" enchant-include-path)
+                            (format "-L%s/lib" enchant-lib-path)))))))
+  (johnny5-jinx-get-paths)
+  (keymap-set jinx-repeat-map "RET" 'jinx-correct))
 ;;; emacs-env
 ;; Manage dated Emacs environments for testing emacs-overlay updates
 (let ((env-file (locate-user-emacs-file "emacs-env/emacs-env.el")))
