@@ -495,6 +495,28 @@ Press 'q' to exit and edit manually."
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
+;;; schema-store
+;;;; johnny5-schema-store-update
+(defun johnny5-schema-store-update ()
+  "Download the latest JSON Schema Store catalog asynchronously.
+Saves to `user-emacs-directory'/schema-store-catalog.json.
+After downloading, restart eglot in affected buffers to pick up changes."
+  (interactive)
+  (let ((catalog-file (locate-user-emacs-file "schema-store-catalog.json"))
+        (url "https://www.schemastore.org/api/json/catalog.json"))
+    (message "Downloading schema catalog from %s..." url)
+    (url-retrieve url
+                  (lambda (status)
+                    (if (plist-get status :error)
+                        (message "Schema store update failed: %s"
+                                 (plist-get status :error))
+                      (goto-char (point-min))
+                      (re-search-forward "\n\n")
+                      (write-region (point) (point-max) catalog-file)
+                      (kill-buffer)
+                      (message "Schema store catalog updated: %s" catalog-file)))
+                  nil t)))
+;;; eglot
 ;; M-. embark-dwim (rebound from xref-find-definitions)
 ;; M-, xref-go-back
 ;; M-? xref-find-references
@@ -505,6 +527,21 @@ Press 'q' to exit and edit manually."
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
   (add-to-list 'project-vc-ignores "./.venv/")
   (setq eldoc-echo-area-use-multiline-p t)
+  ;; Schema Store: provide schema validation via LSP.
+  (let ((catalog-file (locate-user-emacs-file "schema-store-catalog.json")))
+    (if (file-exists-p catalog-file)
+        (let* ((json-object-type 'plist)
+               (json-array-type  'vector)
+               (json-key-type    'keyword)
+               (json-schemas     (plist-get (json-read-file catalog-file) :schemas)))
+          (setq-default eglot-workspace-configuration
+                        `(:json (:validate (:enable t)
+                                           :schemas ,json-schemas)
+                          :yaml (:schemaStore (:enable t)
+                                 :validate t))))
+      (setq-default eglot-workspace-configuration
+                    `(:yaml (:schemaStore (:enable t)
+                             :validate t)))))
   ;; (with-eval-after-load 'eglot
   ;;   (add-to-list 'eglot-server-programs
   ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
@@ -512,6 +549,7 @@ Press 'q' to exit and edit manually."
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
+         (json-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          (nix-mode . eglot-ensure)
@@ -529,6 +567,18 @@ Press 'q' to exit and edit manually."
   (eglot-autoshutdown t)
   ;; Enable eglot in code external to project
   (eglot-extend-to-xref t))
+;;;; workaround: yaml-language-server sends scopeUri "null"
+;; yaml-language-server sends scopeUri as the literal string "null" for
+;; global configuration sections.  eglot-uri-to-path passes it through
+;; unchanged, file-name-directory returns nil, and hack-dir-local-variables
+;; crashes on (file-remote-p nil).  Guard against non-file URIs here.
+(advice-add 'eglot--workspace-configuration-plist :around
+            (lambda (orig server &optional path)
+              (funcall orig server
+                       (if (and (stringp path)
+                                (not (file-name-absolute-p path)))
+                           nil
+                         path))))
 ;;; Corfu
 ;;
 ;; A modern and minimal completion UI.
