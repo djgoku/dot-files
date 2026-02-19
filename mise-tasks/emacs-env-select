@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+#MISE description="Select and launch an Emacs environment"
+#USAGE flag "--nw" help="Force terminal mode"
+#MISE raw=true
+set -euo pipefail
+
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ]; then
+  MODE="terminal"
+elif [ "${usage_nw:-false}" = "true" ]; then
+  MODE="terminal"
+else
+  MODE="gui"
+fi
+
+if [ "$HOME" = "${MISE_CONFIG_ROOT:-}" ]; then
+  DIRECTORY="$HOME/dev/github/djgoku/dot-files"
+else
+  DIRECTORY="$MISE_PROJECT_ROOT"
+fi
+
+emacs -Q -nw -l "$DIRECTORY/emacs/emacs-env/emacs-env.el" \
+      --eval "(emacs-env-unified-select \"$MODE\")"
+
+CMD_FILE="${TMPDIR:?TMPDIR must be set}/emacs-env-cmd"
+[ -f "$CMD_FILE" ] && source "$CMD_FILE" && rm "$CMD_FILE"

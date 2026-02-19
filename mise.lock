@@ -1,0 +1,171 @@
+[[tools.age]]
+version = "1.3.1"
+backend = "aqua:FiloSottile/age"
+"platforms.linux-arm64" = { checksum = "sha256:c6878a324421b69e3e20b00ba17c04bc5c6dab0030cfe55bf8f68fa8d9e9093a", url = "https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-linux-arm64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:bdc69c09cbdd6cf8b1f333d372a1f58247b3a33146406333e30c0f26e8f51377", url = "https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-linux-amd64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:01120ea2cbf0463d4c6bd767f99f3271bbed1cdc8a9aa718a76ba1fe4f01998b", url = "https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-darwin-arm64.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:c56e8ce22f7e80cb85ad946cc82d198767b056366201d3e1a2b93d865be38154", url = "https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-windows-amd64.zip"}
+
+[[tools.aqua]]
+version = "2.56.6"
+backend = "ubi:aquaproj/aqua"
+
+[[tools."aqua:ripgrep"]]
+version = "15.1.0"
+backend = "aqua:ripgrep"
+"platforms.linux-arm64" = { checksum = "sha256:2b661c6ef508e902f388e9098d9c4c5aca72c87b55922d94abdba830b4dc885e", url = "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-aarch64-unknown-linux-gnu.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:1c9297be4a084eea7ecaedf93eb03d058d6faae29bbc57ecdaf5063921491599", url = "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-unknown-linux-musl.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:378e973289176ca0c6054054ee7f631a065874a352bf43f0fa60ef079b6ba715", url = "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-aarch64-apple-darwin.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:64811cb24e77cac3057d6c40b63ac9becf9082eedd54ca411b475b755d334882", url = "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-apple-darwin.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:124510b94b6baa3380d051fdf4650eaa80a302c876d611e9dba0b2e18d87493a", url = "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-pc-windows-msvc.zip"}
+
+[[tools."aqua:ripgrep-all"]]
+version = "0.10.10"
+backend = "aqua:ripgrep-all"
+"platforms.linux-arm64" = { checksum = "sha256:2cd875ab6c78b27e4830b5bca92c570a8a8dcfb368bc71b189b65ac01fbc3020", url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgrep_all-v0.10.10-aarch64-unknown-linux-gnu.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:a969c25b182ac84aa672518313b5f741091decf7d93d03a020bcfe517b9ff4e8", url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgrep_all-v0.10.10-x86_64-unknown-linux-musl.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:9deeaa927779078568832b5b69ae57986ca917f24974bb4976c062f632846856", url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgrep_all-v0.10.10-aarch64-apple-darwin.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:3d9fe75878ddab6a8e7abb66ab13af1bdea2844a02c479fb293b7bfb258ab353", url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgrep_all-v0.10.10-x86_64-apple-darwin.tar.gz"}
+
+[[tools.aws-cli]]
+version = "2.33.27"
+backend = "aqua:aws/aws-cli"
+"platforms.linux-arm64" = { url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.33.27.zip"}
+"platforms.linux-x64" = { url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.33.27.zip"}
+"platforms.macos-arm64" = { checksum = "blake3:b6989deceb725eb2944827f0fbff7c9eb15624baa71529cbe8c58448ba0cc0d9", url = "https://awscli.amazonaws.com/AWSCLIV2-2.33.27.pkg"}
+"platforms.macos-x64" = { url = "https://awscli.amazonaws.com/AWSCLIV2-2.33.27.pkg"}
+
+[[tools.colima]]
+version = "0.10.0"
+backend = "aqua:abiosoft/colima"
+"platforms.linux-arm64" = { checksum = "sha256:c748f2a1577ff9a168ddd5c08e9b52ce0336ab13c52e6fa06b049da77531b95e", url = "https://github.com/abiosoft/colima/releases/download/v0.10.0/colima-Linux-aarch64"}
+"platforms.linux-x64" = { checksum = "sha256:4300e1e6ce8d4ee354a321d70ff281007eca7f6e56f5e1941bbd73394f8dc193", url = "https://github.com/abiosoft/colima/releases/download/v0.10.0/colima-Linux-x86_64"}
+"platforms.macos-arm64" = { checksum = "sha256:7ff362b4e39279e8a75de86f2cad9f639023c2958f85bbb4d8afd0b528a23793", url = "https://github.com/abiosoft/colima/releases/download/v0.10.0/colima-Darwin-arm64"}
+"platforms.macos-x64" = { checksum = "sha256:d29f3c0fd1a98969c61a461042becbf7fcf45fd8382567e30bf7b2c4ab10da6f", url = "https://github.com/abiosoft/colima/releases/download/v0.10.0/colima-Darwin-x86_64"}
+
+[[tools.docker-cli]]
+version = "29.2.1"
+backend = "aqua:docker/cli"
+"platforms.linux-arm64" = { url = "https://download.docker.com/linux/static/stable/aarch64/docker-29.2.1.tgz"}
+"platforms.linux-x64" = { url = "https://download.docker.com/linux/static/stable/x86_64/docker-29.2.1.tgz"}
+"platforms.macos-arm64" = { url = "https://download.docker.com/mac/static/stable/aarch64/docker-29.2.1.tgz"}
+"platforms.macos-x64" = { url = "https://download.docker.com/mac/static/stable/x86_64/docker-29.2.1.tgz"}
+"platforms.windows-x64" = { url = "https://download.docker.com/win/static/stable/x86_64/docker-29.2.1.zip"}
+
+[[tools.eca]]
+version = "0.101.1"
+backend = "vfox:eca"
+
+[[tools.fnox]]
+version = "1.12.1"
+backend = "github:jdx/fnox"
+"platforms.linux-arm64" = { checksum = "sha256:158195c758d05684ae6e3a7c553edf4f163ac13c4466556742810220ee3866c8", url = "https://github.com/jdx/fnox/releases/download/v1.12.1/fnox-aarch64-unknown-linux-gnu.tar.gz", url_api = "https://api.github.com/repos/jdx/fnox/releases/assets/353421839"}
+"platforms.linux-x64" = { checksum = "sha256:0a28ae0b36584c077dfb4fe0f924246bd3787e58504732f3c7a5dbf3785e738c", url = "https://github.com/jdx/fnox/releases/download/v1.12.1/fnox-x86_64-unknown-linux-gnu.tar.gz", url_api = "https://api.github.com/repos/jdx/fnox/releases/assets/353421846"}
+"platforms.macos-arm64" = { checksum = "sha256:8dc93b9e53b81f61be5e013d6163ed40062217f69221e7cca28a45cac94797c6", url = "https://github.com/jdx/fnox/releases/download/v1.12.1/fnox-aarch64-apple-darwin.tar.gz", url_api = "https://api.github.com/repos/jdx/fnox/releases/assets/353421842"}
+"platforms.macos-x64" = { checksum = "sha256:8a4409be660a8a7d62baf43b7d34ab43c53c1cf47ad296bd90b5d35cc968d9a1", url = "https://github.com/jdx/fnox/releases/download/v1.12.1/fnox-x86_64-apple-darwin.tar.gz", url_api = "https://api.github.com/repos/jdx/fnox/releases/assets/353421841"}
+"platforms.windows-x64" = { checksum = "sha256:2e9cf3f4852d635f757f4216a132b32c568ebfe6af44eb3af3d326f730c721d5", url = "https://github.com/jdx/fnox/releases/download/v1.12.1/fnox-x86_64-pc-windows-msvc.zip", url_api = "https://api.github.com/repos/jdx/fnox/releases/assets/353421843"}
+
+[[tools.fzf]]
+version = "0.68.0"
+backend = "aqua:junegunn/fzf"
+"platforms.linux-arm64" = { checksum = "sha256:dad9cc3b617305d504dbbf8812c4c9970a6dc7efdce9b5eacbd130d1f1dbc05d", url = "https://github.com/junegunn/fzf/releases/download/v0.68.0/fzf-0.68.0-linux_arm64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:545004a69eb65bb9adf32000971105ac21aea54bbecb618c55414d21b823fe95", url = "https://github.com/junegunn/fzf/releases/download/v0.68.0/fzf-0.68.0-linux_amd64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:1817524989b3987ebc67d16acbc5526cb51dfbc52ca62babe37c96d9d09a227b", url = "https://github.com/junegunn/fzf/releases/download/v0.68.0/fzf-0.68.0-darwin_arm64.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:da3aafc569bdd38c7cb30f992c54c4899c935d8b86b88c2a6831b0733b862caf", url = "https://github.com/junegunn/fzf/releases/download/v0.68.0/fzf-0.68.0-darwin_amd64.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:4939ed89f3a75258ea47c55c34422b6b3f28e38b85dbd1e27dc4cf5839d5d310", url = "https://github.com/junegunn/fzf/releases/download/v0.68.0/fzf-0.68.0-windows_amd64.zip"}
+
+[[tools.lima]]
+version = "2.0.3"
+backend = "aqua:lima-vm/lima"
+"platforms.linux-arm64" = { checksum = "sha256:d0f9c30b82fdbd06b5c951b76bf3378b68cc658aebfe243f777949e131b6ea28", url = "https://github.com/lima-vm/lima/releases/download/v2.0.3/lima-2.0.3-Linux-aarch64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:6838a926d85ed2ddcfd636befb476256a96196516a3b7f36d2af66cde9188d66", url = "https://github.com/lima-vm/lima/releases/download/v2.0.3/lima-2.0.3-Linux-x86_64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:22aee997df59e4fd448041b2d1214e48bd8eaf705d2d48a4307d65c1b179dc97", url = "https://github.com/lima-vm/lima/releases/download/v2.0.3/lima-2.0.3-Darwin-arm64.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:0806bcb83a08411e9d878b43b2c4203f1556fe14f9f8ba1e5f0d5d9a3c2c0bd8", url = "https://github.com/lima-vm/lima/releases/download/v2.0.3/lima-2.0.3-Darwin-x86_64.tar.gz"}
+
+[[tools."nix:emacs-pgtk-git"]]
+version = "https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=04541a061e35e3a7852e8525b76e853fe9390399#default"
+backend = "nix:emacs-pgtk-git"
+
+[[tools."nix:emacsPackages.vterm"]]
+version = "20251119.1653"
+backend = "nix:emacsPackages.vterm"
+
+[[tools."nix:enchant"]]
+version = "nixos/nixpkgs#enchant"
+backend = "nix:enchant"
+
+[[tools."nix:gcc"]]
+version = "15.2.0"
+backend = "nix:gcc"
+
+[[tools."nix:git"]]
+version = "2.52.0"
+backend = "nix:git"
+
+[[tools."nix:github+djgoku/dot-files?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec"]]
+version = "v2sppxd0aipyhfqr6lfmpic705xdmqm4-emacs-git-pgtk-20260119.0"
+backend = "nix:github+djgoku/dot-files?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec"
+
+[[tools."nix:gnupg"]]
+version = "2.4.8"
+backend = "nix:gnupg"
+
+[[tools."nix:https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=04541a061e35e3a7852e8525b76e853fe9390399"]]
+version = "bpngaw9xmsyk3iqncvi1fr5qg9nm0nmc-emacs-git-pgtk-20260208.0"
+backend = "nix:https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=04541a061e35e3a7852e8525b76e853fe9390399"
+
+[[tools."nix:https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec"]]
+version = "v2sppxd0aipyhfqr6lfmpic705xdmqm4-emacs-git-pgtk-20260119.0"
+backend = "nix:https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=2eb467140b8f392eba66512c9028228bf74117ec"
+
+[[tools."nix:pinentry-emacs"]]
+version = "1.3.2"
+backend = "nix:pinentry-emacs"
+
+[[tools."nix:poppler_utils"]]
+version = "24.02.0"
+backend = "nix:poppler_utils"
+
+[[tools."nix:stow"]]
+version = "2.4.1"
+backend = "nix:stow"
+
+[[tools."nix:texlive.combined.scheme-full"]]
+version = "2022-final"
+backend = "nix:texlive.combined.scheme-full"
+
+[[tools.node]]
+version = "24.13.1"
+backend = "core:node"
+"platforms.linux-arm64" = { checksum = "sha256:4873459d7c9b28feaa1f0fade9bb9c81cb702670991ff80a51d805325c5e3456", url = "https://nodejs.org/dist/v24.13.1/node-v24.13.1-linux-arm64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:7ad28fb172a9ab0593f86c1a39e5c268d0d8fc3d6cb0167f455b5655a7a6e2fd", url = "https://nodejs.org/dist/v24.13.1/node-v24.13.1-linux-x64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:8c039d59f2fec6195e4281ad5b0d02b9a940897b4df7b849c6fb48be6787bba6", url = "https://nodejs.org/dist/v24.13.1/node-v24.13.1-darwin-arm64.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:527f0578d9812e7dfa225121bda0b1546a6a0e4b5f556295fc8299c272de5fbf", url = "https://nodejs.org/dist/v24.13.1/node-v24.13.1-darwin-x64.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:fba577c4bb87df04d54dd87bbdaa5a2272f1f99a2acbf9152e1a91b8b5f0b279", url = "https://nodejs.org/dist/v24.13.1/node-v24.13.1-win-x64.zip"}
+
+[[tools.pandoc]]
+version = "3.9"
+backend = "github:jgm/pandoc"
+"platforms.linux-arm64" = { checksum = "sha256:e09b97d7313bd417a35bde6c747c458486ec84f696e1cfd0f8c527cd69c89433", url = "https://github.com/jgm/pandoc/releases/download/3.9/pandoc-3.9-linux-arm64.tar.gz", url_api = "https://api.github.com/repos/jgm/pandoc/releases/assets/350472687"}
+"platforms.linux-x64" = { checksum = "sha256:872a10c7ec29d5278831d855b11bd4ade0df4d5ec9a089a3197bc63a37eb4003", url = "https://github.com/jgm/pandoc/releases/download/3.9/pandoc-3.9-linux-amd64.tar.gz", url_api = "https://api.github.com/repos/jgm/pandoc/releases/assets/350472451"}
+"platforms.macos-arm64" = { checksum = "sha256:7d56ac6fe6fad0a7407bcd776aa142f61ca41838f286165f79d0584fa57b24d1", url = "https://github.com/jgm/pandoc/releases/download/3.9/pandoc-3.9-arm64-macOS.zip", url_api = "https://api.github.com/repos/jgm/pandoc/releases/assets/350472393"}
+"platforms.macos-x64" = { checksum = "sha256:f1dfb5a433976b131818c2e69db70bb46874604367e8923412a5c2fa673f2526", url = "https://github.com/jgm/pandoc/releases/download/3.9/pandoc-3.9-x86_64-macOS.zip", url_api = "https://api.github.com/repos/jgm/pandoc/releases/assets/350473216"}
+"platforms.windows-x64" = { checksum = "sha256:edccdaa95b5a33b3320187f0e291d58a232e21318a8081750bd31f847e598d18", url = "https://github.com/jgm/pandoc/releases/download/3.9/pandoc-3.9-windows-x86_64.zip", url_api = "https://api.github.com/repos/jgm/pandoc/releases/assets/350472785"}
+
+[[tools.sops]]
+version = "3.11.0"
+backend = "aqua:getsops/sops"
+"platforms.linux-arm64" = { checksum = "sha256:c71d32f74b3a73ce283affe6ed36e221a8f1476c3d37963f60bd962fb1676681", url = "https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.linux.arm64"}
+"platforms.linux-x64" = { checksum = "sha256:775f1384d55decfad228e7196a3f683791914f92a473f78fc47700531c29dfef", url = "https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.linux.amd64"}
+"platforms.macos-arm64" = { checksum = "sha256:45e7562b1f5d022c4d7a4e4c3d1b7b1a7ee6c328356629286cfd18a394b00e7c", url = "https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.darwin.arm64"}
+"platforms.macos-x64" = { checksum = "sha256:c36583e178f7e83b947044b292e106e79615f7725f75cb147045fb0c81953e2b", url = "https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.darwin.amd64"}
+"platforms.windows-x64" = { checksum = "sha256:f3d74d83006954f0d8cf770ad7e5380504270ded5a62f33eb2548ce5461af3b3", url = "https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.amd64.exe"}
+
+[[tools.tombi]]
+version = "0.7.31"
+backend = "aqua:tombi-toml/tombi"
+"platforms.linux-arm64" = { checksum = "sha256:dcacd08e41b2b48c0e60aae502ede431c3ddb2b8d174c4d60b3000e7890ef6f4", url = "https://github.com/tombi-toml/tombi/releases/download/v0.7.31/tombi-cli-0.7.31-aarch64-unknown-linux-musl.gz"}
+"platforms.linux-x64" = { checksum = "sha256:36be194363e14adfc62fa1eb51cb1bade09e5a9dbab47e8f176878eb6004ec6c", url = "https://github.com/tombi-toml/tombi/releases/download/v0.7.31/tombi-cli-0.7.31-x86_64-unknown-linux-musl.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:738313a8f9323b9c269acdff078addb5632261bb757ac6956d2eee3c3da7c06d", url = "https://github.com/tombi-toml/tombi/releases/download/v0.7.31/tombi-cli-0.7.31-aarch64-apple-darwin.gz"}
+"platforms.macos-x64" = { checksum = "sha256:01083717a0815b8b9f4a38dc1ef591b60d646dedb58ca8d15cbe110ea79aca59", url = "https://github.com/tombi-toml/tombi/releases/download/v0.7.31/tombi-cli-0.7.31-x86_64-apple-darwin.gz"}
+"platforms.windows-x64" = { checksum = "sha256:77826377917d51b22c05f5863c5d336e63b32d6821466d172f79c82dc355fbf6", url = "https://github.com/tombi-toml/tombi/releases/download/v0.7.31/tombi-cli-0.7.31-x86_64-pc-windows-msvc.zip"}

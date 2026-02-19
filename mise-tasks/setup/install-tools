@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#MISE description="Run mise install for all configured tools"
+
+set -euo pipefail
+
+mise install

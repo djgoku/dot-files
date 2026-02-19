@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+#MISE description="Clone fzf-tab and tree-sitter-module repos"
+
+set -euo pipefail
+
+local -A repos=(
+  [~/dev/github/Aloxaf/fzf-tab]="https://github.com/Aloxaf/fzf-tab.git"
+  [~/dev/github/casouri/tree-sitter-module]="https://github.com/casouri/tree-sitter-module.git"
+)
+
+for dir url in "${(@kv)repos}"; do
+  if [[ ! -d "$dir" ]]; then
+    mkdir -p "$(dirname "$dir")"
+    git clone "$url" "$dir"
+  else
+    echo "[INFO] $dir already exists, skipping clone"
+  fi
+done

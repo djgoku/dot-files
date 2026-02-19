@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#MISE description="Compile tree-sitter grammars via batch.sh"
+#MISE depends=["setup:clone-deps"]
+
+set -euo pipefail
+
+cd "$HOME/dev/github/casouri/tree-sitter-module/"
+./batch.sh

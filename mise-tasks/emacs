@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+#MISE description="Launch Emacs (GUI by default, --nw for terminal)"
+#MISE depends=["install-enchant", "setup-gpg-agent", "setup-pinentry-auto"]
+#MISE raw=true
+#USAGE flag "--nw" help="Run in terminal mode (no window)"
+set -euo pipefail
+
+export EMACS_DATE="2026-01-19"
+MISE_ENCHANT_INCLUDE_PATH=$(mise where 'nix:enchant@nixos/nixpkgs#enchant^dev') || { echo "Error: could not find enchant include path"; exit 1; }
+MISE_ENCHANT_LIB_PATH=$(mise where 'nix:enchant@nixos/nixpkgs#enchant') || { echo "Error: could not find enchant lib path"; exit 1; }
+MISE_VTERM_PATH=$(mise where 'nix:emacsPackages.vterm') || { echo "Error: could not find vterm path"; exit 1; }
+export MISE_ENCHANT_INCLUDE_PATH MISE_ENCHANT_LIB_PATH MISE_VTERM_PATH
+# This ulimit is mostly for terminal emacs
+ulimit -n 10240
+# Setup GPG only if available
+if command -v gpgconf >/dev/null 2>&1; then
+  export GPG_TTY="$(tty)"
+  export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+  gpgconf --launch gpg-agent || echo "Warning: Could not launch gpg-agent"
+else
+  echo "Info: gpgconf not found, skipping GPG setup"
+fi
+
+if [ "$usage_nw" = "true" ]; then
+  export PINENTRY_USER_DATA=USE_EMACS
+  gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+  "$(mise which Emacs)" --debug-init --init-directory="$MISE_PROJECT_ROOT/emacs" -nw --name "emacs-nw-$EMACS_DATE"
+  # Reset pinentry routing after terminal Emacs exits
+  unset PINENTRY_USER_DATA
+  gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+else
+  "$(mise which Emacs)" --debug-init --init-directory="$MISE_PROJECT_ROOT/emacs" --name "emacs-$EMACS_DATE" &
+fi
