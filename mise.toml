@@ -1,0 +1,161 @@
+[settings]
+experimental = true
+lockfile = true
+task_timings = true
+# env_cache = true
+
+[tools]
+# Aqua
+"aqua:ripgrep" = "latest"
+"aqua:ripgrep-all" = "latest"
+
+# Nix - Emacs
+"nix:emacs-pgtk-git" = "https+github.com/djgoku/dot-files.git?dir=emacs-overlay&rev=04541a061e35e3a7852e8525b76e853fe9390399#default"
+"nix:emacsPackages.vterm" = "latest"
+"nix:pinentry-emacs" = "latest"
+
+# poppler_utils # pdftotext
+# Nix - System
+"nix:gcc" = "latest"
+"nix:git" = "latest"
+"nix:gnupg" = "latest"
+"nix:poppler_utils" = "latest"
+"nix:stow" = "latest"
+
+# Standard
+age = "latest"
+aqua = "latest"
+aws-cli = "latest"
+colima = "latest"
+docker-cli = "latest"
+fnox = "latest"
+fzf = "latest"
+lima = "latest"
+node = "24"
+pandoc = "latest"
+sops = "latest"
+tombi = "latest"
+"nix:enchant" = "nixos/nixpkgs#enchant"
+
+[env]
+
+# Enchant requires both dev headers (compilation) and runtime lib.
+[tasks.install-enchant]
+description = "Install enchant spell-checking (dev headers + runtime lib)"
+usage = '''
+flag "--update -u" help="update"
+'''
+run = """
+#!/bin/bash
+if [ "${usage_update:-false}" = "true" ]; then
+  PARAM="up"
+else
+  PARAM="use"
+fi
+mise $PARAM 'nix:enchant@nixos/nixpkgs#enchant^dev'
+mise $PARAM 'nix:enchant@nixos/nixpkgs#enchant'
+"""
+
+# Must stay inline: generates mise-tasks/pinentry-auto with {{config_root}}
+# baked in, since gpg-agent runs pinentry-auto outside of mise context.
+[tasks.setup-pinentry-auto]
+description = "Generate mise-tasks/pinentry-auto with correct config path"
+run = '''
+mkdir -p mise-tasks
+cat << 'SCRIPT' > mise-tasks/pinentry-auto
+#!/bin/sh
+#MISE description="GPG pinentry router: Emacs minibuffer when socket exists, pinentry-mac otherwise"
+#MISE raw=true
+#MISE tools={"nix:pinentry-emacs"="latest"}
+
+LOG="/tmp/pinentry-auto.log"
+echo "--- $(date) ---" >> "$LOG"
+echo "PINENTRY_USER_DATA=$PINENTRY_USER_DATA" >> "$LOG"
+
+case "$PINENTRY_USER_DATA" in
+*USE_EMACS*)
+    PE=$(mise -C {{config_root}} which pinentry-emacs 2>/dev/null)
+    if [ -n "$PE" ] && [ -x "$PE" ]; then
+        echo "-> pinentry-emacs" >> "$LOG"
+        exec "$PE" "$@"
+    fi
+    ;;
+esac
+
+# Fallback: pinentry-mac
+PM=$(gpgconf --list-components 2>/dev/null | grep '^pinentry:' | cut -d: -f3)
+if [ -n "$PM" ] && [ -x "$PM" ]; then
+    echo "-> pinentry-mac" >> "$LOG"
+    exec "$PM" "$@"
+fi
+
+echo "-> pinentry (last resort)" >> "$LOG"
+exec pinentry "$@"
+SCRIPT
+
+chmod +x mise-tasks/pinentry-auto
+'''
+
+# Must stay inline: bakes {{config_root}} into the launcher script so the
+# .app bundle works from Finder/Spotlight where mise context isn't available.
+[tasks.generate-macos-app]
+description = "Generate MiseEmacs.app bundle in macos/"
+run = '''
+#!/bin/bash
+APP_DIR="macos/MiseEmacs.app/Contents"
+mkdir -p "$APP_DIR/MacOS"
+
+cat << 'PLIST' > "$APP_DIR/Info.plist"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>mise-emacs</string>
+    <key>CFBundleName</key>
+    <string>Mise Emacs</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.djgoku.mise-emacs</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSUIElement</key>
+    <true/>
+</dict>
+</plist>
+PLIST
+
+cat << LAUNCHER > "$APP_DIR/MacOS/mise-emacs"
+#!/bin/bash
+# Finder/Spotlight only provides /usr/bin:/bin:/usr/sbin:/sbin — add mise
+export PATH="\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+exec mise -C "{{config_root}}" run emacs
+LAUNCHER
+
+chmod +x "$APP_DIR/MacOS/mise-emacs"
+
+echo "Created macos/MiseEmacs.app"
+cp -R macos/MiseEmacs.app /Applications/MiseEmacs.app
+echo "Copied to /Applications/MiseEmacs.app"
+'''
+
+# Must stay inline: mise-tasks/setup as a file would conflict with
+# mise-tasks/setup/ directory (mise uses directory-based namespacing).
+[tasks.setup]
+description = "Run full post-bootstrap setup"
+depends = [
+  "setup:clone-deps",
+  "setup:treesitter",
+  "setup:install-tools",
+  "setup:texlive",
+  "setup:dotfiles",
+  "setup:macos",
+]
+run = """
+echo "[INFO] Setup complete! Next steps:"
+echo "[INFO]   1. Test global access: mise which git"
+echo "[INFO]   2. Launch Emacs: mise run emacs"
+echo "[INFO]   3. Reboot for macOS settings"
+"""

@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+#MISE description="Configure macOS settings (Terminal, MiseEmacs.app, defaults)"
+#MISE depends=["setup:install-tools"]
+
+set -euo pipefail
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "[INFO] Not macOS, skipping"
+  exit 0
+fi
+
+if [[ -f "$MISE_PROJECT_ROOT/macos/com.apple.Terminal.plist" ]]; then
+  cp "$MISE_PROJECT_ROOT/macos/com.apple.Terminal.plist" ~/Library/Preferences/
+else
+  echo "[WARN] macos/com.apple.Terminal.plist not found, skipping Terminal preferences"
+fi
+
+mise run generate-macos-app
+
+defaults write NSGlobalDomain AppleInterfaceStyle -string "Dark"
+defaults write .GlobalPreferences.plist com.apple.swipescrolldirection 0
+defaults write com.apple.finder FXPreferredSearchViewStyle Nlsv
+defaults write com.apple.finder FXPreferredViewStyle Nlsv
+defaults write com.apple.finder AppleShowAllFiles -boolean true
+killall Finder 2>/dev/null || true

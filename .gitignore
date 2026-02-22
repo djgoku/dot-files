@@ -9,6 +9,9 @@ main/
 mise.toml~
 setup.el-original-maybe
 setup.zsh
+mise-tasks/pinentry-auto
+macos/MiseEmacs.app/Contents/MacOS/mise-emacs
+macos/MiseEmacs.app/Contents/Info.plist
 
 # Node
 node_modules/

@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#MISE description="Install texlive (scheme-full) via nix"
+
+set -euo pipefail
+
+mise use "nix:texlive.combined.scheme-full@latest"

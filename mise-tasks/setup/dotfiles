@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+#MISE description="Stow zsh dotfiles and symlink global mise config"
+#MISE depends=["setup:install-tools"]
+
+set -euo pipefail
+
+mise exec -- stow -v -t ~ zsh --adopt
+
+mkdir -p ~/.config/mise
+ln -sfnv "$MISE_PROJECT_ROOT/mise.toml" ~/.config/mise/config.toml
+ln -sfnv "$MISE_PROJECT_ROOT/mise-tasks" ~/.config/mise/mise-tasks

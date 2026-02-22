@@ -1,0 +1,100 @@
+#+TITLE: dot-files
+#+AUTHOR: djgoku
+
+* Overview
+
+Personal development environment for macOS using [[https://mise.jdx.dev/][mise]] for tool/task management and [[https://nixos.org/][Nix]] for packages. Features a custom Emacs build with native compilation.
+
+* Quick Start
+
+Prerequisites: macOS, Xcode CLI tools (=xcode-select --install=).
+
+#+begin_src sh
+curl -fsSL https://raw.githubusercontent.com/djgoku/dot-files/main/setup.sh | zsh
+#+end_src
+
+Or clone and run locally:
+
+#+begin_src sh
+mkdir -p ~/dev/github/djgoku && cd "$_"
+git clone https://github.com/djgoku/dot-files.git
+cd dot-files && ./setup.sh
+#+end_src
+
+After setup, activate mise and install tools:
+
+#+begin_src sh
+eval "$(~/.local/bin/mise activate zsh)"
+mise install
+#+end_src
+
+* Project Structure
+
+#+begin_example
+.
+├── setup.sh                # Idempotent bootstrap script
+├── mise.toml               # Tools and inline task definitions
+├── mise-tasks/             # File-based mise tasks
+├── emacs/
+│   ├── init.el             # Emacs init
+│   ├── main.el             # Main configuration
+│   ├── early-init.el
+│   └── emacs-env/          # Environment selector
+├── emacs-overlay/          # Custom Emacs Nix build overlay
+├── macos/
+│   └── com.apple.Terminal.plist
+├── zsh/                    # Shell configuration
+└── flake.nix               # Nix flake
+#+end_example
+
+* Tasks
+
+All tools and tasks are managed through mise. See =mise tasks= for the full list.
+
+| Task                          | Description                                    |
+|-------------------------------+------------------------------------------------|
+| =mise run emacs=              | Launch Emacs (=--nw= for terminal mode)        |
+| =mise run setup-gpg-agent=    | Generate =~/.gnupg/gpg-agent.conf=             |
+| =mise run install-enchant=    | Install enchant spell-checking libraries       |
+| =mise run generate-macos-app= | Create MiseEmacs.app in =/Applications=        |
+
+* Testing
+
+Run the full bootstrap and Emacs smoke tests in a single command (useful for CI or validating on a fresh machine):
+
+#+begin_src sh
+zsh <<'SCRIPT'
+  export MISE_TASK_SKIP="setup:treesitter,setup:texlive"
+  curl -fsSL "https://raw.githubusercontent.com/djgoku/dot-files/main/setup.sh" |
+    MISE_VERSION=v2026.2.10 zsh
+  source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  source ~/.zshrc
+  mise -C ~/dev/github/djgoku/dot-files run test-emacs
+SCRIPT
+#+end_src
+
+To test a feature branch, set =REPO_BRANCH=:
+
+#+begin_src sh
+zsh <<'SCRIPT'
+  export MISE_TASK_SKIP="setup:treesitter,setup:texlive"
+  BRANCH="chore/switch-completely-to-mise"
+  curl -fsSL "https://raw.githubusercontent.com/djgoku/dot-files/${BRANCH}/setup.sh" |
+    REPO_BRANCH="$BRANCH" MISE_VERSION=v2026.2.10 zsh
+  source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  source ~/.zshrc
+  mise -C ~/dev/github/djgoku/dot-files run test-emacs
+SCRIPT
+#+end_src
+
+* Troubleshooting
+
+#+begin_src sh
+mise doctor
+#+end_src
+
+* Links
+
+- [[https://mise.jdx.dev/][mise Documentation]]
+- [[https://nixos.org/manual/nix/stable/][Nix Manual]]
+- [[https://www.gnu.org/software/emacs/][GNU Emacs]]
