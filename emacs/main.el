@@ -773,15 +773,7 @@ After downloading, restart eglot in affected buffers to pick up changes."
    indent-bars-pad-frac 0.25
    indent-bars-color-by-depth nil
    indent-bars-highlight-current-depth '(:face default :blend 0.4))
-  :config
-  (require 'indent-bars-ts)             ; not needed with straight
   :custom
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (setq-local
-               indent-tabs-mode t ; make sure tabs-based indenting is on, even if we disable it globally
-               indent-bars-no-descend-lists nil) ; elisp is mostly continued lists!  allow bars to descend inside
-              (indent-bars-mode 1)))
   (indent-bars-treesit-support t)
   (indent-bars-treesit-ignore-blank-lines-types '("module"))
   ;; Add other languages as needed
@@ -792,6 +784,14 @@ After downloading, restart eglot in affected buffers to pick up changes."
   ;;                                  list list_comprehension
   ;;                                  dictionary dictionary_comprehension
   ;;                                  parenthesized_expression subscript)))
+  :config
+  (require 'indent-bars-ts)             ; not needed with straight
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda ()
+              (setq-local
+               indent-tabs-mode t ; make sure tabs-based indenting is on, even if we disable it globally
+               indent-bars-no-descend-lists nil) ; elisp is mostly continued lists!  allow bars to descend inside
+              (indent-bars-mode 1)))
   :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
 ;;; jinx
 ;; If this errors when loading and enchant is installed try
