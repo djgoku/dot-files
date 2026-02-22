@@ -20,7 +20,7 @@ echo "Running Emacs config smoke tests..."
 echo "Emacs: $EMACS_CMD"
 echo "Init dir: $INIT_DIR"
 
-if [ "$usage_nw" = "true" ]; then
+if [ "${usage_nw:-false}" = "true" ]; then
   "$EMACS_CMD" --init-directory="$INIT_DIR" -l "$TEST_SCRIPT" -nw
 else
   "$EMACS_CMD" --init-directory="$INIT_DIR" -l "$TEST_SCRIPT"

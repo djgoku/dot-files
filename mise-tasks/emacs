@@ -21,7 +21,7 @@ else
   echo "Info: gpgconf not found, skipping GPG setup"
 fi
 
-if [ "$usage_nw" = "true" ]; then
+if [ "${usage_nw:-false}" = "true" ]; then
   export PINENTRY_USER_DATA=USE_EMACS
   gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
   "$(mise which Emacs)" --debug-init --init-directory="$MISE_PROJECT_ROOT/emacs" -nw --name "emacs-nw-$EMACS_DATE"
