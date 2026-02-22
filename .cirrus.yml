@@ -1,0 +1,22 @@
+persistent_worker:
+  isolation:
+    tart:
+      image: ghcr.io/cirruslabs/macos-tahoe-base:latest
+      user: admin
+      password: admin
+      cpu: 32
+      memory: 64G
+
+task:
+  name: "Test setup.sh and MiseEmacs.app"
+  env:
+    CIRRUS_SHELL: zsh
+    REPO_BRANCH: main
+    DOT_FILES: /Users/admin/dev/github/djgoku/dot-files
+    MISE_TASK_SKIP: "setup:treesitter,setup:texlive"
+
+  setup_script:
+    - "curl -fsSL https://raw.githubusercontent.com/djgoku/dot-files/${REPO_BRANCH}/setup.sh | REPO_BRANCH=${REPO_BRANCH} MISE_VERSION=v2026.2.10 zsh"
+
+  test_emacs_script:
+    - "source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && source ~/.zshrc && mise -C $DOT_FILES run test-emacs"
