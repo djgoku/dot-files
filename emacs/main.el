@@ -337,6 +337,10 @@ Return nil if test execution fails."
             ((not (file-directory-p dir)) (message (format "excluded git dir as it doesn't exist: %s" dir)))
             (t (message (format "git dir: %s" dir)) (push (cons dir 0) repository-directories))))
     (setq magit-repository-directories repository-directories)))
+;;; pinentry
+(use-package pinentry
+  :hook
+  (elpaca-after-init . pinentry-start))
 ;;; git-link
 (use-package git-link)
 ;;; git-timemachine
