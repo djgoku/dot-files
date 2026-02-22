@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Default Window Settings</key>
+	<string>Pro</string>
+	<key>DefaultProfilesVersion</key>
+	<integer>2</integer>
+	<key>HasMigratedDefaults</key>
+	<true/>
+	<key>NSOSPLastRootDirectory</key>
+	<data>
+	Ym9va/wCAAAAAAUQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAMQBAAAEAAAAAwMAAAAEAAAFAAAAAQEAAFVzZXJzAAAABwAAAAEB
+	AABkal9nb2t1AAkAAAABAQAARG9jdW1lbnRzAAAADAAAAAEGAAAQAAAAIAAAADAAAAAI
+	AAAABAMAAIRcAAAAAAAACAAAAAQDAADZwgMAAAAAAAgAAAAEAwAAu24EAAAAAAAMAAAA
+	AQYAAFgAAABoAAAAeAAAAAgAAAAABAAAQcRdkuWAAAAYAAAAAQIAAAIAAAAAAAAAHwIA
+	AAAAAAAfAgAAAAAAAAAAAAABBQAACAAAAAQDAAABAAAAAAAAAAQAAAADAwAA9QEAAAgA
+	AAABCQAAZmlsZTovLy8MAAAAAQEAAE1hY2ludG9zaCBIRAgAAAAEAwAAAJCClucAAAAI
+	AAAAAAQAAEHHaPt0AAAAJAAAAAEBAAA2MzVBQTA2Ny04OTZELTRGM0UtODVDMS1DNzUz
+	MEFBMzI4NEEYAAAAAQIAAIEAAAABAAAA7xMAAAEAAADvEwAAAQAAAAEAAAABAQAALwAA
+	ADAAAAABAgAAZG5pYgAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAc2NvZAIA
+	AAAAAAAA8AAAAP7///8BAAAAAAAAABMAAAAEEAAARAAAAAAAAAAFEAAAiAAAAAAAAAAQ
+	EAAArAAAAAAAAABAEAAAnAAAAAAAAAACIAAAgAEAAAAAAAAFIAAA8AAAAAAAAAAQIAAA
+	AAEAAAAAAAARIAAANAEAAAAAAAASIAAAFAEAAAAAAAATIAAAJAEAAAAAAAAgIAAAYAEA
+	AAAAAAAwIAAAzAAAAAAAAAABwAAA1AAAAAAAAAARwAAAIAAAAAAAAAASwAAA5AAAAAAA
+	AAAB0AAAzAAAAAAAAAAQ0AAABAAAAAAAAAAX8AAAMAAAAAAAAAAi8AAAjAEAAAAAAAA=
+	</data>
+	<key>NSSplitView Subview Frames NSColorPanelSplitView</key>
+	<array>
+		<string>0.000000, 0.000000, 255.000000, 353.000000, NO, NO</string>
+		<string>0.000000, 354.000000, 255.000000, 43.000000, NO, NO</string>
+	</array>
+	<key>NSToolbar Configuration com.apple.NSColorPanel</key>
+	<dict>
+		<key>TB Is Shown</key>
+		<integer>1</integer>
+	</dict>
+	<key>NSWindow Frame NSColorPanel</key>
+	<string>0 99 275 388 0 0 3440 1348 </string>
+	<key>NSWindow Frame NSFontPanel</key>
+	<string>1967 316 543 281 0 0 2992 1877 </string>
+	<key>NSWindow Frame TTAppPreferences</key>
+	<string>1109 642 667 572 0 0 2880 1708 </string>
+	<key>NSWindow Frame TTWindow</key>
+	<string>0 90 2879 1612 0 0 2880 1708 </string>
+	<key>NSWindow Frame TTWindow Clear Dark</key>
+	<string>40 449 877 499 0 0 1900 968 </string>
+	<key>NSWindow Frame TTWindow Pro</key>
+	<string>1 13 2990 1851 0 0 2992 1877 {"tilingState":{"tilingPosition":9,"normalizedSize":1,"untiledFrame":"{{1, 57}, {2990, 1068}}"}}</string>
+	<key>ProfileCurrentVersion</key>
+	<real>2.0899999999999999</real>
+	<key>SecureKeyboardEntry</key>
+	<true/>
+	<key>Startup Window Settings</key>
+	<string>Pro</string>
+	<key>TTAppPreferences Selected Tab</key>
+	<integer>1</integer>
+	<key>Window Settings</key>
+	<dict>
+		<key>Clear Dark</key>
+		<dict>
+			<key>ProfileCurrentVersion</key>
+			<real>2.0899999999999999</real>
+			<key>name</key>
+			<string>Clear Dark</string>
+			<key>type</key>
+			<string>Window Settings</string>
+			<key>useOptionAsMetaKey</key>
+			<true/>
+		</dict>
+		<key>Pro</key>
+		<dict>
+			<key>BackgroundBlur</key>
+			<real>0.0</real>
+			<key>BackgroundColor</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGjCwwTVSRudWxs0w0ODxAREldOU1doaXRlXE5TQ29sb3JT
+			cGFjZVYkY2xhc3NCMAAQA4AC0hQVFhdaJGNsYXNzbmFtZVgkY2xh
+			c3Nlc1dOU0NvbG9yohYYWE5TT2JqZWN0CBEaJCkyN0lMUVNXXWRs
+			eYCDhYeMl6CoqwAAAAAAAAEBAAAAAAAAABkAAAAAAAAAAAAAAAAA
+			AAC0
+			</data>
+			<key>Bell</key>
+			<false/>
+			<key>BellBadge</key>
+			<true/>
+			<key>CursorColor</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGjCwwTVSRudWxs0w0ODxAREldOU1doaXRlXE5TQ29sb3JT
+			cGFjZVYkY2xhc3NLMC4zMDI0MTkzNgAQA4AC0hQVFhdaJGNsYXNz
+			bmFtZVgkY2xhc3Nlc1dOU0NvbG9yohYYWE5TT2JqZWN0CBEaJCky
+			N0lMUVNXXWRseYCMjpCVoKmxtAAAAAAAAAEBAAAAAAAAABkAAAAA
+			AAAAAAAAAAAAAAC9
+			</data>
+			<key>DisableANSIColor</key>
+			<false/>
+			<key>Font</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGkCwwVFlUkbnVsbNQNDg8QERITFFZOU1NpemVYTlNmRmxh
+			Z3NWTlNOYW1lViRjbGFzcyNAOAAAAAAAABAQgAKAA18QFlNGTW9u
+			b1Rlcm1pbmFsLVJlZ3VsYXLSFxgZGlokY2xhc3NuYW1lWCRjbGFz
+			c2VzVk5TRm9udKIZG1hOU09iamVjdAgRGiQpMjdJTFFTWF5nbnd+
+			hY6QkpStsr3GzdAAAAAAAAABAQAAAAAAAAAcAAAAAAAAAAAAAAAA
+			AAAA2Q==
+			</data>
+			<key>FontAntialias</key>
+			<false/>
+			<key>FontWidthSpacing</key>
+			<real>0.99596774193548387</real>
+			<key>ProfileCurrentVersion</key>
+			<real>2.0899999999999999</real>
+			<key>SelectionColor</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGjCwwTVSRudWxs0w0ODxAREldOU1doaXRlXE5TQ29sb3JT
+			cGFjZVYkY2xhc3NLMC4yNTQwMzIyNQAQA4AC0hQVFhdaJGNsYXNz
+			bmFtZVgkY2xhc3Nlc1dOU0NvbG9yohYYWE5TT2JqZWN0CBEaJCky
+			N0lMUVNXXWRseYCMjpCVoKmxtAAAAAAAAAEBAAAAAAAAABkAAAAA
+			AAAAAAAAAAAAAAC9
+			</data>
+			<key>ShowWindowSettingsNameInTitle</key>
+			<false/>
+			<key>TextBoldColor</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGjCwwTVSRudWxs0w0ODxAREldOU1doaXRlXE5TQ29sb3JT
+			cGFjZVYkY2xhc3NCMQAQA4AC0hQVFhdaJGNsYXNzbmFtZVgkY2xh
+			c3Nlc1dOU0NvbG9yohYYWE5TT2JqZWN0CBEaJCkyN0lMUVNXXWRs
+			eYCDhYeMl6CoqwAAAAAAAAEBAAAAAAAAABkAAAAAAAAAAAAAAAAA
+			AAC0
+			</data>
+			<key>TextColor</key>
+			<data>
+			YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0
+			b3BYJG9iamVjdHMSAAGGoF8QD05TS2V5ZWRBcmNoaXZlctEICVRy
+			b290gAGjCwwTVSRudWxs0w0ODxAREldOU1doaXRlXE5TQ29sb3JT
+			cGFjZVYkY2xhc3NLMC45NDc1ODA2NAAQA4AC0hQVFhdaJGNsYXNz
+			bmFtZVgkY2xhc3Nlc1dOU0NvbG9yohYYWE5TT2JqZWN0CBEaJCky
+			N0lMUVNXXWRseYCMjpCVoKmxtAAAAAAAAAEBAAAAAAAAABkAAAAA
+			AAAAAAAAAAAAAAC9
+			</data>
+			<key>UseBoldFonts</key>
+			<true/>
+			<key>UseBrightBold</key>
+			<false/>
+			<key>VisualBell</key>
+			<false/>
+			<key>name</key>
+			<string>Pro</string>
+			<key>shellExitAction</key>
+			<integer>2</integer>
+			<key>type</key>
+			<string>Window Settings</string>
+			<key>useOptionAsMetaKey</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
