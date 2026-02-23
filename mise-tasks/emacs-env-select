@@ -4,7 +4,7 @@
 #MISE raw=true
 set -euo pipefail
 
-if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ]; then
+if [ -n "${SSH_CLIENT:-}" ] || [ -n "${SSH_TTY:-}" ] || [ -n "${SSH_CONNECTION:-}" ]; then
   MODE="terminal"
 elif [ "${usage_nw:-false}" = "true" ]; then
   MODE="terminal"
