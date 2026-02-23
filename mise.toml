@@ -66,13 +66,14 @@ cat << 'SCRIPT' > mise-tasks/pinentry-auto
 #!/bin/sh
 #MISE description="GPG pinentry router: Emacs minibuffer when socket exists, pinentry-mac otherwise"
 #MISE raw=true
-#MISE tools={"nix:pinentry-emacs"="latest"}
+#MISE tools={"nix:pinentry-emacs"="latest", "nix:pinentry_mac"="latest"}
+set -euo pipefail
 
 LOG="/tmp/pinentry-auto.log"
 echo "--- $(date) ---" >> "$LOG"
-echo "PINENTRY_USER_DATA=$PINENTRY_USER_DATA" >> "$LOG"
+echo "PINENTRY_USER_DATA=${PINENTRY_USER_DATA:-}" >> "$LOG"
 
-case "$PINENTRY_USER_DATA" in
+case "${PINENTRY_USER_DATA:-}" in
 *USE_EMACS*)
     PE=$(mise -C {{config_root}} which pinentry-emacs 2>/dev/null)
     if [ -n "$PE" ] && [ -x "$PE" ]; then
