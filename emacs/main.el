@@ -342,9 +342,7 @@ Return nil if test execution fails."
   :config
   (unless (display-graphic-p)
     (pinentry-start)
-    (add-hook 'kill-emacs-hook #'pinentry-stop))
-  :hook
-  (elpaca-after-init . pinentry-start))
+    (add-hook 'kill-emacs-hook #'pinentry-stop)))
 ;;; git-link
 (use-package git-link)
 ;;; git-timemachine
