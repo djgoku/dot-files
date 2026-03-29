@@ -90,9 +90,8 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
           (magit-status full-path)
           ;; user-error aborts the clone after opening magit-status
           (user-error "Repository already cloned at %s, opened magit-status" full-path))
-      (list repo
-            (read-directory-name "Clone to: " default-dir nil nil repo-name)
-            (transient-args 'magit-clone)))))
+      (magit-clone-internal repo full-path nil)
+      (user-error "Cloning %s to %s" repo full-path))))
 
 ;; :override intentionally replaces the original — adds existing-repo detection.
 (advice-add 'magit-clone-read-args :override #'johnny5-magit-clone-maybe-status)
