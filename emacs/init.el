@@ -134,6 +134,7 @@
   (setq ripgrep--extra-args " -g !.venv -g !.pre-commit -g !.terraform")
   (setq johnny--maybe-ripgrep-executable nil)
   (save-place-mode 1)
+  (column-number-mode 1)
   :bind (;; Better than default - from /u/zck
          ("M-c" . capitalize-dwim)
          ("M-l" . downcase-dwim)

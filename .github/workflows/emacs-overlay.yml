@@ -66,3 +66,13 @@ jobs:
       - name: Build Emacs
         working-directory: emacs-overlay
         run: mise run build
+  push:
+    if: needs.update.outputs.changes_exist == 'true'
+    needs: [update, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.build-branch || 'build-emacs-overlay' }}
+      - name: Push updated flake.lock
+        run: git push

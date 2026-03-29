@@ -90,9 +90,8 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
           (magit-status full-path)
           ;; user-error aborts the clone after opening magit-status
           (user-error "Repository already cloned at %s, opened magit-status" full-path))
-      (list repo
-            (read-directory-name "Clone to: " default-dir nil nil repo-name)
-            (transient-args 'magit-clone)))))
+      (magit-clone-internal repo full-path nil)
+      (user-error "Cloning %s to %s" repo full-path))))
 
 ;; :override intentionally replaces the original — adds existing-repo detection.
 (advice-add 'magit-clone-read-args :override #'johnny5-magit-clone-maybe-status)
@@ -143,8 +142,6 @@ Return nil if test execution fails."
 (use-package string-inflection)
 ;;; powerthesaurus
 (use-package powerthesaurus)
-;;; nix-mode
-(use-package nix-mode)
 ;;; markdown-mode
 (use-package markdown-mode)
 ;;; json-mode
@@ -548,17 +545,16 @@ After downloading, restart eglot in affected buffers to pick up changes."
       (setq-default eglot-workspace-configuration
                     `(:yaml (:schemaStore (:enable t)
                              :validate t)))))
-  ;; (with-eval-after-load 'eglot
-  ;;   (add-to-list 'eglot-server-programs
-  ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
-  ;;                  ("nextls" "--stdio=true" :initializationOptions (:experimental (:completions (:enable t)))))))
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ,(eglot-alternatives
+                                                                                        '(("expert" "--stdio")
+                                                                                          ("elixir-ls"))))))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
          (json-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
-         (nix-mode . eglot-ensure)
          (terraform-mode . eglot-ensure)
          (toml-ts-mode . eglot-ensure)
          (typescript-ts-mode . eglot-ensure)
