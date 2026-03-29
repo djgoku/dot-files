@@ -142,8 +142,6 @@ Return nil if test execution fails."
 (use-package string-inflection)
 ;;; powerthesaurus
 (use-package powerthesaurus)
-;;; nix-mode
-(use-package nix-mode)
 ;;; markdown-mode
 (use-package markdown-mode)
 ;;; json-mode
@@ -557,7 +555,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
          (json-ts-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
-         (nix-mode . eglot-ensure)
          (terraform-mode . eglot-ensure)
          (toml-ts-mode . eglot-ensure)
          (typescript-ts-mode . eglot-ensure)
