@@ -2,20 +2,8 @@
 experimental = true
 
 [tasks.update]
-description = "Update flake inputs and commit if changed"
-run = """
-nix flake update
-
-if git diff --quiet flake.lock; then
-  echo "No changes"
-  exit 0
-fi
-
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-git commit -m "Updated flake inputs for latest emacs-overlay" flake.lock
-echo "CHANGES_EXIST=true"
-"""
+description = "Update flake inputs"
+run = "nix flake update"
 
 [tasks.build]
 description = "Build emacs-git-pgtk from emacs-overlay"
