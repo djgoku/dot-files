@@ -545,10 +545,10 @@ After downloading, restart eglot in affected buffers to pick up changes."
       (setq-default eglot-workspace-configuration
                     `(:yaml (:schemaStore (:enable t)
                              :validate t)))))
-  ;; (with-eval-after-load 'eglot
-  ;;   (add-to-list 'eglot-server-programs
-  ;;                `((elixir-ts-mode heex-ts-mode elixir-mode) .
-  ;;                  ("nextls" "--stdio=true" :initializationOptions (:experimental (:completions (:enable t)))))))
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ,(eglot-alternatives
+                                                                                        '(("expert" "--stdio")
+                                                                                          ("elixir-ls"))))))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
