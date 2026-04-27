@@ -626,32 +626,18 @@ After downloading, restart eglot in affected buffers to pick up changes."
          :map isearch-mode-map
          ("C-'" . avy-isearch)))
 ;;; vterm
-(defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use mise vterm or compile with cmake."
+(use-package vterm
+  :init
   (setq vterm-buffer-name-string "vterm %s"
-        vterm-kill-buffer-on-exit nil
-        vterm-max-scrollback 1000000
-        vterm-use-vterm-prompt-detection-method t
-        vterm--maybe-compile nil)
-  (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
-            (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
-      (progn
-        (add-to-list 'load-path maybe-load-path)
-        (message "----- using mise vterm -----"))
-    (setq vterm--maybe-compile t)
-    (setq vterm-always-compile-module t)
-    (message "----- downloading and compiling vterm -----")))
-
-(setup-vterm-init)
-
-(if vterm--maybe-compile
-    (use-package vterm)
-  (use-package vterm
-    :ensure nil))
-
-(eval-after-load 'vterm
-  '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                  (setq default-directory path)))))
+	vterm-kill-buffer-on-exit nil
+	vterm-max-scrollback 1000000
+	vterm-use-vterm-prompt-detection-method t
+	vterm-always-compile-module nil)
+  (let ((frameworks (expand-file-name "../Frameworks" (invocation-directory))))
+    (add-to-list 'load-path frameworks))
+  :config
+  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+						 (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init
@@ -805,17 +791,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
          ("C-."   . jinx-next)
          ("C-M-$" . jinx-languages))
   :config
-  (defun johnny5-jinx-get-paths ()
-    "Get paths to configure jinx from mise environment."
-    (let ((enchant-include-path (getenv "MISE_ENCHANT_INCLUDE_PATH"))
-          (enchant-lib-path (getenv "MISE_ENCHANT_LIB_PATH")))
-      (when (and enchant-include-path (file-directory-p enchant-include-path)
-                 enchant-lib-path (file-directory-p enchant-lib-path))
-        (setq jinx--compile-flags
-              (append jinx--compile-flags
-                      (list (format "-I%s/include/enchant-2" enchant-include-path)
-                            (format "-L%s/lib" enchant-lib-path)))))))
-  (johnny5-jinx-get-paths)
   (keymap-set jinx-repeat-map "RET" 'jinx-correct))
 ;;; emacs-env
 ;; Manage dated Emacs environments for testing emacs-overlay updates
