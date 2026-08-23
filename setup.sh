@@ -65,25 +65,27 @@ if [[ ! -f ~/.local/bin/mise ]]; then
 fi
 ~/.local/bin/mise --version
 
-# 3. Link the machine config by hand. This is the only unavoidable imperative
-#    step: ~/.config/mise holds the very config mise must read to learn that
-#    ~/.config/mise is a managed symlink.
-log "Linking machine config into place..."
+# 3. Let mise create its own symlinks. MISE_CONFIG_DIR points it straight at
+#    the config inside the clone, so nothing here has to know where those
+#    symlinks go -- the paths stay declared exactly once, in [dotfiles]. mise
+#    then writes ~/.config/mise -> ~/.dot-files/config/mise, honouring
+#    dotfiles.root, which a hand-rolled `ln` to the repo path would not.
+#
+#    One target per invocation, in this order: mise validates the sources of
+#    every target named in a single call, and ~/.config/mise's source lives
+#    under ~/.dot-files, which does not exist yet on the first pass.
 if [[ -e ~/.config/mise && ! -L ~/.config/mise ]]; then
   log "Moving pre-existing ~/.config/mise aside..."
   mv ~/.config/mise ~/.config/mise.pre-dotfiles.$$
 fi
-mkdir -p ~/.config
-ln -sfn "$REPO_DIR/config/mise" ~/.config/mise
 
-# 4. Apply ~/.dot-files on its own, before anything else. mise validates every
-#    [dotfiles] source before applying any entry, and every other source is
-#    written as ~/.dot-files/... -- so a full run fails up front with "sources
-#    do not exist" even though the entry creating it is right there. Targeting
-#    one entry validates only that entry. Going through mise rather than `ln`
-#    keeps the path declared in exactly one place: the config.
-log "Applying ~/.dot-files..."
+log "Applying ~/.dot-files and ~/.config/mise..."
+export MISE_CONFIG_DIR="$REPO_DIR/config/mise"
 ~/.local/bin/mise bootstrap dotfiles apply --yes '~/.dot-files'
+~/.local/bin/mise bootstrap dotfiles apply --yes '~/.config/mise'
+#    Unset so everything after this reads config through the symlink, exactly
+#    as a normal invocation on this machine will.
+unset MISE_CONFIG_DIR
 
 if (( ! bootstrap )); then
   log "--prepare-only: stopping before mise bootstrap."
