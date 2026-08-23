@@ -1,0 +1,15 @@
+# rendered by mise from ssh/config.tmpl -- DO NOT HAND EDIT
+# Your own hosts go in ~/.ssh/config.local (unmanaged, survives re-renders).
+# Re-render after editing it: mise bootstrap dotfiles apply '~/.ssh/config'
+# Included first: ssh takes the first value it sees, so local entries win.
+{{ exec(command='cat ~/.ssh/config.local 2>/dev/null || true') }}
+
+# ControlMaster is what makes the sk key usable -- without a live master every
+# connection re-authenticates, which means a touch each time. ~/.ssh/cm comes
+# from [bootstrap.directories] in conf.d/20-files.toml. Docs: ~/dev/notes/yubikey.org
+Host github.com
+  IdentityFile ~/.ssh/id_ed25519_sk
+  IdentitiesOnly yes
+  ControlMaster auto
+  ControlPath ~/.ssh/cm/%r@%h:%p
+  ControlPersist 30m

@@ -45,6 +45,11 @@ usage = "latest"
 "~/.config/mise" = { source = "~/.dot-files/config/mise", mode = "symlink" }
 "~/.zshrc" = { source = "~/.dot-files/zsh/.zshrc", mode = "symlink" }
 
+# Owns the whole file -- tera renders output and never reads the destination,
+# so a region cannot be managed on its own. Hand-added hosts live in
+# ~/.ssh/config.local, pulled in by the template with exec().
+"~/.ssh/config" = { source = "~/.dot-files/ssh/config.tmpl", mode = "template" }
+
 # Rendered at the dotfiles stage (9) and again by the post-tools hook in
 # conf.d/90-hooks.toml: `mise which pinentry-curses` cannot resolve until the
 # tools stage (15), six stages later.
