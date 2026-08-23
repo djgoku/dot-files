@@ -15,6 +15,10 @@ d="$HOME/dev/github/casouri/tree-sitter-module"
 post-tools = """
 set -eu
 mise bootstrap dotfiles apply --force --yes '~/.gnupg/gpg-agent.conf'
-gpgconf --kill gpg-agent
-gpgconf --launch gpg-agent
+# Via `mise exec`: this hook's shell has the PATH from before the tools stage
+# installed conda:gnupg, so a bare `gpgconf` is "command not found" on a fresh
+# machine. No `|| true` -- if gnupg is installed and gpgconf fails, that should
+# fail the stage. No YubiKey check either: gpg-agent starts fine with no card.
+mise exec -- gpgconf --kill gpg-agent
+mise exec -- gpgconf --launch gpg-agent
 """

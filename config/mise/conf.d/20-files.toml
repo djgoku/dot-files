@@ -9,6 +9,14 @@
 [bootstrap.directories."~/.gnupg"]
 mode = "0700"
 
+# ControlMaster sockets for ssh/config.tmpl. ssh will not create this itself,
+# and without it there is no multiplexing -- a YubiKey touch per connection.
+[bootstrap.directories."~/.ssh"]
+mode = "0700"
+
+[bootstrap.directories."~/.ssh/cm"]
+mode = "0700"
+
 [bootstrap.directories."~/.local/share/zsh"]
 mode = "0755"
 
