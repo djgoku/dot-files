@@ -52,11 +52,16 @@ reviving it.
 - **`setup.sh` holds only what cannot be declared,** and CI calls it rather than
   reimplementing it. `--no-clone` uses an existing checkout (and fails loudly if
   absent, instead of cloning main and testing the wrong code); `--prepare-only`
-  stops before the expensive `mise bootstrap`. Two steps are irreducibly
-  imperative: the `~/.config/mise` symlink, because it holds the config mise
-  must read to learn the symlink is managed; and applying `~/.dot-files` as a
-  single target, because mise validates every `[dotfiles]` source before
-  applying any entry and the rest are written relative to it.
+  stops before the expensive `mise bootstrap`. Only two things are genuinely
+  imperative: cloning, and installing mise.
+- **No path is symlinked by hand.** `MISE_CONFIG_DIR` points mise at the config
+  inside the clone, so it creates `~/.dot-files` and `~/.config/mise` from its
+  own `[dotfiles]` entries — which also means `~/.config/mise` correctly points
+  through `dotfiles.root` rather than at the repo path. They are applied one
+  target per invocation and in that order: mise validates the sources of every
+  target named in a single call, and `~/.config/mise`'s source lives under
+  `~/.dot-files`. The env var is unset afterwards so the rest of the run reads
+  config through the symlink, like any normal invocation.
 - **Stage order matters.** `mise bootstrap` runs 17 stages and `tools` is #15.
   Anything shelling out to an installed binary belongs in `post-tools` or
   `final`. Putting it earlier is the bug that required a `|| true` guard on the
