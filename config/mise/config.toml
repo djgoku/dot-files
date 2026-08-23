@@ -12,6 +12,15 @@ experimental = true
 lockfile = true
 dotfiles.root = "~/.dot-files"
 
+# Emacs comes from a personal aqua registry. This MUST be a setting rather than
+# a MISE_AQUA_REGISTRIES entry under [env]: [env] populates the shell
+# environment, which happens long after mise resolves its own settings, so the
+# registry stayed invisible and every `aqua:djgoku/...` install failed with
+# "no aqua-registry found". It only looked fine locally because the tool was
+# already installed.
+[settings.aqua]
+registries = ["https://github.com/djgoku/misemacs"]
+
 [tools]
 "aqua:djgoku/misemacs-emacs-master" = "latest"
 "aqua:ripgrep" = "latest"
@@ -30,9 +39,6 @@ tombi = "latest"
 # Required by `mise completion zsh` in conf.d/20-files.toml. Declared here so
 # mise does not silently append it to this file on first bootstrap.
 usage = "latest"
-
-[env]
-MISE_AQUA_REGISTRIES = "https://github.com/djgoku/misemacs"
 
 [dotfiles]
 "~/.dot-files" = "~/dev/github/djgoku/dot-files"

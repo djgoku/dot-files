@@ -35,3 +35,7 @@ jobs:
         test "$(~/.local/bin/mise config ls --no-header | grep -c 'config/mise')" = "5"
     - name: Every bootstrap stage resolves
       run: ~/.local/bin/mise bootstrap --dry-run
+    - name: Custom aqua registry is configured and reachable
+      run: |-
+        ~/.local/bin/mise settings get aqua.registries
+        ~/.local/bin/mise ls-remote aqua:djgoku/misemacs-emacs-master | grep -q .
