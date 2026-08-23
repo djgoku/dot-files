@@ -40,9 +40,11 @@ jobs {
         run = "rm -f ~/.zshrc"
       }
 
+      // --no-clone makes the job fail loudly if the symlink above is wrong,
+      // rather than silently cloning main and testing the wrong code.
       new {
         name = "Bootstrap"
-        run = "./setup.sh"
+        run = "./setup.sh --no-clone"
       }
 
       new {

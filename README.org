@@ -25,7 +25,10 @@ cd dot-files && ./setup.sh
 #+end_src
 
 =setup.sh= does only what cannot be declared in config -- clone the repo,
-install mise, symlink =~/.config/mise= -- then runs =mise bootstrap --yes=.
+install mise, symlink =~/.config/mise=, apply =~/.dot-files= -- then runs
+=mise bootstrap --yes=. It takes =--no-clone= (use the checkout already in
+place) and =--prepare-only= (stop before bootstrapping); CI uses both rather
+than reimplementing the setup.
 Once bootstrapped, re-apply at any time with:
 
 #+begin_src sh

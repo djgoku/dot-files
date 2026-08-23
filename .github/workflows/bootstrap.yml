@@ -19,7 +19,7 @@ jobs:
     - name: Clear runner-provided files mise will manage
       run: rm -f ~/.zshrc
     - name: Bootstrap
-      run: ./setup.sh
+      run: ./setup.sh --no-clone
     - name: Assert the stages produced their artifacts
       run: |-
         test -L ~/.config/mise

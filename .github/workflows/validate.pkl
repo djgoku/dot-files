@@ -46,15 +46,16 @@ jobs {
           """
       }
 
-      // Same layout setup.sh performs, minus the clone: point the well-known
-      // paths at this checkout so the [dotfiles] sources resolve.
+      // Runs the real setup.sh rather than reimplementing its linking --
+      // when the two diverged, this job created a ~/.dot-files that setup.sh
+      // did not, so the dry-run passed while a real bootstrap failed.
+      // --prepare-only stops before the expensive `mise bootstrap`.
       new {
-        name = "Link this checkout into place"
+        name = "Prepare, via the real setup.sh"
         run = """
-          mkdir -p ~/.config ~/dev/github/djgoku
+          mkdir -p ~/dev/github/djgoku
           ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
-          ln -sfn ~/dev/github/djgoku/dot-files ~/.dot-files
-          ln -sfn "$GITHUB_WORKSPACE/config/mise" ~/.config/mise
+          ./setup.sh --no-clone --prepare-only
           """
       }
 
@@ -71,6 +72,23 @@ jobs {
       new {
         name = "Every bootstrap stage resolves"
         run = "~/.local/bin/mise bootstrap --dry-run"
+      }
+
+      // --dry-run says "would install" without ever contacting a registry, so
+      // it cannot see a misconfigured one -- a real bootstrap died at the tools
+      // stage while dry-run stayed green. `settings get` is the deterministic
+      // check: it fails with "Setting [aqua.registries] is not set" when the
+      // value drifts back under [env], where mise never reads it.
+      //
+      // ls-remote additionally exercises the network path. It is only
+      // meaningful on a cold runner -- a warm local aqua cache answers it even
+      // with the setting removed.
+      new {
+        name = "Custom aqua registry is configured and reachable"
+        run = """
+          ~/.local/bin/mise settings get aqua.registries
+          ~/.local/bin/mise ls-remote aqua:djgoku/misemacs-emacs-master | grep -q .
+          """
       }
     }
   }

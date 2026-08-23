@@ -49,10 +49,14 @@ reviving it.
   deliberately *not* named `mise/`, `.mise/`, or `.config/mise/` — mise
   auto-discovers all three as project config, which would make `[bootstrap]`
   stanzas (including `macos.defaults`) go live merely by `cd`-ing into the repo.
-- **`setup.sh` holds only what cannot be declared.** Clone, install mise, create
-  the `~/.config/mise` symlink, then `mise bootstrap --yes`. The symlink is
-  imperative because the `[dotfiles]` entry that creates it lives inside the
-  directory it creates.
+- **`setup.sh` holds only what cannot be declared,** and CI calls it rather than
+  reimplementing it. `--no-clone` uses an existing checkout (and fails loudly if
+  absent, instead of cloning main and testing the wrong code); `--prepare-only`
+  stops before the expensive `mise bootstrap`. Two steps are irreducibly
+  imperative: the `~/.config/mise` symlink, because it holds the config mise
+  must read to learn the symlink is managed; and applying `~/.dot-files` as a
+  single target, because mise validates every `[dotfiles]` source before
+  applying any entry and the rest are written relative to it.
 - **Stage order matters.** `mise bootstrap` runs 17 stages and `tools` is #15.
   Anything shelling out to an installed binary belongs in `post-tools` or
   `final`. Putting it earlier is the bug that required a `|| true` guard on the
