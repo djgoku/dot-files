@@ -16,6 +16,17 @@ on {
 
 permissions { contents = "read" }
 
+// A custom aqua registry is fetched through the GitHub API, and unauthenticated
+// calls are capped at 60/hour per IP -- which shared runner IPs exhaust
+// routinely (observed 0/60, "github auth: no"). The default token lifts the cap
+// and needs no extra permissions beyond the contents:read declared above.
+env {
+  // com.github.actions.context exposes no `secrets`, so this is the literal
+  // expression; `$` is not special in a Pkl string.
+  ["GITHUB_TOKEN"] = "${{ secrets.GITHUB_TOKEN }}"
+}
+
+
 jobs {
   ["bootstrap"] {
     `runs-on` = "macos-latest"
