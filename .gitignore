@@ -3,15 +3,7 @@
 
 # Root level
 docs/
-flake.lock
-flake.nix
 main/
-mise.toml~
-setup.el-original-maybe
-setup.zsh
-mise-tasks/pinentry-auto
-macos/MiseEmacs.app/Contents/MacOS/mise-emacs
-macos/MiseEmacs.app/Contents/Info.plist
 
 # Node
 node_modules/
@@ -28,7 +20,9 @@ emacs/custom.el
 emacs/history
 emacs/places.eld
 emacs/projects
+emacs/projects.eld
 emacs/recentf
+emacs/recentf.eld
 emacs/recall
 emacs/tramp
 
@@ -66,4 +60,5 @@ emacs/url/
 # Emacs - other files
 emacs/count-duplicate-lines.el
 emacs/elfeed.opml
+emacs/elfeed/
 emacs/test-count-duplicate-lines.el

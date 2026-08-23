@@ -1,0 +1,74 @@
+/// The expensive job: a real `setup.sh` run on a clean macOS runner, which is
+/// the only thing that proves the fresh-machine path actually works. It pulls
+/// Emacs, conda gnupg/pinentry, and compiles every tree-sitter grammar, so it
+/// runs on a schedule and on demand rather than per-PR.
+///
+/// Regenerate the YAML with `mise run render-workflows` -- never hand-edit
+/// the .yml.
+amends "@com.github.actions/Workflow.pkl"
+
+name = "Bootstrap"
+
+on {
+  schedule { new { cron = "30 8 * * 1" } }
+  workflow_dispatch = new {}
+}
+
+permissions { contents = "read" }
+
+jobs {
+  ["bootstrap"] {
+    `runs-on` = "macos-latest"
+    `timeout-minutes` = 90
+    steps {
+      new { uses = "actions/checkout@v6" }
+
+      // setup.sh clones only when the directory is absent, so linking the
+      // checkout here is what makes it test THIS ref instead of main.
+      new {
+        name = "Use this checkout as the dot-files clone"
+        run = """
+          mkdir -p ~/dev/github/djgoku
+          ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
+          """
+      }
+
+      // Runner images ship a ~/.zshrc; mise refuses to overwrite an unmanaged
+      // file and the whole dotfiles stage would fail on it.
+      new {
+        name = "Clear runner-provided files mise will manage"
+        run = "rm -f ~/.zshrc"
+      }
+
+      new {
+        name = "Bootstrap"
+        run = "./setup.sh"
+      }
+
+      new {
+        name = "Assert the stages produced their artifacts"
+        run = """
+          test -L ~/.config/mise
+          test -f ~/.config/mise/conf.d/90-hooks.toml
+          test -L ~/.zshrc
+          test -s ~/.local/share/zsh/site-functions/_mise
+          test -d ~/dev/github/Aloxaf/fzf-tab
+          test -d ~/dev/github/casouri/tree-sitter-module/dist
+          test "$(stat -f '%Sp' ~/.gnupg)" = "drwx------"
+          grep -qE '^pinentry-program /' ~/.gnupg/gpg-agent.conf
+          """
+      }
+
+      // The completion file is worthless if a real shell cannot load it.
+      new {
+        name = "Completions load in a real shell"
+        run = "zsh -c 'fpath=(~/.local/share/zsh/site-functions $fpath); autoload -U compinit; compinit -u; whence -w _mise'"
+      }
+
+      new {
+        name = "Second run is a no-op"
+        run = "~/.local/bin/mise bootstrap --yes"
+      }
+    }
+  }
+}

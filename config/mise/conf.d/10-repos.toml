@@ -1,0 +1,10 @@
+# No `ref` means "an existing clone with a matching origin is current" -- mise
+# won't pull. A dirty worktree fails the whole stage, so hide local additions
+# with .git/info/exclude rather than leaving them untracked.
+[bootstrap.repos]
+"~/dev/github/Aloxaf/fzf-tab" = { url = "https://github.com/Aloxaf/fzf-tab.git" }
+
+# Grammars are compiled from this clone by the post-repos hook in
+# conf.d/90-hooks.toml; emacs/main.el points treesit-extra-load-path at its
+# dist/ directory.
+"~/dev/github/casouri/tree-sitter-module" = { url = "https://github.com/casouri/tree-sitter-module.git" }

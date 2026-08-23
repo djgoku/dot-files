@@ -61,6 +61,8 @@ setopt PUSHD_SILENT
 setopt PUSHD_TO_HOME
 
 # Case-insensitive globbing and completion
+# _mise is written here by [bootstrap.files] in mise-conf.d/10-bootstrap.toml
+fpath=(~/.local/share/zsh/site-functions $fpath)
 autoload -U compinit; compinit
 autoload -U select-word-style
 select-word-style bash

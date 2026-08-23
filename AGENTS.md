@@ -4,39 +4,63 @@ This document provides guidance for AI agents working on this repository.
 
 ## Overview
 
-Personal macOS development environment using [mise](https://mise.jdx.dev/) as the single tool/task manager, [Nix](https://nixos.org/) as a mise backend for system packages, and a custom Emacs build with native compilation via [elpaca](https://github.com/progfolio/elpaca).
+Personal macOS development environment. [mise](https://mise.jdx.dev/) is the single
+entry point: it installs every tool, applies dotfiles, and configures the machine
+via `mise bootstrap`. Emacs is installed as an aqua package
+(`aqua:djgoku/misemacs-emacs-master`) with packages managed by
+[elpaca](https://github.com/progfolio/elpaca).
+
+**Nix has been removed.** So have all mise tasks and the project-level `mise.toml`.
+If you find a reference to `nix`, `mise run <task>`, `mise-tasks/`, `setup.sh`
+helper functions, or `MiseEmacs.app`, it is stale — remove it rather than
+reviving it.
 
 ## Architecture
 
 ```
 .
-├── setup.sh                # Idempotent bootstrap: nix -> mise -> mise run setup
-├── mise.toml               # Tool definitions and inline tasks (see comments for why inline)
-├── mise-tasks/             # File-based mise tasks
-│   ├── emacs               # Launch Emacs (GUI/terminal)
-│   ├── emacs-env-select    # Select dated Emacs environment
-│   ├── test-emacs          # Smoke tests for CI
-│   ├── setup-gpg-agent     # Generate gpg-agent.conf
-│   └── setup/              # Bootstrap subtasks (clone-deps, dotfiles, install-tools, macos, texlive, treesitter)
+├── setup.sh                    # Fresh-machine bootstrap (3 steps, then hands off)
+├── config/mise/                # Machine config -> symlinked to ~/.config/mise
+│   ├── config.toml             #   [settings] [tools] [env] [dotfiles]
+│   └── conf.d/
+│       ├── 10-repos.toml       #   git clones (fzf-tab, tree-sitter-module)
+│       ├── 20-files.toml       #   managed directories and generated files
+│       ├── 30-macos.toml       #   Finder and NSGlobalDomain defaults
+│       └── 90-hooks.toml       #   post-repos, post-tools
 ├── emacs/
-│   ├── init.el             # Emacs init (loads main.el)
-│   ├── main.el             # Main configuration (~800 lines)
-│   ├── early-init.el       # Early init (elpaca bootstrap)
-│   ├── test-init.el        # CI smoke test harness
-│   └── emacs-env/          # Dated environment selector
-├── emacs-overlay/          # Custom Emacs Nix build overlay (flake.nix)
-├── macos/                  # macOS Terminal.plist
-├── zsh/                    # Shell configuration
-├── .cirrus.yml             # CI: macOS VM bootstrap + smoke tests
-└── flake.nix               # Nix flake
+│   ├── init.el                 # Emacs init (loads main.el)
+│   ├── main.el                 # Main configuration
+│   ├── early-init.el           # Early init (elpaca bootstrap)
+│   └── emacs-env/              # Dated environment selector
+├── gnupg/gpg-agent.conf.tmpl   # Rendered to ~/.gnupg/gpg-agent.conf
+├── macos/com.apple.Terminal.plist
+├── zsh/.zshrc
+├── mise.toml                   # PROJECT config: this repo's tasks only
+└── .github/
+    ├── PklProject              # pins com.github.actions (pkl-pantry)
+    └── workflows/*.pkl         # workflow SOURCES; the .yml are generated
 ```
 
 ## Key Design Decisions
 
-- **mise is the single entry point.** All tools, tasks, and environment setup flow through mise. No devbox, no standalone nix shells, no Makefiles.
-- **Some tasks must stay inline in `mise.toml`** (see comments there): tasks using `{{config_root}}` template, or where a file would conflict with the `setup/` directory namespace.
-- **Emacs packages are managed by elpaca**, not nix. Nix provides system-level dependencies (Emacs binary, enchant, vterm, gcc, git, gnupg).
-- **`setup.sh` is the only bootstrap entry point.** It installs nix, installs mise, then hands off to `mise run setup`.
+- **Two configs, two jobs.** `mise.toml` at the root is *project* config: this
+  repo's tasks and the tools they need. `config/mise/` is *machine* config,
+  reachable only through the `~/.config/mise` symlink. The directory is
+  deliberately *not* named `mise/`, `.mise/`, or `.config/mise/` — mise
+  auto-discovers all three as project config, which would make `[bootstrap]`
+  stanzas (including `macos.defaults`) go live merely by `cd`-ing into the repo.
+- **`setup.sh` holds only what cannot be declared.** Clone, install mise, create
+  the `~/.config/mise` symlink, then `mise bootstrap --yes`. The symlink is
+  imperative because the `[dotfiles]` entry that creates it lives inside the
+  directory it creates.
+- **Stage order matters.** `mise bootstrap` runs 17 stages and `tools` is #15.
+  Anything shelling out to an installed binary belongs in `post-tools` or
+  `final`. Putting it earlier is the bug that required a `|| true` guard on the
+  old `post-dotfiles` gpg hook, which then silently no-opped on fresh machines.
+- **`bootstrap.files` does not create parents** and does not `mkdir -p`. Declare
+  each directory level explicitly, parent first. Directories apply as part of the
+  `files` stage; there is no `--only directories`.
+- **Emacs packages are managed by elpaca**, not by mise.
 
 ## Emacs Lisp Conventions
 
@@ -67,45 +91,42 @@ Personal macOS development environment using [mise](https://mise.jdx.dev/) as th
 ## Shell Script Conventions
 
 - Shebang: `#!/usr/bin/env zsh` (this is a zsh-based environment)
-- Always include `set -euo pipefail` at the top of mise task scripts
-- Use `command -v` to guard optional tool sourcing (e.g., fzf, mise)
-- Use `log_info`, `log_warn`, `log_error` helpers in `setup.sh`
-- Idempotency: guard with `[[ ! -d ... ]]`, `check_command`, etc.
-- Symlinks: use `ln -sfnv` (not `ln -sfv`) to prevent loops on re-run
+- Always include `set -euo pipefail`
+- Hook bodies in `conf.d/90-hooks.toml` run under `sh`, not zsh — use `set -eu`
+  and POSIX constructs there
+- Use `command -v` to guard optional tool sourcing (e.g. fzf, mise)
+- Idempotency: guard expensive work on its output (e.g. tree-sitter grammar
+  compilation is guarded on `dist/`), not on a flag
+- Symlinks: use `ln -sfn` (not `ln -sf`) to prevent loops on re-run
 
 ## Running Tests
 
 ```bash
-# Emacs config smoke test (requires mise environment)
-mise run test-emacs
-
-# Emacs ERT tests (inline in main.el, run in batch)
-mise run test-emacs  # includes ert tests
-
-# Full bootstrap test (as CI does it)
-curl -fsSL setup.sh | REPO_BRANCH=main MISE_VERSION=v2026.2.10 zsh
+mise run check-workflows      # generated YAML still matches its .pkl source
+mise bootstrap --dry-run      # inspect every stage, change nothing
+mise bootstrap --only files --yes
+mise config ls                # confirm which config files are actually loaded
 ```
+
+A second `mise bootstrap --yes` must be a no-op; non-convergence is a bug.
 
 ## CI
 
-Cirrus CI runs on macOS Tart VMs (`.cirrus.yml`). The pipeline:
-1. Runs `setup.sh` (installs nix + mise + all tools)
-2. Runs `mise run test-emacs` (Emacs smoke test)
+GitHub Actions, in two tiers. **The workflow YAML is generated from Pkl — never
+hand-edit a `.yml` under `.github/workflows/`.** Edit the `.pkl` beside it and
+run `mise run render-workflows`; `mise run check-workflows` (and the `validate`
+job) fails on drift.
 
-Skipped in CI: `setup:treesitter`, `setup:texlive` (via `MISE_TASK_SKIP`).
+- `validate.pkl` — per-PR, cheap. Installs nothing: asserts all five config
+  files load, every bootstrap stage resolves under `--dry-run`, and the
+  generated YAML matches its source.
+- `bootstrap.pkl` — weekly and on demand, expensive. A real `setup.sh` run on a
+  clean macOS runner, then artifact assertions and an idempotency re-run.
 
-## Common Tasks
-
-| Command | Description |
-|---------|-------------|
-| `mise run emacs` | Launch Emacs (add `--nw` for terminal) |
-| `mise run emacs-env-select` | Select a dated Emacs environment |
-| `mise run test-emacs` | Run Emacs config smoke tests |
-| `mise run setup` | Full post-bootstrap setup |
-| `mise run setup-gpg-agent` | Generate gpg-agent.conf |
-| `mise run generate-macos-app` | Create MiseEmacs.app in /Applications |
-| `mise run install-enchant` | Install enchant spell-checking libs |
-| `mise tasks` | List all available tasks |
+`.github/PklProject` pins `com.github.actions`; after changing it run
+`pkl project resolve .github/` and commit `PklProject.deps.json`. Note that pkl
+does *not* find a `PklProject` in an ancestor directory — the render task passes
+`--project-dir .github/` for exactly this reason.
 
 ## Commit Message Convention
 

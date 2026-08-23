@@ -1,0 +1,20 @@
+[bootstrap.hooks]
+
+# Needs the clone from the repos stage (8). Compiling every grammar takes
+# minutes, so this is guarded on dist/ instead of running each bootstrap.
+post-repos = """
+set -eu
+d="$HOME/dev/github/casouri/tree-sitter-module"
+[ -d "$d/dist" ] || (cd "$d" && ./batch.sh)
+"""
+
+# Tools install at stage 15, so anything shelling out to an installed binary
+# belongs here rather than in an earlier stage. The previous post-dotfiles
+# gpgconf hook ran at stage 9 and needed a `|| true` guard, which meant it
+# silently did nothing on exactly the fresh-machine case it was written for.
+post-tools = """
+set -eu
+mise bootstrap dotfiles apply --force --yes '~/.gnupg/gpg-agent.conf'
+gpgconf --kill gpg-agent
+gpgconf --launch gpg-agent
+"""

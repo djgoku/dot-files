@@ -1,0 +1,9 @@
+# NOTE: `apply` here writes to your REAL macOS preferences -- the sandbox HOME
+# does not isolate them (cfprefsd is keyed by uid). Use status/--dry-run only.
+[bootstrap.macos.finder]
+show_all_files = true
+preferred_view_style = "list"
+
+[bootstrap.macos.defaults]
+NSGlobalDomain = { "com.apple.swipescrolldirection" = false, AppleInterfaceStyle = "Dark" }
+"com.apple.finder" = { FXPreferredSearchViewStyle = "Nlsv" }

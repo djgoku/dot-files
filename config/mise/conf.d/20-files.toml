@@ -1,0 +1,22 @@
+# `bootstrap.files` does not create parent directories, and does not mkdir -p:
+# a missing parent fails with "managed file parent does not exist", and a
+# missing grandparent with a bare `os error 2`. Declare each level, parent
+# first. Directories are applied as part of the files stage (4); there is no
+# separate `--only directories`.
+# Applied at the files stage (4), before dotfiles (9), so the mode is correct
+# before gpg-agent.conf lands inside. mise creates parents with OS defaults
+# (0755), which gpg refuses.
+[bootstrap.directories."~/.gnupg"]
+mode = "0700"
+
+[bootstrap.directories."~/.local/share/zsh"]
+mode = "0755"
+
+[bootstrap.directories."~/.local/share/zsh/site-functions"]
+mode = "0755"
+
+# zsh/.zshrc prepends this directory to $fpath ahead of compinit.
+[bootstrap.files."~/.local/share/zsh/site-functions/_mise"]
+mode = "0644"
+template = true
+content = "{{ exec(command='mise completion zsh') }}"
