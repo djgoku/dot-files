@@ -24,12 +24,11 @@ jobs:
         ~/.local/bin/mise trust --yes
         ~/.local/bin/mise install
         ~/.local/bin/mise run check-workflows
-    - name: Link this checkout into place
+    - name: Prepare, via the real setup.sh
       run: |-
-        mkdir -p ~/.config ~/dev/github/djgoku
+        mkdir -p ~/dev/github/djgoku
         ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
-        ln -sfn ~/dev/github/djgoku/dot-files ~/.dot-files
-        ln -sfn "$GITHUB_WORKSPACE/config/mise" ~/.config/mise
+        ./setup.sh --no-clone --prepare-only
     - name: Machine config loads
       run: |-
         ~/.local/bin/mise config ls

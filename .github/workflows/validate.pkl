@@ -46,15 +46,16 @@ jobs {
           """
       }
 
-      // Same layout setup.sh performs, minus the clone: point the well-known
-      // paths at this checkout so the [dotfiles] sources resolve.
+      // Runs the real setup.sh rather than reimplementing its linking --
+      // when the two diverged, this job created a ~/.dot-files that setup.sh
+      // did not, so the dry-run passed while a real bootstrap failed.
+      // --prepare-only stops before the expensive `mise bootstrap`.
       new {
-        name = "Link this checkout into place"
+        name = "Prepare, via the real setup.sh"
         run = """
-          mkdir -p ~/.config ~/dev/github/djgoku
+          mkdir -p ~/dev/github/djgoku
           ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
-          ln -sfn ~/dev/github/djgoku/dot-files ~/.dot-files
-          ln -sfn "$GITHUB_WORKSPACE/config/mise" ~/.config/mise
+          ./setup.sh --no-clone --prepare-only
           """
       }
 
