@@ -1,0 +1,50 @@
+# Machine-level mise config, symlinked to ~/.config/mise by the [dotfiles]
+# entry below. See setup.sh for the single manual step that bootstraps it.
+#
+# This directory is deliberately named `config/mise` and not `mise/` or
+# `.config/mise/`: both of those are project-config paths mise auto-discovers,
+# so a `cd` into this repo would load this machine config -- and its
+# [bootstrap] stanzas -- a second time as project config. `config/mise/`
+# matches no discovery rule, so the symlink is the only way it loads.
+
+[settings]
+experimental = true
+lockfile = true
+dotfiles.root = "~/.dot-files"
+
+[tools]
+"aqua:djgoku/misemacs-emacs-master" = "latest"
+"aqua:ripgrep" = "latest"
+"aqua:ripgrep-all" = "latest"
+"conda:gnupg" = "latest"
+# Required for the YubiKey ed25519-sk key: Apple's /usr/bin/ssh has no FIDO
+# support, ignores sk keys, and fails with "Permission denied (publickey)".
+# Needs to be on PATH for git and Emacs/Tramp too, not just interactive shells.
+"conda:openssh" = "latest"
+"conda:pinentry" = "latest"
+aws-cli = "latest"
+fzf = "latest"
+pandoc = "latest"
+sops = "latest"
+tombi = "latest"
+# Required by `mise completion zsh` in conf.d/20-files.toml. Declared here so
+# mise does not silently append it to this file on first bootstrap.
+usage = "latest"
+
+[env]
+MISE_AQUA_REGISTRIES = "https://github.com/djgoku/misemacs"
+
+[dotfiles]
+"~/.dot-files" = "~/dev/github/djgoku/dot-files"
+"~/.config/mise" = { source = "~/.dot-files/config/mise", mode = "symlink" }
+"~/.zshrc" = { source = "~/.dot-files/zsh/.zshrc", mode = "symlink" }
+
+# Rendered at the dotfiles stage (9) and again by the post-tools hook in
+# conf.d/90-hooks.toml: `mise which pinentry-curses` cannot resolve until the
+# tools stage (15), six stages later.
+"~/.gnupg/gpg-agent.conf" = { source = "~/.dot-files/gnupg/gpg-agent.conf.tmpl", mode = "template" }
+
+# Copy, not symlink: cfprefsd rewrites this file in place, and through a
+# symlink that would mean macOS editing the copy inside this repo. Quit
+# Terminal before applying or cfprefsd overwrites it again on quit.
+"~/Library/Preferences/com.apple.Terminal.plist" = { source = "~/.dot-files/macos/com.apple.Terminal.plist", mode = "copy" }

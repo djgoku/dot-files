@@ -1,0 +1,38 @@
+# Generated from Workflow.pkl. DO NOT EDIT.
+name: Validate
+'on':
+  pull_request: {}
+  push:
+    branches:
+    - main
+  workflow_dispatch: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install mise
+      run: curl -fsSL https://mise.run | sh
+    - name: Workflow YAML matches its Pkl source
+      run: |-
+        ~/.local/bin/mise trust --yes
+        ~/.local/bin/mise install
+        ~/.local/bin/mise run check-workflows
+    - name: Link this checkout into place
+      run: |-
+        mkdir -p ~/.config ~/dev/github/djgoku
+        ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
+        ln -sfn ~/dev/github/djgoku/dot-files ~/.dot-files
+        ln -sfn "$GITHUB_WORKSPACE/config/mise" ~/.config/mise
+    - name: Machine config loads
+      run: |-
+        ~/.local/bin/mise config ls
+        test "$(~/.local/bin/mise config ls --no-header | grep -c 'config/mise')" = "5"
+    - name: Every bootstrap stage resolves
+      run: ~/.local/bin/mise bootstrap --dry-run

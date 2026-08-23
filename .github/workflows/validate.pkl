@@ -1,0 +1,77 @@
+/// Fast per-PR checks. Nothing is installed and nothing is applied: this job
+/// proves the mise config parses, every bootstrap stage resolves, and the
+/// generated workflow YAML still matches its Pkl source.
+///
+/// Regenerate the YAML with `mise run render-workflows` -- never hand-edit
+/// the .yml.
+amends "@com.github.actions/Workflow.pkl"
+
+name = "Validate"
+
+on {
+  push { branches { "main" } }
+  pull_request {}
+  workflow_dispatch = new {}
+}
+
+permissions { contents = "read" }
+
+concurrency {
+  group = "\(module.context.github.workflow)-\(module.context.github.ref)"
+  `cancel-in-progress` = true
+}
+
+jobs {
+  ["validate"] {
+    // macOS, not ubuntu: the config is macOS-specific (Terminal.plist,
+    // bootstrap.macos.*), so validating it anywhere else proves little.
+    `runs-on` = "macos-latest"
+    `timeout-minutes` = 15
+    steps {
+      new { uses = "actions/checkout@v6" }
+
+      new {
+        name = "Install mise"
+        run = "curl -fsSL https://mise.run | sh"
+      }
+
+      // Runs before the machine config is linked so only the project config is
+      // in scope -- otherwise `mise install` would pull Emacs and conda too.
+      new {
+        name = "Workflow YAML matches its Pkl source"
+        run = """
+          ~/.local/bin/mise trust --yes
+          ~/.local/bin/mise install
+          ~/.local/bin/mise run check-workflows
+          """
+      }
+
+      // Same layout setup.sh performs, minus the clone: point the well-known
+      // paths at this checkout so the [dotfiles] sources resolve.
+      new {
+        name = "Link this checkout into place"
+        run = """
+          mkdir -p ~/.config ~/dev/github/djgoku
+          ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
+          ln -sfn ~/dev/github/djgoku/dot-files ~/.dot-files
+          ln -sfn "$GITHUB_WORKSPACE/config/mise" ~/.config/mise
+          """
+      }
+
+      // Catches the failure that started all this: config sitting somewhere
+      // mise never reads. Five files must load.
+      new {
+        name = "Machine config loads"
+        run = """
+          ~/.local/bin/mise config ls
+          test "$(~/.local/bin/mise config ls --no-header | grep -c 'config/mise')" = "5"
+          """
+      }
+
+      new {
+        name = "Every bootstrap stage resolves"
+        run = "~/.local/bin/mise bootstrap --dry-run"
+      }
+    }
+  }
+}

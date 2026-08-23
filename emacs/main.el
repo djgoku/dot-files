@@ -626,32 +626,32 @@ After downloading, restart eglot in affected buffers to pick up changes."
          :map isearch-mode-map
          ("C-'" . avy-isearch)))
 ;;; vterm
-(defun setup-vterm-init ()
-  "This might be hacky, but this allows me to use mise vterm or compile with cmake."
-  (setq vterm-buffer-name-string "vterm %s"
-        vterm-kill-buffer-on-exit nil
-        vterm-max-scrollback 1000000
-        vterm-use-vterm-prompt-detection-method t
-        vterm--maybe-compile nil)
-  (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
-            (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
-      (progn
-        (add-to-list 'load-path maybe-load-path)
-        (message "----- using mise vterm -----"))
-    (setq vterm--maybe-compile t)
-    (setq vterm-always-compile-module t)
-    (message "----- downloading and compiling vterm -----")))
+;; (defun setup-vterm-init ()
+;;   "This might be hacky, but this allows me to use mise vterm or compile with cmake."
+;;   (setq vterm-buffer-name-string "vterm %s"
+;;         vterm-kill-buffer-on-exit nil
+;;         vterm-max-scrollback 1000000
+;;         vterm-use-vterm-prompt-detection-method t
+;;         vterm--maybe-compile nil)
+;;   (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
+;;             (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
+;;       (progn
+;;         (add-to-list 'load-path maybe-load-path)
+;;         (message "----- using mise vterm -----"))
+;;     (setq vterm--maybe-compile t)
+;;     (setq vterm-always-compile-module t)
+;;     (message "----- downloading and compiling vterm -----")))
 
-(setup-vterm-init)
+;; (setup-vterm-init)
 
-(if vterm--maybe-compile
-    (use-package vterm)
-  (use-package vterm
-    :ensure nil))
+;; (if vterm--maybe-compile
+;;     (use-package vterm)
+;;   (use-package vterm
+;;     :ensure nil))
 
-(eval-after-load 'vterm
-  '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-                                                  (setq default-directory path)))))
+;; (eval-after-load 'vterm
+;;   '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
+;;                                                   (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init

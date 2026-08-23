@@ -3,7 +3,10 @@
 
 * Overview
 
-Personal development environment for macOS using [[https://mise.jdx.dev/][mise]] for tool/task management and [[https://nixos.org/][Nix]] for packages. Features a custom Emacs build with native compilation.
+Personal macOS development environment. [[https://mise.jdx.dev/][mise]] is the only entry point: it
+installs every tool, applies dotfiles, and configures the machine through
+=mise bootstrap=. There is no Nix, no task runner, and no project-level mise
+config in this repo.
 
 * Quick Start
 
@@ -21,71 +24,132 @@ git clone https://github.com/djgoku/dot-files.git
 cd dot-files && ./setup.sh
 #+end_src
 
-After setup, activate mise and install tools:
+=setup.sh= does only what cannot be declared in config -- clone the repo,
+install mise, symlink =~/.config/mise= -- then runs =mise bootstrap --yes=.
+Once bootstrapped, re-apply at any time with:
 
 #+begin_src sh
-eval "$(~/.local/bin/mise activate zsh)"
-mise install
+mise bootstrap --yes
 #+end_src
 
 * Project Structure
 
 #+begin_example
 .
-├── setup.sh                # Idempotent bootstrap script
-├── mise.toml               # Tools and inline task definitions
-├── mise-tasks/             # File-based mise tasks
+├── setup.sh                    # Fresh-machine bootstrap (3 steps, then hands off)
+├── config/mise/                # Machine config -> symlinked to ~/.config/mise
+│   ├── config.toml             #   [settings] [tools] [env] [dotfiles]
+│   └── conf.d/
+│       ├── 10-repos.toml       #   git clones (fzf-tab, tree-sitter-module)
+│       ├── 20-files.toml       #   managed directories and generated files
+│       ├── 30-macos.toml       #   Finder and NSGlobalDomain defaults
+│       └── 90-hooks.toml       #   post-repos, post-tools
 ├── emacs/
-│   ├── init.el             # Emacs init
-│   ├── main.el             # Main configuration
+│   ├── init.el                 # Emacs init
+│   ├── main.el                 # Main configuration
 │   ├── early-init.el
-│   └── emacs-env/          # Environment selector
-├── emacs-overlay/          # Custom Emacs Nix build overlay
-├── macos/
-│   └── com.apple.Terminal.plist
-├── zsh/                    # Shell configuration
-└── flake.nix               # Nix flake
+│   └── emacs-env/              # Environment selector
+├── mise.toml                   # PROJECT config: this repo's tasks only
+├── .github/
+│   ├── PklProject              # pins com.github.actions (pkl-pantry)
+│   └── workflows/              # *.pkl are the SOURCES; *.yml are generated
+├── gnupg/gpg-agent.conf.tmpl   # Rendered to ~/.gnupg/gpg-agent.conf
+├── macos/com.apple.Terminal.plist
+└── zsh/.zshrc
 #+end_example
 
-* Tasks
+** Why =config/mise/= and not =mise/=
 
-All tools and tasks are managed through mise. See =mise tasks= for the full list.
+mise auto-discovers =mise/config.toml=, =.mise/conf.d/=, and
+=.config/mise/conf.d/= as /project/ config. Any of those names would mean that
+=cd=-ing into this repo loads the machine config a second time -- including its
+=[bootstrap]= stanzas, so =[bootstrap.macos.defaults]= would go live locally.
+=config/mise/= matches no discovery rule, so the =~/.config/mise= symlink is
+the only path by which it loads.
 
-| Task                          | Description                                    |
-|-------------------------------+------------------------------------------------|
-| =mise run emacs=              | Launch Emacs (=--nw= for terminal mode)        |
-| =mise run setup-gpg-agent=    | Generate =~/.gnupg/gpg-agent.conf=             |
-| =mise run install-enchant=    | Install enchant spell-checking libraries       |
-| =mise run generate-macos-app= | Create MiseEmacs.app in =/Applications=        |
+* Bootstrap Stages
 
-* Testing
+=mise bootstrap= runs stages in a fixed order:
 
-Run the full bootstrap and Emacs smoke tests in a single command (useful for CI or validating on a fresh machine):
+#+begin_example
+plugins  packages  accounts  files  services  firewall  compose  repos
+dotfiles  mise-shell-activate  macos-defaults  macos-launchd-agents
+linux-systemd-units  user  tools  task  final-hook
+#+end_example
+
+*=tools= is stage 15 of 17.* Anything that shells out to an installed binary
+must run in =post-tools= or =final=, not earlier. Two entries here depend on
+that ordering:
+
+- =~/.gnupg/gpg-agent.conf= interpolates =mise which pinentry-curses=. It
+  renders at the dotfiles stage with a bare-name fallback so the stage cannot
+  hard-fail, then =post-tools= re-renders it with the resolved absolute path.
+- The gpg-agent restart runs in =post-tools=, where =gpgconf= actually exists.
+
+Inspect without changing anything:
 
 #+begin_src sh
-zsh <<'SCRIPT'
-  export MISE_TASK_SKIP="setup:treesitter,setup:texlive"
-  curl -fsSL "https://raw.githubusercontent.com/djgoku/dot-files/main/setup.sh" |
-    MISE_VERSION=v2026.2.10 zsh
-  source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-  source ~/.zshrc
-  mise -C ~/dev/github/djgoku/dot-files run test-emacs
-SCRIPT
+mise bootstrap --dry-run
 #+end_src
 
-To test a feature branch, set =REPO_BRANCH=:
+Run a single stage:
 
 #+begin_src sh
-zsh <<'SCRIPT'
-  export MISE_TASK_SKIP="setup:treesitter,setup:texlive"
-  BRANCH="chore/switch-completely-to-mise"
-  curl -fsSL "https://raw.githubusercontent.com/djgoku/dot-files/${BRANCH}/setup.sh" |
-    REPO_BRANCH="$BRANCH" MISE_VERSION=v2026.2.10 zsh
-  source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-  source ~/.zshrc
-  mise -C ~/dev/github/djgoku/dot-files run test-emacs
-SCRIPT
+mise bootstrap --only files --yes
 #+end_src
+
+Note that =bootstrap.directories= is applied as part of the =files= stage;
+there is no =--only directories=. =bootstrap.files= does not create parent
+directories or =mkdir -p=, so each level is declared explicitly, parent first.
+
+* CI
+
+GitHub Actions, in two tiers:
+
+- *Validate* runs on every push and PR. It installs nothing -- it asserts the
+  five config files load, that every bootstrap stage resolves under
+  =--dry-run=, and that the workflow YAML still matches its Pkl source.
+- *Bootstrap* runs weekly and on =workflow_dispatch=. It runs =setup.sh= for
+  real on a clean macOS runner, asserts the artifacts, and re-runs bootstrap to
+  prove idempotency.
+
+** Workflow YAML is generated -- do not hand-edit it
+
+=.github/workflows/*.yml= is rendered from the =.pkl= file beside it using
+[[https://pkl-lang.org/][Pkl]] and the =com.github.actions= pkl-pantry package.
+Edit the =.pkl=, then:
+
+#+begin_src sh
+mise run render-workflows
+#+end_src
+
+The validate job runs =mise run check-workflows=, which re-renders and then
+runs =git diff --exit-code=, so a hand-edited =.yml= fails CI.
+
+Note this repo carries two mise configs with different jobs: =mise.toml= at the
+root is *project* config (tasks, and the =pkl= they need), while =config/mise/=
+is *machine* config and is never loaded from here.
+
+After changing =.github/PklProject=, re-resolve and commit the lockfile:
+
+#+begin_src sh
+pkl project resolve .github/
+#+end_src
+
+Note pkl does *not* discover a =PklProject= in an ancestor directory, which is
+why the render task passes =--project-dir .github/=.
+
+* Caveats
+
+- =macos-defaults= writes to your *real* macOS preferences. A sandboxed =HOME=
+  does not isolate them, because =cfprefsd= is keyed by uid. Use =--dry-run=
+  to inspect.
+- =com.apple.Terminal.plist= is applied with =mode = "copy"=, not =symlink=,
+  because =cfprefsd= rewrites the file in place. Quit Terminal before applying
+  or it will overwrite the copy again on quit.
+- =bootstrap.repos= entries have no =ref=, so mise never pulls -- an existing
+  clone with a matching origin counts as current. A dirty worktree fails the
+  stage, so hide local additions with =.git/info/exclude=.
 
 * Troubleshooting
 
@@ -93,8 +157,13 @@ SCRIPT
 mise doctor
 #+end_src
 
+Check which config files mise is actually reading:
+
+#+begin_src sh
+mise config ls
+#+end_src
+
 * Links
 
 - [[https://mise.jdx.dev/][mise Documentation]]
-- [[https://nixos.org/manual/nix/stable/][Nix Manual]]
 - [[https://www.gnu.org/software/emacs/][GNU Emacs]]
