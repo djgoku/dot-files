@@ -3,7 +3,16 @@
 [bootstrap.macos.finder]
 show_all_files = true
 preferred_view_style = "list"
+show_pathbar = true
 
 [bootstrap.macos.defaults]
 NSGlobalDomain = { "com.apple.swipescrolldirection" = false, AppleInterfaceStyle = "Dark" }
-"com.apple.finder" = { FXPreferredSearchViewStyle = "Nlsv" }
+
+[bootstrap.macos.dock]
+autohide = true
+orientation = "left"
+tilesize = 48
+show_recents = false
+
+[bootstrap.macos.trackpad]
+tap_to_click = true
