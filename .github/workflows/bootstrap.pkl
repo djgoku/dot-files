@@ -16,16 +16,14 @@ on {
 
 permissions { contents = "read" }
 
-// A custom aqua registry is fetched through the GitHub API, and unauthenticated
-// calls are capped at 60/hour per IP -- which shared runner IPs exhaust
-// routinely (observed 0/60, "github auth: no"). The default token lifts the cap
-// and needs no extra permissions beyond the contents:read declared above.
+// Packslip release discovery uses the GitHub API. The default token avoids
+// unauthenticated rate limits on shared runner IPs and needs no extra
+// permissions beyond the contents:read declared above.
 env {
   // com.github.actions.context exposes no `secrets`, so this is the literal
   // expression; `$` is not special in a Pkl string.
   ["GITHUB_TOKEN"] = "${{ secrets.GITHUB_TOKEN }}"
 }
-
 
 jobs {
   ["bootstrap"] {
@@ -38,7 +36,8 @@ jobs {
       // checkout here is what makes it test THIS ref instead of main.
       new {
         name = "Use this checkout as the dot-files clone"
-        run = """
+        run =
+          """
           mkdir -p ~/dev/github/djgoku
           ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
           """
@@ -60,7 +59,8 @@ jobs {
 
       new {
         name = "Assert the stages produced their artifacts"
-        run = """
+        run =
+          """
           test -L ~/.config/mise
           test -f ~/.config/mise/conf.d/90-hooks.toml
           test -L ~/.zshrc
@@ -75,11 +75,12 @@ jobs {
       // The completion file is worthless if a real shell cannot load it.
       new {
         name = "Completions load in a real shell"
-        run = "zsh -c 'fpath=(~/.local/share/zsh/site-functions $fpath); autoload -U compinit; compinit -u; whence -w _mise'"
+        run =
+          "zsh -c 'fpath=(~/.local/share/zsh/site-functions $fpath); autoload -U compinit; compinit -u; whence -w _mise'"
       }
 
       new {
-        name = "Second run is a no-op"
+        name = "Second bootstrap succeeds"
         run = "~/.local/bin/mise bootstrap --yes"
       }
     }

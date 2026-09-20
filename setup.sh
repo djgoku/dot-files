@@ -3,7 +3,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/djgoku/dot-files/main/setup.sh | zsh
 #
 # Usage:
-#   setup.sh                    clone if needed, install mise, link, bootstrap
+#   setup.sh                    clone if needed, install/update mise, link, bootstrap
 #   setup.sh --no-clone         use the checkout already at $REPO_DIR; fail if absent
 #   setup.sh --prepare-only     stop after linking; skip `mise bootstrap`
 #
@@ -23,7 +23,7 @@ bootstrap=1
 usage() {
   cat <<'USAGE'
 Usage:
-  setup.sh                    clone if needed, install mise, link, bootstrap
+  setup.sh                    clone if needed, install/update mise, link, bootstrap
   setup.sh --no-clone         use the checkout already at $REPO_DIR; fail if absent
   setup.sh --prepare-only     stop after linking; skip `mise bootstrap`
 USAGE
@@ -58,10 +58,14 @@ elif [[ ! -d "$REPO_DIR" ]]; then
 fi
 log "Current commit: $(git -C "$REPO_DIR" log --oneline -1)"
 
-# 2. Install mise.
-if [[ ! -f ~/.local/bin/mise ]]; then
+# 2. Install mise, or update an existing standalone installation. Auto-update
+#    skips non-interactive commands, including this bootstrap script.
+if [[ ! -x ~/.local/bin/mise ]]; then
   log "Installing mise..."
   curl -fsSL https://mise.run | sh
+else
+  log "Checking for a mise update..."
+  ~/.local/bin/mise self-update --yes --no-plugins
 fi
 ~/.local/bin/mise --version
 

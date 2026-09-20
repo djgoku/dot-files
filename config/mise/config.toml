@@ -10,19 +10,18 @@
 [settings]
 experimental = true
 lockfile = true
+lockfile_platforms = [
+  "linux-arm64",
+  "linux-arm64-musl",
+  "linux-x64",
+  "linux-x64-musl",
+  "macos-arm64",
+  "macos-x64",
+]
 dotfiles.root = "~/.dot-files"
-
-# Emacs comes from a personal aqua registry. This MUST be a setting rather than
-# a MISE_AQUA_REGISTRIES entry under [env]: [env] populates the shell
-# environment, which happens long after mise resolves its own settings, so the
-# registry stayed invisible and every `aqua:djgoku/...` install failed with
-# "no aqua-registry found". It only looked fine locally because the tool was
-# already installed.
-[settings.aqua]
-registries = ["https://github.com/djgoku/misemacs"]
+auto_update = true
 
 [tools]
-"aqua:djgoku/misemacs-emacs-master" = "latest"
 "aqua:ripgrep" = "latest"
 "aqua:ripgrep-all" = "latest"
 "conda:gnupg" = "latest"
@@ -39,6 +38,10 @@ tombi = "latest"
 # Required by `mise completion zsh` in conf.d/20-files.toml. Declared here so
 # mise does not silently append it to this file on first bootstrap.
 usage = "latest"
+"aqua:apple/container" = "latest"
+packslip = { version = "latest", identity_prefix = "https://github.com/jdx/packslip/.github/workflows/release.yml@", issuer = "https://token.actions.githubusercontent.com", list_identity_prefix = "https://github.com/jdx/packslip/.github/workflows/packslip-releases.yml@" }
+"packslip:github.com/djgoku/misemacs-emacs-master" = "latest"
+"conda:git" = "latest"
 
 [dotfiles]
 "~/.dot-files" = "~/dev/github/djgoku/dot-files"
@@ -50,9 +53,9 @@ usage = "latest"
 # ~/.ssh/config.local, pulled in by the template with exec().
 "~/.ssh/config" = { source = "~/.dot-files/ssh/config.tmpl", mode = "template" }
 
-# Rendered at the dotfiles stage (9) and again by the post-tools hook in
-# conf.d/90-hooks.toml: `mise which pinentry-curses` cannot resolve until the
-# tools stage (15), six stages later.
+# Rendered during dotfiles and again by the post-tools hook in
+# conf.d/90-hooks.toml: `mise which pinentry-curses` cannot resolve until
+# versioned tools have been installed.
 "~/.gnupg/gpg-agent.conf" = { source = "~/.dot-files/gnupg/gpg-agent.conf.tmpl", mode = "template" }
 
 # Copy, not symlink: cfprefsd rewrites this file in place, and through a

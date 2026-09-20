@@ -6,22 +6,22 @@ This document provides guidance for AI agents working on this repository.
 
 Personal macOS development environment. [mise](https://mise.jdx.dev/) is the single
 entry point: it installs every tool, applies dotfiles, and configures the machine
-via `mise bootstrap`. Emacs is installed as an aqua package
-(`aqua:djgoku/misemacs-emacs-master`) with packages managed by
+via `mise bootstrap`. Emacs is installed through Packslip
+(`packslip:github.com/djgoku/misemacs-emacs-master`) with packages managed by
 [elpaca](https://github.com/progfolio/elpaca).
 
-**Nix has been removed.** So have all mise tasks and the project-level `mise.toml`.
-If you find a reference to `nix`, `mise run <task>`, `mise-tasks/`, `setup.sh`
-helper functions, or `MiseEmacs.app`, it is stale — remove it rather than
-reviving it.
+**Nix has been removed.** The root `mise.toml` contains only project tasks and
+the tools they need; machine setup lives in `config/mise/`. References to
+`mise-tasks/` or `MiseEmacs.app` are stale.
 
 ## Architecture
 
 ```
 .
 ├── setup.sh                    # Fresh-machine bootstrap (3 steps, then hands off)
+├── hk.pkl                      # Repo checks: TOML, Pkl, zsh syntax
 ├── config/mise/                # Machine config -> symlinked to ~/.config/mise
-│   ├── config.toml             #   [settings] [tools] [env] [dotfiles]
+│   ├── config.toml             #   [settings] [tools] [dotfiles]
 │   └── conf.d/
 │       ├── 10-repos.toml       #   git clones (fzf-tab, tree-sitter-module)
 │       ├── 20-files.toml       #   managed directories and generated files
@@ -49,11 +49,14 @@ reviving it.
   deliberately *not* named `mise/`, `.mise/`, or `.config/mise/` — mise
   auto-discovers all three as project config, which would make `[bootstrap]`
   stanzas (including `macos.defaults`) go live merely by `cd`-ing into the repo.
+- **The machine lockfile is global.** Update `config/mise/mise.lock` with
+  `mise lock --global`. `lockfile_platforms` targets Linux and macOS, excluding
+  Windows artifacts.
 - **`setup.sh` holds only what cannot be declared,** and CI calls it rather than
   reimplementing it. `--no-clone` uses an existing checkout (and fails loudly if
   absent, instead of cloning main and testing the wrong code); `--prepare-only`
   stops before the expensive `mise bootstrap`. Only two things are genuinely
-  imperative: cloning, and installing mise.
+  imperative: cloning, and installing or updating mise.
 - **No path is symlinked by hand.** `MISE_CONFIG_DIR` points mise at the config
   inside the clone, so it creates `~/.dot-files` and `~/.config/mise` from its
   own `[dotfiles]` entries — which also means `~/.config/mise` correctly points
@@ -62,12 +65,13 @@ reviving it.
   target named in a single call, and `~/.config/mise`'s source lives under
   `~/.dot-files`. The env var is unset afterwards so the rest of the run reads
   config through the symlink, like any normal invocation.
-- **Stage order matters.** `mise bootstrap` runs 17 stages and `tools` is #15.
-  Anything shelling out to an installed binary belongs in `post-tools` or
-  `final`. Putting it earlier is the bug that required a `|| true` guard on the
-  old `post-dotfiles` gpg hook, which then silently no-opped on fresh machines.
-- **`bootstrap.files` does not create parents** and does not `mkdir -p`. Declare
-  each directory level explicitly, parent first. Directories apply as part of the
+- **Stage order matters.** Repos, dotfiles, and macOS settings are applied before
+  versioned tools. Anything shelling out to an installed binary belongs in
+  `post-tools` or `final`. Putting it earlier required a `|| true` guard on
+  the old `post-dotfiles` gpg hook, which then silently no-opped on fresh machines.
+- **`bootstrap.files` creates missing parents** with `mkdir -p` semantics and
+  default OS permissions. Declare parents whose mode or ownership matters;
+  declared parents apply before their children. Directories are part of the
   `files` stage; there is no `--only directories`.
 - **Emacs packages are managed by elpaca**, not by mise.
 
@@ -111,13 +115,15 @@ reviving it.
 ## Running Tests
 
 ```bash
+mise exec -- hk check --all   # project formatting and syntax checks
 mise run check-workflows      # generated YAML still matches its .pkl source
 mise bootstrap --dry-run      # inspect every stage, change nothing
 mise bootstrap --only files --yes
 mise config ls                # confirm which config files are actually loaded
 ```
 
-A second `mise bootstrap --yes` must be a no-op; non-convergence is a bug.
+A second `mise bootstrap --yes` must succeed. Hooks run again on each apply,
+so a successful re-run does not imply that no commands ran.
 
 ## CI
 
@@ -126,9 +132,10 @@ hand-edit a `.yml` under `.github/workflows/`.** Edit the `.pkl` beside it and
 run `mise run render-workflows`; `mise run check-workflows` (and the `validate`
 job) fails on drift.
 
-- `validate.pkl` — per-PR, cheap. Installs nothing: asserts all five config
-  files load, every bootstrap stage resolves under `--dry-run`, and the
-  generated YAML matches its source.
+- `validate.pkl` — per-PR, cheap. Installs project tools but no machine tools;
+  runs hk checks, asserts all five tracked machine config files load, every
+  bootstrap stage resolves under `--dry-run`, Packslip Emacs is discoverable,
+  and the generated YAML matches its source.
 - `bootstrap.pkl` — weekly and on demand, expensive. A real `setup.sh` run on a
   clean macOS runner, then artifact assertions and an idempotency re-run.
 

@@ -21,11 +21,12 @@ jobs:
     - uses: actions/checkout@v6
     - name: Install mise
       run: curl -fsSL https://mise.run | sh
-    - name: Workflow YAML matches its Pkl source
+    - name: Install project tools
       run: |-
         ~/.local/bin/mise trust --yes
         ~/.local/bin/mise install
-        ~/.local/bin/mise run check-workflows
+    - name: Repository checks
+      run: ~/.local/bin/mise exec -- hk check --all
     - name: Prepare, via the real setup.sh
       run: |-
         mkdir -p ~/dev/github/djgoku
@@ -37,7 +38,7 @@ jobs:
         test "$(~/.local/bin/mise config ls --no-header | grep -c 'config/mise')" = "5"
     - name: Every bootstrap stage resolves
       run: ~/.local/bin/mise bootstrap --dry-run
-    - name: Custom aqua registry is configured and reachable
+    - name: Packslip Emacs release is discoverable
       run: |-
-        ~/.local/bin/mise settings get aqua.registries
-        ~/.local/bin/mise ls-remote aqua:djgoku/misemacs-emacs-master | grep -q .
+        versions="$(~/.local/bin/mise ls-remote --minimum-release-age 0s 'packslip:github.com/djgoku/misemacs-emacs-master')"
+        test -n "$versions"

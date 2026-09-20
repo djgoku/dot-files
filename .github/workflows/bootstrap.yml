@@ -34,5 +34,5 @@ jobs:
         grep -qE '^pinentry-program /' ~/.gnupg/gpg-agent.conf
     - name: Completions load in a real shell
       run: zsh -c 'fpath=(~/.local/share/zsh/site-functions $fpath); autoload -U compinit; compinit -u; whence -w _mise'
-    - name: Second run is a no-op
+    - name: Second bootstrap succeeds
       run: ~/.local/bin/mise bootstrap --yes

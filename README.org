@@ -5,8 +5,8 @@
 
 Personal macOS development environment. [[https://mise.jdx.dev/][mise]] is the only entry point: it
 installs every tool, applies dotfiles, and configures the machine through
-=mise bootstrap=. There is no Nix, no task runner, and no project-level mise
-config in this repo.
+=mise bootstrap=. There is no Nix. The root =mise.toml= contains project checks
+and tasks; machine configuration lives in =config/mise/=.
 
 * Quick Start
 
@@ -25,7 +25,7 @@ cd dot-files && ./setup.sh
 #+end_src
 
 =setup.sh= does only what cannot be declared in config: clone the repo and
-install mise. It then points mise at the config inside the clone with
+install or update mise. It then points mise at the config inside the clone with
 =MISE_CONFIG_DIR= and lets mise create =~/.dot-files= and =~/.config/mise=
 from its own =[dotfiles]= entries -- no path is symlinked by hand -- before
 running =mise bootstrap --yes=. It takes =--no-clone= (use the checkout
@@ -42,8 +42,9 @@ mise bootstrap --yes
 #+begin_example
 .
 ├── setup.sh                    # Fresh-machine bootstrap (3 steps, then hands off)
+├── hk.pkl                      # Project checks for TOML, Pkl, and zsh syntax
 ├── config/mise/                # Machine config -> symlinked to ~/.config/mise
-│   ├── config.toml             #   [settings] [tools] [env] [dotfiles]
+│   ├── config.toml             #   [settings] [tools] [dotfiles]
 │   └── conf.d/
 │       ├── 10-repos.toml       #   git clones (fzf-tab, tree-sitter-module)
 │       ├── 20-files.toml       #   managed directories and generated files
@@ -72,19 +73,11 @@ mise auto-discovers =mise/config.toml=, =.mise/conf.d/=, and
 =config/mise/= matches no discovery rule, so the =~/.config/mise= symlink is
 the only path by which it loads.
 
-* Bootstrap Stages
+* Bootstrap Order
 
-=mise bootstrap= runs stages in a fixed order:
-
-#+begin_example
-plugins  packages  accounts  files  services  firewall  compose  repos
-dotfiles  mise-shell-activate  macos-defaults  macos-launchd-agents
-linux-systemd-units  user  tools  task  final-hook
-#+end_example
-
-*=tools= is stage 15 of 17.* Anything that shells out to an installed binary
-must run in =post-tools= or =final=, not earlier. Two entries here depend on
-that ordering:
+=mise bootstrap= applies files, repos, dotfiles, and macOS settings before it
+installs versioned tools. Anything that shells out to an installed binary must
+run in =post-tools= or =final=. Two entries here depend on that ordering:
 
 - =~/.gnupg/gpg-agent.conf= interpolates =mise which pinentry-curses=. It
   renders at the dotfiles stage with a bare-name fallback so the stage cannot
@@ -104,19 +97,21 @@ mise bootstrap --only files --yes
 #+end_src
 
 Note that =bootstrap.directories= is applied as part of the =files= stage;
-there is no =--only directories=. =bootstrap.files= does not create parent
-directories or =mkdir -p=, so each level is declared explicitly, parent first.
+there is no =--only directories=. Mise creates missing parent directories with
+OS default permissions. Parents that need a specific mode are declared
+explicitly in =conf.d/20-files.toml=.
 
 * CI
 
 GitHub Actions, in two tiers:
 
-- *Validate* runs on every push and PR. It installs nothing -- it asserts the
-  five config files load, that every bootstrap stage resolves under
-  =--dry-run=, and that the workflow YAML still matches its Pkl source.
+- *Validate* runs on every push and PR. It installs only project tools; it runs
+  =hk check --all=, asserts the five tracked machine config files load, checks
+  every bootstrap stage under =--dry-run=, confirms Packslip Emacs is
+  discoverable, and checks generated workflow YAML against its Pkl source.
 - *Bootstrap* runs weekly and on =workflow_dispatch=. It runs =setup.sh= for
   real on a clean macOS runner, asserts the artifacts, and re-runs bootstrap to
-  prove idempotency.
+  check that repeated application succeeds.
 
 ** Workflow YAML is generated -- do not hand-edit it
 
@@ -128,12 +123,33 @@ Edit the =.pkl=, then:
 mise run render-workflows
 #+end_src
 
-The validate job runs =mise run check-workflows=, which re-renders and then
-runs =git diff --exit-code=, so a hand-edited =.yml= fails CI.
+The validate job runs this task through hk. =mise run check-workflows= renders
+to a temporary directory and compares each =.yml= with its Pkl source. It
+leaves the checkout unchanged, so it also works before changes are committed.
 
 Note this repo carries two mise configs with different jobs: =mise.toml= at the
-root is *project* config (tasks, and the =pkl= they need), while =config/mise/=
-is *machine* config and is never loaded from here.
+root is *project* config (tasks, hk, Pkl, and Tombi), while =config/mise/=
+is *machine* config and is not discovered from the repo as project config.
+
+** Repository checks
+
+Run all project checks through mise:
+
+#+begin_src sh
+mise exec -- hk check --all
+#+end_src
+
+=hk.pkl= checks TOML lint and formatting with Tombi, Pkl formatting and
+workflow evaluation/YAML drift, and =setup.sh= syntax with =zsh -n=.
+=hk fix --all= applies available formatting
+fixes without staging them. To run the same checks before local commits, use
+=mise exec -- hk install --mise= once in this checkout. This installs a local
+Git hook; it does not change global Git settings.
+Remove it with =mise exec -- hk uninstall= if you no longer want it.
+The local launcher requires =mise= on Git's =PATH= when a commit runs.
+
+The machine tool lockfile is global. Refresh it with =mise lock --global=;
+=lockfile_platforms= includes Linux and macOS targets and excludes Windows.
 
 After changing =.github/PklProject=, re-resolve and commit the lockfile:
 

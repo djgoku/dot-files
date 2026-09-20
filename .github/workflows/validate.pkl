@@ -1,6 +1,6 @@
-/// Fast per-PR checks. Nothing is installed and nothing is applied: this job
-/// proves the mise config parses, every bootstrap stage resolves, and the
-/// generated workflow YAML still matches its Pkl source.
+/// Fast per-PR checks. Only project tools are installed: this job checks repo
+/// formatting and syntax, proves the mise config and bootstrap stages resolve,
+/// and confirms generated workflow YAML matches its Pkl source.
 ///
 /// Regenerate the YAML with `mise run render-workflows` -- never hand-edit
 /// the .yml.
@@ -16,16 +16,14 @@ on {
 
 permissions { contents = "read" }
 
-// A custom aqua registry is fetched through the GitHub API, and unauthenticated
-// calls are capped at 60/hour per IP -- which shared runner IPs exhaust
-// routinely (observed 0/60, "github auth: no"). The default token lifts the cap
-// and needs no extra permissions beyond the contents:read declared above.
+// Packslip release discovery uses the GitHub API. The default token avoids
+// unauthenticated rate limits on shared runner IPs and needs no extra
+// permissions beyond the contents:read declared above.
 env {
   // com.github.actions.context exposes no `secrets`, so this is the literal
   // expression; `$` is not special in a Pkl string.
   ["GITHUB_TOKEN"] = "${{ secrets.GITHUB_TOKEN }}"
 }
-
 
 concurrency {
   group = "\(module.context.github.workflow)-\(module.context.github.ref)"
@@ -49,12 +47,17 @@ jobs {
       // Runs before the machine config is linked so only the project config is
       // in scope -- otherwise `mise install` would pull Emacs and conda too.
       new {
-        name = "Workflow YAML matches its Pkl source"
-        run = """
+        name = "Install project tools"
+        run =
+          """
           ~/.local/bin/mise trust --yes
           ~/.local/bin/mise install
-          ~/.local/bin/mise run check-workflows
           """
+      }
+
+      new {
+        name = "Repository checks"
+        run = "~/.local/bin/mise exec -- hk check --all"
       }
 
       // Runs the real setup.sh rather than reimplementing its linking --
@@ -63,7 +66,8 @@ jobs {
       // --prepare-only stops before the expensive `mise bootstrap`.
       new {
         name = "Prepare, via the real setup.sh"
-        run = """
+        run =
+          """
           mkdir -p ~/dev/github/djgoku
           ln -sfn "$GITHUB_WORKSPACE" ~/dev/github/djgoku/dot-files
           ./setup.sh --no-clone --prepare-only
@@ -74,7 +78,8 @@ jobs {
       // mise never reads. Five files must load.
       new {
         name = "Machine config loads"
-        run = """
+        run =
+          """
           ~/.local/bin/mise config ls
           test "$(~/.local/bin/mise config ls --no-header | grep -c 'config/mise')" = "5"
           """
@@ -85,20 +90,16 @@ jobs {
         run = "~/.local/bin/mise bootstrap --dry-run"
       }
 
-      // --dry-run says "would install" without ever contacting a registry, so
-      // it cannot see a misconfigured one -- a real bootstrap died at the tools
-      // stage while dry-run stayed green. `settings get` is the deterministic
-      // check: it fails with "Setting [aqua.registries] is not set" when the
-      // value drifts back under [env], where mise never reads it.
-      //
-      // ls-remote additionally exercises the network path. It is only
-      // meaningful on a cold runner -- a warm local aqua cache answers it even
-      // with the setting removed.
+      // bootstrap --dry-run does not resolve remote tool releases. On a cold
+      // runner this checks Packslip discovery without installing Emacs or
+      // changing the lockfile. The release-age override covers a newly
+      // published first release that would otherwise produce an empty list.
       new {
-        name = "Custom aqua registry is configured and reachable"
-        run = """
-          ~/.local/bin/mise settings get aqua.registries
-          ~/.local/bin/mise ls-remote aqua:djgoku/misemacs-emacs-master | grep -q .
+        name = "Packslip Emacs release is discoverable"
+        run =
+          """
+          versions="$(~/.local/bin/mise ls-remote --minimum-release-age 0s 'packslip:github.com/djgoku/misemacs-emacs-master')"
+          test -n "$versions"
           """
       }
     }
