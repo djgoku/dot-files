@@ -8,6 +8,9 @@ steps {
   ["pkl-format"] = (Builtins.pkl_format) {
     glob = List("*.pkl", "**/*.pkl")
   }
+  ["pkl"] = (Builtins.pkl) {
+    glob = "hk.pkl"
+  }
   // The task evaluates workflow Pkl with its project dependencies, then
   // compares the rendered YAML without modifying the checkout.
   ["pkl-workflows"] {
