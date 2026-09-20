@@ -1,7 +1,7 @@
 # rendered by mise from gnupg/gpg-agent.conf.tmpl
-# The fallback keeps the dotfiles stage (9) from hard-failing on a fresh
-# machine -- `mise which` exits 1 until the tools stage (15) installs pinentry,
-# and a failing exec() aborts the whole stage. The post-tools hook in
+# The fallback keeps the dotfiles phase from hard-failing on a fresh
+# machine -- `mise which` exits 1 until versioned tools install pinentry,
+# and a failing exec() aborts the phase. The post-tools hook in
 # config/mise/conf.d/90-hooks.toml re-renders this with the resolved path.
 pinentry-program {{ exec(command='mise which pinentry-curses 2>/dev/null || echo pinentry-curses') }}
 default-cache-ttl 60

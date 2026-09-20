@@ -2,10 +2,12 @@
 # Machine config lives in config/mise/ and is not loaded from here; see the
 # comment at the top of config/mise/config.toml for why the split exists.
 
+# Repo checks and workflow rendering use these project tools. Machine setup
+# remains in config/mise/.
 [tools]
-# Only needed to regenerate the workflow YAML, so it is a project tool rather
-# than something every machine installs.
-pkl = "latest"
+pkl = "0.32.1"
+tombi = "1.5.5"
+"packslip:github.com/jdx/hk" = "latest"
 
 [tasks.render-workflows]
 description = "Regenerate .github/workflows/*.yml from their .pkl sources"
@@ -20,6 +22,14 @@ done
 
 [tasks.check-workflows]
 description = "Fail if the generated workflow YAML has drifted from its .pkl source"
-depends = ["render-workflows"]
-# Scoped to the generated YAML: the .pkl sources are inputs, not outputs.
-run = "git diff --exit-code -- '.github/workflows/*.yml'"
+run = """
+set -eu
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+for src in .github/workflows/*.pkl; do
+  out=".github/workflows/$(basename "$src" .pkl).yml"
+  rendered="$tmp/$(basename "$out")"
+  pkl eval --project-dir .github/ -f yaml -o "$rendered" "$src"
+  diff -u "$out" "$rendered"
+done
+"""

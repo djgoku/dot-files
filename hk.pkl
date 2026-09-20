@@ -1,0 +1,26 @@
+amends "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Config.pkl"
+
+import "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Builtins.pkl"
+
+steps {
+  ["toml-lint"] = Builtins.tombi
+  ["toml-format"] = Builtins.tombi_format
+  ["pkl-format"] = (Builtins.pkl_format) {
+    glob = List("*.pkl", "**/*.pkl")
+  }
+  // The task evaluates workflow Pkl with its project dependencies, then
+  // compares the rendered YAML without modifying the checkout.
+  ["pkl-workflows"] {
+    glob = List(".github/workflows/*.pkl", ".github/workflows/*.yml", "mise.toml")
+    depends = "pkl-format"
+    check = new Command {
+      argv = List("mise", "run", "check-workflows")
+    }
+  }
+  ["zsh-syntax"] {
+    glob = "setup.sh"
+    check = new Command {
+      argv = List("zsh", "-n", "{{files}}")
+    }
+  }
+}
