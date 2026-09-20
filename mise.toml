@@ -9,6 +9,10 @@ pkl = "0.32.1"
 tombi = "1.5.5"
 "packslip:github.com/jdx/hk" = "latest"
 
+[env]
+# Keep local, untracked files out of hk's pre-commit stash.
+HK_STASH_UNTRACKED = "0"
+
 [tasks.render-workflows]
 description = "Regenerate .github/workflows/*.yml from their .pkl sources"
 run = """
