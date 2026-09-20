@@ -62,3 +62,6 @@ emacs/count-duplicate-lines.el
 emacs/elfeed.opml
 emacs/elfeed/
 emacs/test-count-duplicate-lines.el
+
+mise.local.toml
+mise.local.lock
