@@ -5,60 +5,34 @@
     (mkdir (concat user-emacs-directory directory))))
 ;;; functions
 ;;;; johnny5-magit-clone - magit-clone integration
-;; Integrates with magit-clone via advice to provide:
-;; - Automatic directory calculation: ~/dev/{site}/{org-or-user}/{repo}
+;; Integrates with magit-clone to provide:
+;; - Default clone directory from the URL: ~/dev/{host-without-domain}/{owner}/{repo}
 ;; - "git clone " prefix stripping when pasting full clone commands
 ;; - Jump to magit-status if repository already exists locally
-;;
-;; Set johnny5-magit-clone-default-directory-remove-domain to t to use
-;; "github" instead of "github.com" in the directory path.
 
-(setq johnny5-magit-clone-default-directory-remove-domain t)
-
-(defun johnny5-magit-clone-default-directory (git-clone-url)
-  "Calculate the parent directory for cloning a git repository.
-Returns a path like ~/dev/github/djgoku/ for git@github.com:djgoku/repo.git"
-  (cond ((string-prefix-p "git@" git-clone-url)
-         (johnny5-git-url-parse (cadr (split-string git-clone-url "git@"))))
-        ((string-prefix-p "https://" git-clone-url)
-         (johnny5-git-https-url-parse git-clone-url))))
-
-(defun johnny5-git-https-url-parse (url-string)
-  "Parse HTTPS git URL and return the clone directory path.
-Converts URL to a format suitable for `johnny5-git-url-parse'."
-  (let* ((url (url-generic-parse-url url-string))
-         (host (url-host url))
-         (user-or-workspace-and-repo (substring (url-filename url) 1)))
-    (johnny5-git-url-parse (format "%s:%s/" host user-or-workspace-and-repo))))
-
-(defun johnny5-git-url-parse (git-clone-url)
-  "Parse git URL (host:user/repo format) and return the clone directory path.
-Returns ~/dev/{site}/{user}/ or ~/dev/{site-without-domain}/{user}/
-depending on `johnny5-magit-clone-default-directory-remove-domain'."
-  (let* ((git-url-path-and-repo-split (string-split git-clone-url ":"))
-         (uri (car git-url-path-and-repo-split))
-         (uri-without-domain (car (split-string uri "\\.")))
-         (user-or-workspace-and-repo-split (split-string (cadr git-url-path-and-repo-split) "/"))
-         (user-or-workspace (car user-or-workspace-and-repo-split)))
-    (if johnny5-magit-clone-default-directory-remove-domain
-        (format "~/dev/%s/%s/" uri-without-domain user-or-workspace)
-      (format "~/dev/%s/%s/" uri user-or-workspace))))
+(defun johnny5-magit-clone-default-directory (url)
+  "Return ~/dev/{host}/{owner}/ for clone URL, with the host's domain dropped.
+Return nil when URL has no host, such as a local path or bundle."
+  (when (string-match (rx bos
+                          (? (+ (any "a-z+")) "://")
+                          (? (+ (not (any "@/"))) "@")
+                          (group (+ (not (any "./:"))))
+                          (* (not (any "/:")))
+                          (? ":" (+ digit))
+                          (any ":/")
+                          (group (+ (not (any "/"))))
+                          "/")
+                      url)
+    (format "~/dev/%s/%s/" (match-string 1 url) (match-string 2 url))))
 
 ;;;;; advice: strip "git clone " prefix and allow pasting full commands
-(defun johnny5-magit-clone-clean-url (url)
-  "Strip 'git clone ' prefix if present.
-Allows pasting full clone commands like 'git clone git@github.com:user/repo.git'."
-  (if (and url (string-prefix-p "git clone " url))
-      (substring url 10)
-    url))
-
 (defun johnny5-magit-clone-read-repository ()
-  "Wrap magit-clone-read-repository to allow pasting 'git clone URL' commands.
-Magit's default uses magit-read-string-ns which rejects whitespace."
+  "Read the repository to clone, accepting a pasted \"git clone URL\".
+Upstream reads with `magit-read-string-ns', which rejects whitespace."
   (magit-read-char-case "Clone from " nil
     (?u "[u]rl or name"
-        (let* ((input (read-string "Clone from url or name: "))
-               (str (johnny5-magit-clone-clean-url (string-trim input))))
+        (let ((str (string-remove-prefix
+                    "git clone " (string-trim (read-string "Clone from url or name: ")))))
           (if (string-match-p "\\(://\\|@\\)" str)
               str
             (magit-clone--name-to-url str))))
@@ -73,54 +47,32 @@ Magit's default uses magit-read-string-ns which rejects whitespace."
         (magit-convert-filename-for-git
          (read-file-name "Clone from bundle: ")))))
 
-;; :override intentionally replaces the original — our implementation is a
-;; complete replacement that adds "git clone " prefix stripping.
+;; :override, tested against magit fe66e74.  Upstream differs only in
+;; reading the url with `magit-read-string-ns'.
 (advice-add 'magit-clone-read-repository :override #'johnny5-magit-clone-read-repository)
 
 ;;;;; advice: jump to existing repos
-(defun johnny5-magit-clone-maybe-status ()
-  "If repo already exists locally, open magit-status instead of cloning."
-  (let* ((repo (johnny5-magit-clone-read-repository))
-         (repo-name (magit-clone--url-to-name repo))
-         (default-dir (johnny5-magit-clone-default-directory repo))
-         (full-path (and default-dir repo-name
-                         (expand-file-name repo-name default-dir))))
-    (if (and full-path (file-directory-p full-path))
-        (progn
-          (magit-status full-path)
-          ;; user-error aborts the clone after opening magit-status
-          (user-error "Repository already cloned at %s, opened magit-status" full-path))
-      (magit-clone-internal repo full-path nil)
-      (user-error "Cloning %s to %s" repo full-path))))
+(defun johnny5-magit-clone-open-existing (_repository directory &rest _)
+  "Open `magit-status' instead of cloning into the repository at DIRECTORY."
+  (when (magit-git-repo-p directory)
+    (magit-status-setup-buffer directory)
+    (user-error "Repository already cloned at %s, opened magit-status" directory)))
 
-;; :override intentionally replaces the original — adds existing-repo detection.
-(advice-add 'magit-clone-read-args :override #'johnny5-magit-clone-maybe-status)
+;; :before, so an existing clone opens instead of failing upstream's
+;; "already exists" check.  Every clone command goes through here.
+(advice-add 'magit-clone-internal :before #'johnny5-magit-clone-open-existing)
 
 ;;;;; tests
-(ert-deftest test-johnny5-magit-clone-clean-url ()
-  "Test that 'git clone ' prefix is stripped."
-  (should (equal (johnny5-magit-clone-clean-url "git clone git@github.com:djgoku/melpa.git")
-                 "git@github.com:djgoku/melpa.git"))
-  (should (equal (johnny5-magit-clone-clean-url "git@github.com:djgoku/melpa.git")
-                 "git@github.com:djgoku/melpa.git"))
-  (should (equal (johnny5-magit-clone-clean-url "https://github.com/djgoku/melpa.git")
-                 "https://github.com/djgoku/melpa.git")))
-
 (ert-deftest test-johnny5-magit-clone-default-directory ()
-  "Tests that we return the correct magit-clone-default-directory."
-  (setq johnny5-magit-clone-default-directory-remove-domain nil)
-  (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github.com/djgoku/"))
-  (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github.com/djgoku/"))
-  (should (equal (johnny5-magit-clone-default-directory "git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/"))
-  (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket.org/johnny-5-is-alive/")))
-
-(ert-deftest test-johnny5-magit-clone-default-directory-remove-domain ()
-  "Tests that we return the correct magit-clone-default-directory."
-  (setq johnny5-magit-clone-default-directory-remove-domain t)
+  "Clone directory is ~/dev/{host without domain}/{owner}/, nil with no host."
   (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
-  (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/")))
+  (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "ssh://git@github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
+  (should (equal (johnny5-magit-clone-default-directory "ssh://git@gitlab.example.com:2222/team/x.git") "~/dev/gitlab/team/"))
+  (should-not (johnny5-magit-clone-default-directory "file:///Users/me/src/x"))
+  (should-not (johnny5-magit-clone-default-directory "/Users/me/src/x.bundle")))
 ;;;; unfill-paragraph
 ;; It is the opposite of fill-paragraph
 (defun unfill-paragraph ()
@@ -232,10 +184,14 @@ Return nil if test execution fails."
   (defvar-keymap embark-project-map
     :doc "Keymap for Embark project actions."
     :parent embark-file-map
-    "RET" #'project-switch-project
+    "RET" #'johnny5-project-switch-project
     "b" #'johnny5-git-link-homepage)
 
   (add-to-list 'embark-keymap-alist '(project-file embark-project-map))
+  (add-to-list 'embark-keymap-alist '(johnny5-project embark-project-map))
+  (add-to-list 'embark-transformer-alist
+               (cons 'johnny5-project
+                     (lambda (type candidate) (cons type (johnny5--project-root-of candidate)))))
   (defun embark--keep-project-type(full-path)
     (cons 'project-file (cdr full-path)))
 
@@ -302,17 +258,168 @@ Return nil if test execution fails."
 (use-package wgrep
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
+;;; project prompt with git branch and age
+(defun johnny5--project-git-info (root)
+  "Return (BRANCH . TIME) for the git checkout at ROOT, or nil.
+TIME is when HEAD last moved (commit, checkout, pull), in seconds.  Both
+are read from files rather than by running git, so the prompt stays fast."
+  (unless (file-remote-p root)
+    (let* ((dotgit (expand-file-name ".git" root))
+           (gitdir (if (file-regular-p dotgit)
+                       (with-temp-buffer
+                         (insert-file-contents dotgit)
+                         (and (looking-at (rx "gitdir: " (group (+ nonl))))
+                              (expand-file-name (match-string 1) root)))
+                     dotgit))
+           (head (and gitdir (expand-file-name "HEAD" gitdir)))
+           (log (and gitdir (expand-file-name "logs/HEAD" gitdir))))
+      (when (and head (file-readable-p head))
+        (cons (with-temp-buffer
+                (insert-file-contents head)
+                (if (looking-at (rx "ref: refs/heads/" (group (+ nonl))))
+                    (match-string 1)
+                  (buffer-substring 1 8)))
+              (float-time (file-attribute-modification-time
+                           (file-attributes (if (file-exists-p log) log head)))))))))
+
+(defun johnny5--project-candidates (roots)
+  "Return ROOTS as (CANDIDATE . SUFFIX) pairs, in the same order.
+CANDIDATE is the root, a tab, then the git branch, so completion
+matches either.  The tab displays as alignment.  SUFFIX shows when
+HEAD last moved."
+  (let* ((projects (mapcar (lambda (root) (cons root (johnny5--project-git-info root))) roots))
+         (branch-column (+ 2 (apply #'max 0 (mapcar #'string-width roots))))
+         (time-column (+ branch-column 2
+                         (apply #'max 0 (mapcar (lambda (project) (string-width (or (cadr project) "")))
+                                                projects)))))
+    (mapcar (pcase-lambda (`(,root . ,info))
+              (if info
+                  (cons (concat root
+                                (propertize "\t" 'display `(space :align-to ,branch-column))
+                                (propertize (car info) 'face 'font-lock-constant-face))
+                        (concat (propertize " " 'display `(space :align-to ,time-column))
+                                (propertize (format-time-string "%Y-%m-%d %H:%M" (cdr info))
+                                            'face 'completions-annotations)))
+                (cons root "")))
+            projects)))
+
+(defun johnny5--project-root-of (candidate)
+  "Return the project root that CANDIDATE starts with."
+  (car (split-string candidate "\t")))
+
+(defvar johnny5--project-menu-requested nil
+  "Non-nil when the project prompt was answered with \\`C-u RET'.")
+
+(defun johnny5--project-prompt-setup ()
+  "Make \\`C-u RET' in the project prompt ask for the project menu.
+Runs after Vertico's setup, which reads \\`C-u RET' as \"exit with the
+typed input\", so this map takes priority."
+  (let ((below (current-local-map)))
+    (use-local-map
+     (define-keymap :parent below
+       "RET" (lambda (arg)
+               (interactive "P")
+               (setq johnny5--project-menu-requested arg)
+               (let ((current-prefix-arg nil)
+                     (command (keymap-lookup below "RET")))
+                 (call-interactively (or (command-remapping command nil below) command))))))))
+
+(defvar johnny5-project-history nil
+  "Candidates while `johnny5-project-prompt' runs.
+Vertico sorts by history, so this keeps the most recently used
+projects first, as `project-prompt-project-dir' does.")
+
+(defun johnny5-project-prompt (&optional prompt predicate require-known)
+  "Prompt for a known project, most recently used first.
+Each project shows its git branch and when its HEAD last moved.  Typed
+words match the directory or the branch, so \"dot magit\" finds
+dot-files on a magit branch.  PROMPT, PREDICATE and REQUIRE-KNOWN are as
+in `project-prompt-project-dir'."
+  (let* ((dir-choice "... (choose a dir)")
+         (candidates (johnny5--project-candidates
+                      (seq-filter (or predicate #'always) (project-known-project-roots))))
+         (current (and-let* ((project (project-current))
+                             (root (project-root project))
+                             ((or (null predicate) (funcall predicate root))))
+                    (or (car (seq-find (lambda (candidate)
+                                         (equal (johnny5--project-root-of (car candidate)) root))
+                                       candidates))
+                        root)))
+         (johnny5-project-history (mapcar #'car candidates))
+         (history-add-new-input nil)
+         (choice (minibuffer-with-setup-hook (:append #'johnny5--project-prompt-setup)
+                   (completing-read
+                    (cond (prompt (format "%s: " prompt))
+                          (current "Select project (default current project): ")
+                          (t "Select project: "))
+                    (lambda (string pred action)
+                      (if (eq action 'metadata)
+                          `(metadata (category . johnny5-project)
+                                     (affixation-function
+                                      . ,(lambda (cands)
+                                           (mapcar (lambda (cand)
+                                                     (list cand "" (or (cdr (assoc cand candidates)) "")))
+                                                   cands))))
+                        (complete-with-action action
+                                              (append (mapcar #'car candidates)
+                                                      (unless require-known (list dir-choice)))
+                                              string pred)))
+                    nil t nil 'johnny5-project-history current))))
+    (cond ((equal choice dir-choice)
+           (read-directory-name "Select directory: " default-directory nil t))
+          ((string-empty-p choice) (user-error "No project selected"))
+          (t (johnny5--project-root-of choice)))))
+
+(defun johnny5-project-switch-project (dir &optional menu)
+  "Open Magit in project DIR.
+With a prefix argument, or when the project is chosen with \\`C-u RET',
+show the `project-switch-commands' menu like `project-switch-project'.
+MENU non-nil does the same from Lisp."
+  (interactive
+   (progn
+     (setq johnny5--project-menu-requested nil)
+     (let ((dir (funcall project-prompter)))
+       (list dir (or current-prefix-arg johnny5--project-menu-requested)))))
+  (let ((project-switch-commands (if menu project-switch-commands #'magit-project-status)))
+    (project-switch-project dir)))
+
+(use-package project
+  :ensure nil
+  :custom
+  (project-prompter #'johnny5-project-prompt)
+  :bind (:map project-prefix-map
+              ("p" . johnny5-project-switch-project))
+  :config
+  (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m")))
+
+(ert-deftest test-johnny5-project-git-info ()
+  "Branch comes from HEAD for checkouts, worktrees and detached HEADs."
+  (let ((root (make-temp-file "johnny5-project" t)))
+    (unwind-protect
+        (let ((checkout (expand-file-name "checkout/" root))
+              (worktree (expand-file-name "worktree/" root)))
+          (make-directory (expand-file-name ".git/worktrees/wt/logs" checkout) t)
+          (make-directory worktree)
+          (write-region "ref: refs/heads/feat/x\n" nil (expand-file-name ".git/HEAD" checkout))
+          (write-region "0123456789abcdef\n" nil (expand-file-name ".git/worktrees/wt/HEAD" checkout))
+          (write-region "" nil (expand-file-name ".git/worktrees/wt/logs/HEAD" checkout))
+          (write-region (format "gitdir: %s.git/worktrees/wt\n" checkout) nil (expand-file-name ".git" worktree))
+          (should (equal (car (johnny5--project-git-info checkout)) "feat/x"))
+          (should (equal (car (johnny5--project-git-info worktree)) "0123456"))
+          (should (numberp (cdr (johnny5--project-git-info worktree))))
+          (should-not (johnny5--project-git-info root))
+          (let ((candidate (car (car (johnny5--project-candidates (list checkout))))))
+            (should (equal (substring-no-properties candidate) (concat checkout "\tfeat/x")))
+            (should (equal (johnny5--project-root-of candidate) checkout))))
+      (delete-directory root t))))
 ;;; magit
 (use-package magit
-  :after project
+  :custom
+  (magit-clone-default-directory #'johnny5-magit-clone-default-directory)
   :init
-  (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   (setq magit-clone-set-remote.pushDefault t
         magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1
         magit-bury-buffer-function #'magit-restore-window-configuration
-        ;; setting to level 5 for gpg siging
-        transient-default-level 5
-        magit-revision-headers-format "Author:     %aN <%aE>\nAuthorDate: %ad\nCommit:     %cN <%cE>\nCommitDate: %cd\nSigned:\n\n%GG\n"
         magit-repolist-columns '(("Name" 25 magit-repolist-column-ident nil)
                                  ("Version" 25 magit-repolist-column-version ((:sort magit-repolist-version<)))
                                  ("B<U" 3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
@@ -320,20 +427,177 @@ Return nil if test execution fails."
                                  ("Path" 75 magit-repolist-column-path nil)
                                  ("Branch" 99 magit-repolist-column-branch)))
   :bind (("C-x g" . magit-project-status)))
-;;;; project-populate-magit-repository-directories
-(defvar project-populate-magit-repository-directories-exclude-contains
+;;;; magit revision signature
+(defconst johnny5-magit-signature-types
+  '(("SSH SIGNATURE" . "SSH")
+    ("PGP SIGNATURE" . "GPG"))
+  "Map a commit's `gpgsig' armor header to the format that signed it.")
+
+(defun johnny5--commit-signature-type (commit-object)
+  "Return the format that signed COMMIT-OBJECT, or nil when unsigned.
+COMMIT-OBJECT is the raw output of `git cat-file commit'."
+  (let ((headers (car (split-string commit-object "\n\n"))))
+    (when (string-match (rx bol "gpgsig" (? "-sha256") " -----BEGIN " (group (+ nonl)) "-----" eol)
+                        headers)
+      (cdr (assoc (match-string 1 headers) johnny5-magit-signature-types)))))
+
+(defun johnny5--format-ssh-verification (lines signer committer)
+  "Split git's one-line SSH verification LINES to read like gpg's output.
+SIGNER is the principal `allowed_signers' matched for the key.  Warn when
+it differs from COMMITTER, since anyone can set the committer email."
+  (append
+   (mapcan (lambda (line)
+             (if (string-match (rx bos (group (+? nonl)) " with " (group (+ nonl) " key " (+ nonl)) eos)
+                               line)
+                 (list (concat "ssh: " (match-string 1 line))
+                       (concat "ssh:                using " (match-string 2 line)))
+               (list (concat "ssh: " line))))
+           lines)
+   (unless (or (string-empty-p signer) (string-equal-ignore-case signer committer))
+     (list (format "ssh: Warning: signer does not match committer %s" committer)))))
+
+(defun johnny5-magit-insert-revision-signature ()
+  "Insert which format signed the revision, then git's verification output.
+The format is read from the commit object, so it shows even when the
+key needed to verify the signature is missing."
+  (let ((rev (concat magit-buffer-revision "^{commit}")))
+    (when-let* ((type (johnny5--commit-signature-type
+                       (magit-git-output "cat-file" "commit" rev))))
+      (pcase-let* ((`(,signer ,committer ,verification)
+                    (split-string (magit-git-output "show" "-s" "--format=%GS%x00%ce%x00%GG" rev) "\0"))
+                   (lines (split-string verification "\n" t)))
+        (magit-insert-section (signature)
+          (insert (format "Signed:     %s\n" type))
+          (dolist (line (cond ((null lines)
+                               '("Not verified: git printed nothing (SSH needs gpg.ssh.allowedSignersFile)"))
+                              ((equal type "SSH")
+                               (johnny5--format-ssh-verification lines signer committer))
+                              (t lines)))
+            (insert "            " line "\n"))
+          (insert ?\n))))))
+
+(with-eval-after-load 'magit
+  (magit-add-section-hook 'magit-revision-sections-hook
+                          #'johnny5-magit-insert-revision-signature
+                          'magit-insert-revision-headers t))
+
+(ert-deftest test-johnny5-commit-signature-type ()
+  "Signature type comes from the gpgsig header, never the message."
+  (should (equal (johnny5--commit-signature-type
+                  "tree a\nauthor t\ngpgsig -----BEGIN SSH SIGNATURE-----\n U1NI\n -----END SSH SIGNATURE-----\n\nmsg\n")
+                 "SSH"))
+  (should (equal (johnny5--commit-signature-type
+                  "tree a\ngpgsig -----BEGIN PGP SIGNATURE-----\n \n wsFc\n -----END PGP SIGNATURE-----\n\nmsg\n")
+                 "GPG"))
+  (should-not (johnny5--commit-signature-type "tree a\nauthor t\n\nmsg\n"))
+  (should-not (johnny5--commit-signature-type
+               "tree a\nauthor t\n\ngpgsig -----BEGIN SSH SIGNATURE-----\n")))
+
+(ert-deftest test-johnny5-format-ssh-verification ()
+  "SSH verification splits into a status line and a key line."
+  (should (equal (johnny5--format-ssh-verification
+                  '("Good \"git\" signature for t@e.x with ED25519 key SHA256:abc")
+                  "t@e.x" "T@E.x")
+                 '("ssh: Good \"git\" signature for t@e.x"
+                   "ssh:                using ED25519 key SHA256:abc")))
+  (should (equal (johnny5--format-ssh-verification
+                  '("Good \"git\" signature with ED25519 key SHA256:abc"
+                    "No principal matched.")
+                  "" "t@e.x")
+                 '("ssh: Good \"git\" signature"
+                   "ssh:                using ED25519 key SHA256:abc"
+                   "ssh: No principal matched."))))
+
+(ert-deftest test-johnny5-format-ssh-verification-mismatch ()
+  "Warn when the key's principal differs from the committer email."
+  (should (equal (car (last (johnny5--format-ssh-verification
+                             '("Good \"git\" signature for t@e.x with ED25519 key SHA256:abc")
+                             "t@e.x" "someone@else.x")))
+                 "ssh: Warning: signer does not match committer someone@else.x")))
+;;;; magit log signature markers
+(defun johnny5--raw-log-signature-types (raw-log)
+  "Map each hash in RAW-LOG to its signature type, nil when unsigned.
+RAW-LOG is output of `git log --pretty=raw --abbrev-commit'."
+  (let ((types (make-hash-table :test #'equal)))
+    (dolist (chunk (split-string raw-log "^commit " t) types)
+      (puthash (car (split-string chunk "\n"))
+               (johnny5--commit-signature-type chunk)
+               types))))
+
+(defun johnny5--magit-add-signature-overlay (pos property string face)
+  "Show STRING in FACE at POS through an overlay's PROPERTY."
+  (let ((overlay (make-overlay pos pos)))
+    (overlay-put overlay 'johnny5-signature t)
+    (overlay-put overlay property (propertize string 'face face))))
+
+(defun johnny5-magit-mark-signature-types ()
+  "Show G, S or - after each commit hash for GPG, SSH or no signature.
+The type is read from the raw commits, so nothing is verified.  Rows
+that only draw the graph are padded to keep it aligned."
+  (when (derived-mode-p 'magit-log-mode 'magit-status-mode)
+    (remove-overlays (point-min) (point-max) 'johnny5-signature t)
+    (let (sections width)
+      (magit-map-sections (lambda (section)
+                            (when (and (eq (oref section type) 'commit)
+                                       (stringp (oref section value)))
+                              (push section sections))))
+      (when sections
+        (let ((types (johnny5--raw-log-signature-types
+                      (magit-git-output "log" "--no-walk=unsorted" "--pretty=raw" "--abbrev-commit"
+                                        (mapcar (lambda (section) (oref section value)) sections)))))
+          (save-excursion
+            (dolist (section sections)
+              (let* ((hash (oref section value))
+                     (type (gethash hash types 'missing)))
+                (goto-char (oref section start))
+                (when (and (not (eq type 'missing))
+                           (search-forward hash (line-end-position) t))
+                  (setq width (current-column))
+                  (johnny5--magit-add-signature-overlay
+                   (point) 'after-string
+                   (concat " " (if type (substring type 0 1) "-"))
+                   (if type 'magit-keyword 'magit-dimmed)))))
+            (when (and width (derived-mode-p 'magit-log-mode))
+              (goto-char (point-min))
+              (while (re-search-forward
+                      (rx-to-string `(seq bol (= ,(1+ width) " ")
+                                          (* (any "|/\\_. " ?-))
+                                          (any "|/\\_")
+                                          (* (any "|/\\_. " ?-))
+                                          eol)
+                                    t)
+                      nil t)
+                (johnny5--magit-add-signature-overlay
+                 (+ (line-beginning-position) width) 'before-string "  " 'default)))))))))
+
+(add-hook 'magit-refresh-buffer-hook #'johnny5-magit-mark-signature-types)
+
+(ert-deftest test-johnny5-raw-log-signature-types ()
+  "Each raw commit maps to its signature type, unsigned to nil."
+  (let ((types (johnny5--raw-log-signature-types
+                (concat "commit aaaa1111\ntree t\ngpgsig -----BEGIN SSH SIGNATURE-----\n U1NI\n -----END SSH SIGNATURE-----\n\n    ssh\n\n"
+                        "commit bbbb2222\ntree t\ngpgsig -----BEGIN PGP SIGNATURE-----\n wsFc\n -----END PGP SIGNATURE-----\n\n    gpg\n\n"
+                        "commit cccc3333\ntree t\n\n    commit gpgsig -----BEGIN SSH SIGNATURE-----\n"))))
+    (should (equal (gethash "aaaa1111" types) "SSH"))
+    (should (equal (gethash "bbbb2222" types) "GPG"))
+    (should-not (gethash "cccc3333" types 'missing))))
+;;;; johnny5-magit-repository-directories-from-projects
+(defvar johnny5-magit-repository-directories-exclude
   '("elpaca/repos" "/deps/")
-  "Patterns to exclude using `string-match-p'.")
-(defun project-populate-magit-repository-directories ()
-  "Populate `magit-repository-directories' from project.el's known projects."
+  "Substrings that keep a project out of `magit-repository-directories'.")
+
+(defun johnny5-magit-repository-directories-from-projects ()
+  "Set `magit-repository-directories' from project.el's known local projects."
   (interactive)
-  (let (repository-directories)
-    (dolist (dir (project-known-project-roots) repository-directories)
-      (cond ((string-prefix-p "/ssh" dir) (message (format "excluded '/ssh' git dir: %s" dir)))
-            ((seq-some (lambda (pattern) (string-match-p (regexp-quote pattern) dir)) project-populate-magit-repository-directories-exclude-contains) (message (format "excluded by contains git dir: %s" dir)))
-            ((not (file-directory-p dir)) (message (format "excluded git dir as it doesn't exist: %s" dir)))
-            (t (message (format "git dir: %s" dir)) (push (cons dir 0) repository-directories))))
-    (setq magit-repository-directories repository-directories)))
+  (setq magit-repository-directories
+        (mapcar (lambda (dir) (cons dir 0))
+                (seq-remove (lambda (dir)
+                              (or (file-remote-p dir)
+                                  (not (file-directory-p dir))
+                                  (seq-some (lambda (exclude) (string-search exclude dir))
+                                            johnny5-magit-repository-directories-exclude)))
+                            (project-known-project-roots))))
+  (message "magit-repository-directories: %d projects" (length magit-repository-directories)))
 ;;; pinentry
 (use-package pinentry
   :config
