@@ -186,7 +186,7 @@ Return nil if test execution fails."
   (defvar-keymap embark-project-map
     :doc "Keymap for Embark project actions."
     :parent embark-file-map
-    "RET" #'project-switch-project
+    "RET" #'johnny5-project-switch-project
     "b" #'johnny5-git-link-homepage)
 
   (add-to-list 'embark-keymap-alist '(project-file embark-project-map))
@@ -309,6 +309,23 @@ HEAD last moved."
   "Return the project root that CANDIDATE starts with."
   (car (split-string candidate "\t")))
 
+(defvar johnny5--project-menu-requested nil
+  "Non-nil when the project prompt was answered with \\`C-u RET'.")
+
+(defun johnny5--project-prompt-setup ()
+  "Make \\`C-u RET' in the project prompt ask for the project menu.
+Runs after Vertico's setup, which reads \\`C-u RET' as \"exit with the
+typed input\", so this map takes priority."
+  (let ((below (current-local-map)))
+    (use-local-map
+     (define-keymap :parent below
+       "RET" (lambda (arg)
+               (interactive "P")
+               (setq johnny5--project-menu-requested arg)
+               (let ((current-prefix-arg nil)
+                     (command (keymap-lookup below "RET")))
+                 (call-interactively (or (command-remapping command nil below) command))))))))
+
 (defvar johnny5-project-history nil
   "Candidates while `johnny5-project-prompt' runs.
 Vertico sorts by history, so this keeps the most recently used
@@ -332,29 +349,45 @@ in `project-prompt-project-dir'."
                         root)))
          (johnny5-project-history (mapcar #'car candidates))
          (history-add-new-input nil)
-         (choice (completing-read
-                  (cond (prompt (format "%s: " prompt))
-                        (current "Select project (default current project): ")
-                        (t "Select project: "))
-                  (lambda (string pred action)
-                    (if (eq action 'metadata)
-                        `(metadata (category . johnny5-project)
-                                   (affixation-function
-                                    . ,(lambda (cands)
-                                         (mapcar (lambda (cand)
-                                                   (list cand "" (or (cdr (assoc cand candidates)) "")))
-                                                 cands))))
-                      (complete-with-action action
-                                            (append (mapcar #'car candidates)
-                                                    (unless require-known (list dir-choice)))
-                                            string pred)))
-                  nil t nil 'johnny5-project-history current)))
+         (choice (minibuffer-with-setup-hook (:append #'johnny5--project-prompt-setup)
+                   (completing-read
+                    (cond (prompt (format "%s: " prompt))
+                          (current "Select project (default current project): ")
+                          (t "Select project: "))
+                    (lambda (string pred action)
+                      (if (eq action 'metadata)
+                          `(metadata (category . johnny5-project)
+                                     (affixation-function
+                                      . ,(lambda (cands)
+                                           (mapcar (lambda (cand)
+                                                     (list cand "" (or (cdr (assoc cand candidates)) "")))
+                                                   cands))))
+                        (complete-with-action action
+                                              (append (mapcar #'car candidates)
+                                                      (unless require-known (list dir-choice)))
+                                              string pred)))
+                    nil t nil 'johnny5-project-history current))))
     (cond ((equal choice dir-choice)
            (read-directory-name "Select directory: " default-directory nil t))
           ((string-empty-p choice) (user-error "No project selected"))
           (t (johnny5--project-root-of choice)))))
 
 (setq project-prompter #'johnny5-project-prompt)
+
+(defun johnny5-project-switch-project (dir &optional menu)
+  "Open Magit in project DIR.
+With a prefix argument, or when the project is chosen with \\`C-u RET',
+show the `project-switch-commands' menu like `project-switch-project'.
+MENU non-nil does the same from Lisp."
+  (interactive
+   (progn
+     (setq johnny5--project-menu-requested nil)
+     (let ((dir (funcall project-prompter)))
+       (list dir (or current-prefix-arg johnny5--project-menu-requested)))))
+  (let ((project-switch-commands (if menu project-switch-commands #'magit-project-status)))
+    (project-switch-project dir)))
+
+(keymap-set project-prefix-map "p" #'johnny5-project-switch-project)
 
 (ert-deftest test-johnny5-project-git-info ()
   "Branch comes from HEAD for checkouts, worktrees and detached HEADs."
