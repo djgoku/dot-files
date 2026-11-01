@@ -190,6 +190,10 @@ Return nil if test execution fails."
     "b" #'johnny5-git-link-homepage)
 
   (add-to-list 'embark-keymap-alist '(project-file embark-project-map))
+  (add-to-list 'embark-keymap-alist '(johnny5-project embark-project-map))
+  (add-to-list 'embark-transformer-alist
+               (cons 'johnny5-project
+                     (lambda (type candidate) (cons type (johnny5--project-root-of candidate)))))
   (defun embark--keep-project-type(full-path)
     (cons 'project-file (cdr full-path)))
 
@@ -256,6 +260,122 @@ Return nil if test execution fails."
 (use-package wgrep
   :config (setq wgrep-auto-save-buffer t)
   (setq wgrep-enable-key "r"))
+;;; project prompt with git branch and age
+(defun johnny5--project-git-info (root)
+  "Return (BRANCH . TIME) for the git checkout at ROOT, or nil.
+TIME is when HEAD last moved (commit, checkout, pull), in seconds.  Both
+are read from files rather than by running git, so the prompt stays fast."
+  (unless (file-remote-p root)
+    (let* ((dotgit (expand-file-name ".git" root))
+           (gitdir (if (file-regular-p dotgit)
+                       (with-temp-buffer
+                         (insert-file-contents dotgit)
+                         (and (looking-at (rx "gitdir: " (group (+ nonl))))
+                              (expand-file-name (match-string 1) root)))
+                     dotgit))
+           (head (and gitdir (expand-file-name "HEAD" gitdir)))
+           (log (and gitdir (expand-file-name "logs/HEAD" gitdir))))
+      (when (and head (file-readable-p head))
+        (cons (with-temp-buffer
+                (insert-file-contents head)
+                (if (looking-at (rx "ref: refs/heads/" (group (+ nonl))))
+                    (match-string 1)
+                  (buffer-substring 1 8)))
+              (float-time (file-attribute-modification-time
+                           (file-attributes (if (file-exists-p log) log head)))))))))
+
+(defun johnny5--project-candidates (roots)
+  "Return ROOTS as (CANDIDATE . SUFFIX) pairs, in the same order.
+CANDIDATE is the root, a tab, then the git branch, so completion
+matches either.  The tab displays as alignment.  SUFFIX shows when
+HEAD last moved."
+  (let* ((projects (mapcar (lambda (root) (cons root (johnny5--project-git-info root))) roots))
+         (branch-column (+ 2 (apply #'max 0 (mapcar #'string-width roots))))
+         (time-column (+ branch-column 2
+                         (apply #'max 0 (mapcar (lambda (project) (string-width (or (cadr project) "")))
+                                                projects)))))
+    (mapcar (pcase-lambda (`(,root . ,info))
+              (if info
+                  (cons (concat root
+                                (propertize "\t" 'display `(space :align-to ,branch-column))
+                                (propertize (car info) 'face 'font-lock-constant-face))
+                        (concat (propertize " " 'display `(space :align-to ,time-column))
+                                (propertize (format-time-string "%Y-%m-%d %H:%M" (cdr info))
+                                            'face 'completions-annotations)))
+                (cons root "")))
+            projects)))
+
+(defun johnny5--project-root-of (candidate)
+  "Return the project root that CANDIDATE starts with."
+  (car (split-string candidate "\t")))
+
+(defvar johnny5-project-history nil
+  "Candidates while `johnny5-project-prompt' runs.
+Vertico sorts by history, so this keeps the most recently used
+projects first, as `project-prompt-project-dir' does.")
+
+(defun johnny5-project-prompt (&optional prompt predicate require-known)
+  "Prompt for a known project, most recently used first.
+Each project shows its git branch and when its HEAD last moved.  Typed
+words match the directory or the branch, so \"dot magit\" finds
+dot-files on a magit branch.  PROMPT, PREDICATE and REQUIRE-KNOWN are as
+in `project-prompt-project-dir'."
+  (let* ((dir-choice "... (choose a dir)")
+         (candidates (johnny5--project-candidates
+                      (seq-filter (or predicate #'always) (project-known-project-roots))))
+         (current (and-let* ((project (project-current))
+                             (root (project-root project))
+                             ((or (null predicate) (funcall predicate root))))
+                    (or (car (seq-find (lambda (candidate)
+                                         (equal (johnny5--project-root-of (car candidate)) root))
+                                       candidates))
+                        root)))
+         (johnny5-project-history (mapcar #'car candidates))
+         (history-add-new-input nil)
+         (choice (completing-read
+                  (cond (prompt (format "%s: " prompt))
+                        (current "Select project (default current project): ")
+                        (t "Select project: "))
+                  (lambda (string pred action)
+                    (if (eq action 'metadata)
+                        `(metadata (category . johnny5-project)
+                                   (affixation-function
+                                    . ,(lambda (cands)
+                                         (mapcar (lambda (cand)
+                                                   (list cand "" (or (cdr (assoc cand candidates)) "")))
+                                                 cands))))
+                      (complete-with-action action
+                                            (append (mapcar #'car candidates)
+                                                    (unless require-known (list dir-choice)))
+                                            string pred)))
+                  nil t nil 'johnny5-project-history current)))
+    (cond ((equal choice dir-choice)
+           (read-directory-name "Select directory: " default-directory nil t))
+          ((string-empty-p choice) (user-error "No project selected"))
+          (t (johnny5--project-root-of choice)))))
+
+(setq project-prompter #'johnny5-project-prompt)
+
+(ert-deftest test-johnny5-project-git-info ()
+  "Branch comes from HEAD for checkouts, worktrees and detached HEADs."
+  (let ((root (make-temp-file "johnny5-project" t)))
+    (unwind-protect
+        (let ((checkout (expand-file-name "checkout/" root))
+              (worktree (expand-file-name "worktree/" root)))
+          (make-directory (expand-file-name ".git/worktrees/wt/logs" checkout) t)
+          (make-directory worktree)
+          (write-region "ref: refs/heads/feat/x\n" nil (expand-file-name ".git/HEAD" checkout))
+          (write-region "0123456789abcdef\n" nil (expand-file-name ".git/worktrees/wt/HEAD" checkout))
+          (write-region "" nil (expand-file-name ".git/worktrees/wt/logs/HEAD" checkout))
+          (write-region (format "gitdir: %s.git/worktrees/wt\n" checkout) nil (expand-file-name ".git" worktree))
+          (should (equal (car (johnny5--project-git-info checkout)) "feat/x"))
+          (should (equal (car (johnny5--project-git-info worktree)) "0123456"))
+          (should (numberp (cdr (johnny5--project-git-info worktree))))
+          (should-not (johnny5--project-git-info root))
+          (let ((candidate (car (car (johnny5--project-candidates (list checkout))))))
+            (should (equal (substring-no-properties candidate) (concat checkout "\tfeat/x")))
+            (should (equal (johnny5--project-root-of candidate) checkout))))
+      (delete-directory root t))))
 ;;; magit
 (use-package magit
   :after project
