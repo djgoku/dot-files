@@ -25,8 +25,6 @@ Return nil when URL has no host, such as a local path or bundle."
                       url)
     (format "~/dev/%s/%s/" (match-string 1 url) (match-string 2 url))))
 
-(setq magit-clone-default-directory #'johnny5-magit-clone-default-directory)
-
 ;;;;; advice: strip "git clone " prefix and allow pasting full commands
 (defun johnny5-magit-clone-read-repository ()
   "Read the repository to clone, accepting a pasted \"git clone URL\".
@@ -57,7 +55,7 @@ Upstream reads with `magit-read-string-ns', which rejects whitespace."
 (defun johnny5-magit-clone-open-existing (_repository directory &rest _)
   "Open `magit-status' instead of cloning into the repository at DIRECTORY."
   (when (magit-git-repo-p directory)
-    (magit-status directory)
+    (magit-status-setup-buffer directory)
     (user-error "Repository already cloned at %s, opened magit-status" directory)))
 
 ;; :before, so an existing clone opens instead of failing upstream's
@@ -372,8 +370,6 @@ in `project-prompt-project-dir'."
           ((string-empty-p choice) (user-error "No project selected"))
           (t (johnny5--project-root-of choice)))))
 
-(setq project-prompter #'johnny5-project-prompt)
-
 (defun johnny5-project-switch-project (dir &optional menu)
   "Open Magit in project DIR.
 With a prefix argument, or when the project is chosen with \\`C-u RET',
@@ -387,7 +383,14 @@ MENU non-nil does the same from Lisp."
   (let ((project-switch-commands (if menu project-switch-commands #'magit-project-status)))
     (project-switch-project dir)))
 
-(keymap-set project-prefix-map "p" #'johnny5-project-switch-project)
+(use-package project
+  :ensure nil
+  :custom
+  (project-prompter #'johnny5-project-prompt)
+  :bind (:map project-prefix-map
+              ("p" . johnny5-project-switch-project))
+  :config
+  (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m")))
 
 (ert-deftest test-johnny5-project-git-info ()
   "Branch comes from HEAD for checkouts, worktrees and detached HEADs."
@@ -411,9 +414,9 @@ MENU non-nil does the same from Lisp."
       (delete-directory root t))))
 ;;; magit
 (use-package magit
-  :after project
+  :custom
+  (magit-clone-default-directory #'johnny5-magit-clone-default-directory)
   :init
-  (add-to-list 'project-switch-commands '(magit-project-status "Magit" "m"))
   (setq magit-clone-set-remote.pushDefault t
         magit-display-buffer-function #'magit-display-buffer-fullframe-status-topleft-v1
         magit-bury-buffer-function #'magit-restore-window-configuration
