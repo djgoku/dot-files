@@ -5,7 +5,7 @@
 # Repo checks and workflow rendering use these project tools. Machine setup
 # remains in config/mise/.
 [tools]
-pkl = "0.32.1"
+pkl = "0.32.2"
 tombi = "1.9.8"
 "packslip:github.com/jdx/hk" = "latest"
 
