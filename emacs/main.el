@@ -6,24 +6,29 @@
 ;;; functions
 ;;;; johnny5-magit-clone - magit-clone integration
 ;; Integrates with magit-clone to provide:
-;; - Default clone directory from the URL: ~/dev/{host-without-domain}/{owner}/{repo}
+;; - Default clone directory from the URL: ~/dev/{domain-without-TLD}/{owner}/{repo}
 ;; - "git clone " prefix stripping when pasting full clone commands
 ;; - Jump to magit-status if repository already exists locally
 
 (defun johnny5-magit-clone-default-directory (url)
-  "Return ~/dev/{host}/{owner}/ for clone URL, with the host's domain dropped.
+  "Return ~/dev/{domain}/{owner}/ for clone URL.
+DOMAIN is the host's domain without its TLD, so github.com, ssh.github.com
+and altssh.bitbucket.org give github and bitbucket.  A host with no dot,
+such as an ssh_config alias, is used whole.
 Return nil when URL has no host, such as a local path or bundle."
   (when (string-match (rx bos
                           (? (+ (any "a-z+")) "://")
                           (? (+ (not (any "@/"))) "@")
-                          (group (+ (not (any "./:"))))
-                          (* (not (any "/:")))
+                          (group (+ (not (any "/:"))))
                           (? ":" (+ digit))
                           (any ":/")
                           (group (+ (not (any "/"))))
                           "/")
                       url)
-    (format "~/dev/%s/%s/" (match-string 1 url) (match-string 2 url))))
+    ;; Both groups are read first: `split-string' overwrites the match data.
+    (let ((host (match-string 1 url))
+          (owner (match-string 2 url)))
+      (format "~/dev/%s/%s/" (car (last (split-string host "\\.") 2)) owner))))
 
 ;;;;; advice: strip "git clone " prefix and allow pasting full commands
 (defun johnny5-magit-clone-read-repository ()
@@ -64,13 +69,17 @@ Upstream reads with `magit-read-string-ns', which rejects whitespace."
 
 ;;;;; tests
 (ert-deftest test-johnny5-magit-clone-default-directory ()
-  "Clone directory is ~/dev/{host without domain}/{owner}/, nil with no host."
+  "Clone directory is ~/dev/{domain without TLD}/{owner}/, nil with no host."
   (should (equal (johnny5-magit-clone-default-directory "git@github.com:djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "https://github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "git@bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
   (should (equal (johnny5-magit-clone-default-directory "https://djgoku@bitbucket.org/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "git@ssh.bitbucket.org:johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "ssh://git@altssh.bitbucket.org:443/johnny-5-is-alive/dot-files.git") "~/dev/bitbucket/johnny-5-is-alive/"))
+  (should (equal (johnny5-magit-clone-default-directory "ssh://git@ssh.github.com:443/djgoku/melpa.git") "~/dev/github/djgoku/"))
   (should (equal (johnny5-magit-clone-default-directory "ssh://git@github.com/djgoku/melpa.git") "~/dev/github/djgoku/"))
-  (should (equal (johnny5-magit-clone-default-directory "ssh://git@gitlab.example.com:2222/team/x.git") "~/dev/gitlab/team/"))
+  (should (equal (johnny5-magit-clone-default-directory "ssh://git@gitlab.example.com:2222/team/x.git") "~/dev/example/team/"))
+  (should (equal (johnny5-magit-clone-default-directory "git@work:team/x.git") "~/dev/work/team/"))
   (should-not (johnny5-magit-clone-default-directory "file:///Users/me/src/x"))
   (should-not (johnny5-magit-clone-default-directory "/Users/me/src/x.bundle")))
 ;;;; unfill-paragraph
