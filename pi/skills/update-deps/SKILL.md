@@ -17,7 +17,7 @@ UD=~/.pi/agent/skills/update-deps/scripts/ud
 
 `ud` pins the Python and gh versions the script runs on.
 
-Once per machine: `container system start`, then `$UD image` if `container image list` has no `update-deps:1`.
+Once per machine: `container system start`, then `$UD image` if `container image list` has no `update-deps:2`.
 
 For each repository (`owner/name`):
 

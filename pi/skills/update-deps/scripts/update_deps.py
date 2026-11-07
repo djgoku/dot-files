@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HOME = Path(os.environ.get('UPDATE_DEPS_HOME', Path.home() / '.cache' / 'update-deps'))
-IMAGE = os.environ.get('UPDATE_DEPS_IMAGE', 'update-deps:1')
+IMAGE = os.environ.get('UPDATE_DEPS_IMAGE', 'update-deps:2')
 IMAGE_DIR = Path(__file__).resolve().parent.parent / 'image'
 GH_HELPER = '!gh auth git-credential'
 REPO = re.compile(r'^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')
@@ -115,10 +115,11 @@ def plan(repo):
 
 def container(repo, src, steps, log, args=()):
     """Run steps in order inside the container; a failed step stops the rest."""
-    cache = paths(repo)['cache']
+    cache, tools = paths(repo)['cache'], src.with_name(src.name + '-tools')
     cache.mkdir(parents=True, exist_ok=True)
+    tools.mkdir(exist_ok=True)
     cmd = ['container', 'run', '--rm', '--cpus', '4', '--memory', '6g',
-           '-v', f'{src}:/src', '-v', f'{cache}:/cache', IMAGE,
+           '-v', f'{src}:/src', '-v', f'{cache}:/cache', '-v', f'{tools}:/tools', IMAGE,
            'bash', '-c', 'set -o pipefail; ' + ' && '.join(f'( {s} )' for s in steps), 'step', *args]
     with open(log, 'w') as out:
         return subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT).returncode
