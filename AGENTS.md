@@ -34,6 +34,7 @@ the tools they need; machine setup lives in `config/mise/`. References to
 │   └── emacs-env/              # Dated environment selector
 ├── gnupg/gpg-agent.conf.tmpl   # Rendered to ~/.gnupg/gpg-agent.conf
 ├── macos/com.apple.Terminal.plist
+├── pi/skills/update-deps/       # Agent skill -> symlinked to ~/.pi/agent/skills; uchi runs its sweep nightly
 ├── zsh/.zshrc
 ├── mise.toml                   # PROJECT config: this repo's tasks only
 └── .github/

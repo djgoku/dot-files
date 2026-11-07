@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+exec mise x -q python@3.14 gh@2.103.3 -- python3 -I "${0:A:h}/update_deps.py" "$@"

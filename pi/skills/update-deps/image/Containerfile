@@ -1,0 +1,16 @@
+FROM ubuntu:24.04
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       ca-certificates curl git unzip xz-utils build-essential autoconf m4 \
+       libncurses-dev libssl-dev zlib1g-dev locales \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen C.UTF-8
+ARG MISE_VERSION=2026.11.2
+ARG MISE_SHA256=18bf3ac02033c2a50b772b411e35528cd1888386b4316895fcae626db6ad96f3
+RUN curl -fsSL -o /usr/local/bin/mise \
+       "https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-arm64" \
+    && echo "${MISE_SHA256}  /usr/local/bin/mise" | sha256sum --check - \
+    && chmod 755 /usr/local/bin/mise
+ENV LANG=C.UTF-8 MISE_YES=1 MISE_DATA_DIR=/cache/mise MISE_CACHE_DIR=/cache/mise-cache \
+    HEX_HOME=/cache/hex MIX_HOME=/cache/mix PATH=/cache/mise/shims:$PATH
+WORKDIR /src
