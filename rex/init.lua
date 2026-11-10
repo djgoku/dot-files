@@ -1,4 +1,4 @@
--- Rex config, symlinked to ~/.config/rex/init.lua by config/mise/config.toml.
+-- Rex config, symlinked to ~/.config/rex/init.lua by config/mise/mise.toml.
 -- Apply changes with `rex config reload`.
 
 -- Cmd keys that go to Emacs when it is the focused pane's foreground process,

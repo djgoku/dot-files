@@ -21,7 +21,7 @@ the tools they need; machine setup lives in `config/mise/`. References to
 ├── setup.sh                    # Fresh-machine bootstrap (3 steps, then hands off)
 ├── hk.pkl                      # Repo checks: TOML, Pkl, zsh syntax
 ├── config/mise/                # Machine config -> symlinked to ~/.config/mise
-│   ├── config.toml             #   [settings] [tools] [dotfiles]
+│   ├── mise.toml               #   [settings] [tools] [dotfiles] [tasks]
 │   └── conf.d/
 │       ├── 10-repos.toml       #   git clones (fzf-tab, tree-sitter-module)
 │       ├── 20-files.toml       #   managed directories and generated files

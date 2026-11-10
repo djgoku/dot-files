@@ -1,6 +1,6 @@
 # Project config for THIS REPO -- tasks and the tools they need, nothing else.
 # Machine config lives in config/mise/ and is not loaded from here; see the
-# comment at the top of config/mise/config.toml for why the split exists.
+# comment at the top of config/mise/mise.toml for why the split exists.
 
 # Repo checks and workflow rendering use these project tools. Machine setup
 # remains in config/mise/.
