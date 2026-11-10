@@ -702,64 +702,47 @@ Press 'q' to exit and edit manually."
 ;; M-x org-babel-execute-buffer will execute all src blocks in a buffer
 (use-package org
   :ensure nil
-  :bind (("C-c c" . org-capture)
-         ("C-c a" . org-agenda))
-  :config (setq org-confirm-babel-evaluate nil
-                org-src-fontify-natively t
-                org-src-preserve-indentation t
-                org-edit-src-content-indentation t
-                org-log-into-drawer t
-                ;; NOT-RETAINED - will not continue in the application process
-                org-todo-keywords '((sequence "TODO(t!)" "IN-PROGRESS(i!)" "WAIT(w!)" "APPLIED(a!)" "|" "DONE(d@)"
-                                              "CANCELED(@)" "WITHDRAWN(@)" "FILLED" "HIRED" "NOT-RETAINED(n@)"))
-                org-refile-targets '((org-agenda-files :maxlevel . 2))
-                org-agenda-files '("~/dev/org" "~/dev/notes")
-                ;; org-agenda-include-inactive-timestamps 't
-                org-log-refile 'note
-                org-refile-use-outline-path 'file
-                org-outline-path-complete-in-steps nil
-                org-refile-allow-creating-parent-nodes 'confirm
-                org-startup-indented t)
+  :bind (("C-c a" . org-agenda))
+  :config
+  (setq org-confirm-babel-evaluate nil
+        org-src-preserve-indentation t
+        org-startup-indented t)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers)
-  (setq org-capture-templates '(("t" "Todo" entry (file "~/dev/org/inbox.org")
-                                 "* TODO %? [/]\n:PROPERTIES:\n:Created: %U\nEND:\n %i\n %a")
-                                ("c" "Cookbook" entry (file "~/dev/org/cookbook.org")
-                                 "%(org-chef-get-recipe-from-url)"
-                                 :empty-lines 1)
-                                ("m" "Manual Cookbook" entry (file "~/dev/org/cookbook.org")
-                                 "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
-  (require 'ox-md nil t)
-  (org-babel-do-load-languages 'org-babel-load-languages '((awk . t)
-                                                           (emacs-lisp . t)
-                                                           (eshell . t)
-                                                           ;; (elixir . t)
-                                                           (perl . t)
-                                                           (python . t)
-                                                           ;; (mermaid . t)
-                                                           (sed . t)
-                                                           (shell . t)
-                                                           (sql . t)
-                                                           (sqlite . t)
-                                                           (ruby . t)))
-  :mode (("\\.org$" . org-mode)))
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((emacs-lisp . t)
+                                 (python . t)
+                                 (shell . t))))
 ;;;; ob-async
 ;; just add :async to any org babel src blocks!
 (use-package ob-async
   :after org)
-;;;; org-chef
-(use-package org-chef)
-;;;; org-contrib
-(use-package org-contrib)
 ;;;; ob-elixir
 (use-package ob-elixir)
-;;;; orgit
-(use-package orgit)
-;;;; org-jira
-(use-package org-jira)
-;;;; ox-jira
-(use-package ox-jira)
-;;;; org-ql
-(use-package org-ql)
+;;;; org-gtd
+(use-package org-gtd
+  :after org
+  :demand t
+  :init
+  (setq org-gtd-update-ack "4.0.0"
+        org-gtd-directory "~/dev/gtd/")
+  :custom
+  (org-todo-keywords '((sequence "TODO" "NEXT" "WAIT" "|" "DONE" "CNCL")))
+  :config
+  ;; Agenda views and capture fail while the directory is missing.
+  (make-directory org-gtd-directory t)
+  (org-edna-mode 1)
+  (setq org-agenda-files (list "~/dev/notes" org-gtd-directory)
+        org-log-done 'time)
+  :bind
+  (("C-c d c" . org-gtd-capture)
+   ("C-c d e" . org-gtd-engage)
+   ("C-c d p" . org-gtd-process-inbox)
+   ("C-c d n" . org-gtd-show-all-next)
+   ("C-c d s" . org-gtd-reflect-stuck-projects)
+   :map org-gtd-clarify-mode-map
+   ("C-c c" . org-gtd-organize)
+   :map org-agenda-mode-map
+   ("C-c ." . org-gtd-agenda-transient)))
 ;;; denote
 (use-package denote
   :config
