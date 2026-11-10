@@ -5,7 +5,12 @@
 # `.config/mise/`: both of those are project-config paths mise auto-discovers,
 # so a `cd` into this repo would load this machine config -- and its
 # [bootstrap] stanzas -- a second time as project config. `config/mise/`
-# matches no discovery rule, so the symlink is the only way it loads.
+# matches no discovery rule from the repo root, so the symlink is the only way
+# it loads. Inside `config/mise/` itself mise does find this mise.toml, but it
+# is the same file as the global one and loads once.
+#
+# `mise use -g` writes here; `mise run use-local` writes to the untracked
+# mise.local.toml beside it.
 
 [settings]
 experimental = true
@@ -63,3 +68,10 @@ packslip = { version = "latest", identity_prefix = "https://github.com/jdx/packs
 # symlink that would mean macOS editing the copy inside this repo. Quit
 # Terminal before applying or cfprefsd overwrites it again on quit.
 "~/Library/Preferences/com.apple.Terminal.plist" = { source = "~/.dot-files/macos/com.apple.Terminal.plist", mode = "copy" }
+
+# Global, so it runs from any directory. mise.local.toml is gitignored: tools
+# for this machine only. Arguments go to `mise use`, e.g.
+# `mise run use-local gh jq@1.8` or `mise run use-local --dry-run gh`.
+[tasks.use-local]
+description = "Install tools into ~/.config/mise/mise.local.toml (this machine only)"
+run = 'mise use --path "$HOME/.config/mise/mise.local.toml"'
