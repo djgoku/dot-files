@@ -60,6 +60,33 @@
     (error
      (push (list "vterm" nil (format "error: %s" (error-message-string err))) test-init--results))))
 
+(defun test-init--check-org-gtd ()
+  "Verify org-gtd, its directory, agenda files, keywords and babel setup."
+  (let ((failures nil)
+        (keywords (mapcar (lambda (k) (replace-regexp-in-string "(.*" "" k))
+                          (apply #'append (mapcar #'cdr org-todo-keywords)))))
+    (unless (featurep 'org-gtd)
+      (push "org-gtd not loaded" failures))
+    (when (featurep 'org-gtd)
+      (unless (file-directory-p org-gtd-directory)
+        (push (format "%s does not exist" org-gtd-directory) failures))
+      (dolist (dir (list "~/dev/notes" org-gtd-directory))
+        (unless (member dir org-agenda-files)
+          (push (format "%s missing from org-agenda-files" dir) failures)))
+      (dolist (pair org-gtd-keyword-mapping)
+        (unless (member (cdr pair) keywords)
+          (push (format "keyword %s for %s not in org-todo-keywords" (cdr pair) (car pair)) failures))))
+    (unless (bound-and-true-p org-edna-mode)
+      (push "org-edna-mode is off" failures))
+    (unless (eq org-log-done 'time)
+      (push (format "org-log-done is %S, expected time" org-log-done) failures))
+    (dolist (fn '(org-babel-execute:shell org-babel-execute:python org-babel-execute:elixir))
+      (unless (fboundp fn)
+        (push (format "%s not defined" fn) failures)))
+    (if failures
+        (push (list "org-gtd" nil (mapconcat #'identity failures "; ")) test-init--results)
+      (push (list "org-gtd" t "org-gtd, ~/dev/gtd/, agenda files, keywords and babel ready") test-init--results))))
+
 ;;; Report and exit
 
 (defun test-init--report-and-exit ()
@@ -97,6 +124,7 @@
   (test-init--check-init)
   (test-init--check-ripgrep)
   (test-init--check-vterm)
+  (test-init--check-org-gtd)
   (test-init--report-and-exit))
 
 ;;; Entry point — handle both cached and fresh-install scenarios
