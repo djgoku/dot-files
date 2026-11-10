@@ -6,7 +6,7 @@
 # remains in config/mise/.
 [tools]
 pkl = "0.33.0"
-tombi = "1.10.0"
+tombi = "1.11.1"
 "packslip:github.com/jdx/hk" = "latest"
 
 [env]

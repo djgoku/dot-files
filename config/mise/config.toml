@@ -47,6 +47,7 @@ packslip = { version = "latest", identity_prefix = "https://github.com/jdx/packs
 "~/.dot-files" = "~/dev/github/djgoku/dot-files"
 "~/.config/mise" = { source = "~/.dot-files/config/mise", mode = "symlink" }
 "~/.zshrc" = { source = "~/.dot-files/zsh/.zshrc", mode = "symlink" }
+"~/.config/rex/init.lua" = { source = "~/.dot-files/rex/init.lua", mode = "symlink" }
 
 # Owns the whole file -- tera renders output and never reads the destination,
 # so a region cannot be managed on its own. Hand-added hosts live in
