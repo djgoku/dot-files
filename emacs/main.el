@@ -97,6 +97,12 @@ Return nil if test execution fails."
   (condition-case err
       (call-process command)
     (error (warn (format "Testing executable '%s' failed with '%s'" command err)) nil)))
+;;; kkp
+;; Kitty keyboard protocol in terminal frames, so Cmd arrives as `s-'.
+;; Only acts on tty frames (via `tty-setup-hook'); GUI frames are untouched.
+(use-package kkp
+  :config
+  (global-kkp-mode 1))
 ;;; transient
 (use-package transient)
 ;;; string-inflection
