@@ -43,9 +43,9 @@ tombi = "latest"
 # Required by `mise completion zsh` in conf.d/20-files.toml. Declared here so
 # mise does not silently append it to this file on first bootstrap.
 usage = "latest"
-"aqua:apple/container" = "latest"
+"aqua:apple/container" = { version = "latest", os = ["macos"] }
 packslip = { version = "latest", identity_prefix = "https://github.com/jdx/packslip/.github/workflows/release.yml@", issuer = "https://token.actions.githubusercontent.com", list_identity_prefix = "https://github.com/jdx/packslip/.github/workflows/packslip-releases.yml@" }
-"packslip:github.com/djgoku/misemacs-emacs-master" = "latest"
+"packslip:github.com/djgoku/misemacs-emacs-master" = { version = "latest", os = ["macos"] }
 "conda:git" = "latest"
 
 [dotfiles]
