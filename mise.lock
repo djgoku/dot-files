@@ -3,33 +3,33 @@
 lockfile_version = 2
 
 [[tools."packslip:github.com/jdx/hk"]]
-version = "2.11.1"
+version = "2.12.0"
 backend = "packslip:github.com/jdx/hk"
 specifiers = ["latest"]
 
 [tools."packslip:github.com/jdx/hk"."platforms.linux-arm64"]
-checksum = "sha256:b94d3b405a9e392d0286491693fd22386d3c5be086bf4b8698df33623bfe91a9"
-url = "https://github.com/jdx/hk/releases/download/v2.11.1/hk-aarch64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:0f4e44802c3fcf98461b6608281353ae1944b82fd12f4a683f8e2e6683e562f3"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [tools."packslip:github.com/jdx/hk"."platforms.linux-arm64-musl"]
-checksum = "sha256:5e20747e1335c599e2c1cf5bff06a8153cd42a719af00ced218868784875a63f"
-url = "https://github.com/jdx/hk/releases/download/v2.11.1/hk-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:82758b9671b4b3627f126dc8e9803bb156c23893b4f9ec212797f81c4d242e50"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [tools."packslip:github.com/jdx/hk"."platforms.linux-x64"]
-checksum = "sha256:b9330bd4b9326c3e1aefd757ff923fdf6d1b060074bcb4e54e16ec0a81fde7ec"
-url = "https://github.com/jdx/hk/releases/download/v2.11.1/hk-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:db98f893b882f064c1f7abcc96f4ccc31e8154fd1ba0f7f94823d371c2c4fdad"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [tools."packslip:github.com/jdx/hk"."platforms.linux-x64-musl"]
-checksum = "sha256:2067ccb4eeb4cb17623a7f840ee24a64edcfa242431b090358a854e619b3d345"
-url = "https://github.com/jdx/hk/releases/download/v2.11.1/hk-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:cab1ba30c605444112b4499790a97bd28dda83ffc352baa4aa87d5abfb12c668"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [tools."packslip:github.com/jdx/hk"."platforms.macos-arm64"]
-checksum = "sha256:95f89e6eef60e0c690b0d439b30e3b8558f47235a1a45cbff7b5351d294e4322"
-url = "https://github.com/jdx/hk/releases/download/v2.11.1/hk-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:269c17d47e884c19adb77144d5957e854fc5fc6a1a6f9c1a0a5b19431e2fabb8"
+url = "https://github.com/jdx/hk/releases/download/v2.12.0/hk-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [[tools.pkl]]
@@ -68,42 +68,42 @@ url = "https://github.com/apple/pkl/releases/download/0.33.0/pkl-macos-aarch64"
 url_api = "https://api.github.com/repos/apple/pkl/releases/assets/714757040"
 
 [[tools.tombi]]
-version = "1.11.1"
+version = "1.11.2"
 backend = "aqua:tombi-toml/tombi"
-specifiers = ["1.11.1"]
+specifiers = ["1.11.2"]
 
 [tools.tombi."platforms.linux-arm64"]
-checksum = "sha256:df98bd2067cc97f12e1c92b9a916ed0a6515cda643b31785887c78612fcd15e0"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632065"
+checksum = "sha256:14122e634113d2d9b1210b3f01d5139289575494a2d585824e1e51e116a58d96"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865789"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-arm64-musl"]
-checksum = "sha256:df98bd2067cc97f12e1c92b9a916ed0a6515cda643b31785887c78612fcd15e0"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632065"
+checksum = "sha256:14122e634113d2d9b1210b3f01d5139289575494a2d585824e1e51e116a58d96"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865789"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64"]
-checksum = "sha256:20ad530e4878c8214e40e14e92623fd2ef244254a397a5cab29137f9076c156e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632125"
+checksum = "sha256:8bb862497e99b415310ede463ee6cf997845368d3e6d4edac4dd33b07084beb3"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865894"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64-musl"]
-checksum = "sha256:20ad530e4878c8214e40e14e92623fd2ef244254a397a5cab29137f9076c156e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632125"
+checksum = "sha256:8bb862497e99b415310ede463ee6cf997845368d3e6d4edac4dd33b07084beb3"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865894"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.macos-arm64"]
-checksum = "sha256:c14d4dbe7e0f8887a0090a91362ce3e46aa61002f879ff1728e8607f1c573197"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632070"
+checksum = "sha256:035be0afc61549adbe9ce6b6ab582cfff99bcd6b86f38f847149c3819dc89d33"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865806"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.macos-x64"]
-checksum = "sha256:3130e3cdae621f09c730a19c725b7302463310fd5868362a7241ff9cdf370251"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.1/tombi-cli-1.11.1-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/725632067"
+checksum = "sha256:09ed72a2e8a5a57fa325f95942833692bdc838b4ca4c0964dfbad20da44553c3"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.11.2/tombi-cli-1.11.2-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/731865783"
 provenance = "github-attestations"
