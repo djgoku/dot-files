@@ -945,19 +945,9 @@ After downloading, restart eglot in affected buffers to pick up changes."
 (use-package yasnippet
   :config
   (yas-global-mode 1))
-;;; burly
-(use-package burly
-  :ensure (:type git :host github :repo "alphapapa/burly.el"))
 ;;; tab-bar-history-mode:
 ;; better than winnner, no tabs required
 ;; https://www.reddit.com/r/emacs/comments/1kz57i5/comment/mv4zgji
-(defmacro johnny5-repeat-it (group cmds)
-  (let ((map (intern (concat (symbol-name group) "-repeat-map"))))
-    `(progn
-       (defvar ,map (make-sparse-keymap))
-       (cl-loop for (key def) in ,cmds do
-                (define-key ,map (kbd key) def)
-                (put def 'repeat-map ',map)))))
 (defun johnny5-tab-bar-history-report-position ()
   (let* ((f (selected-frame))
          (back (length (gethash f tab-bar-history-back)))
@@ -974,10 +964,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
   (setq tab-bar-history-limit 200)
   :config
   (tab-bar-history-mode 1)
-  (johnny5-repeat-it tab-bar-history-mode '(("<left>" tab-bar-history-back)
-                                            ("M-s-<left>" tab-bar-history-back)
-                                            ("<right>" tab-bar-history-forward)
-                                            ("M-s-<right>" tab-bar-history-forward)))
   (advice-add 'tab-bar-history-forward :after 'johnny5-tab-bar-history-report-position)
   (advice-add 'tab-bar-history-back :after 'johnny5-tab-bar-history-report-position))
 ;;; ws-butler
