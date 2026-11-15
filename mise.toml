@@ -45,7 +45,7 @@ set -eu
 src="$PWD/emacs"
 dir="$(mktemp -d)"
 mkdir -p "$src/elpaca"
-for f in early-init.el init.el main.el test-init.el emacs-env elpaca; do
+for f in early-init.el init.el main.el test-init.el elpaca; do
   ln -s "$src/$f" "$dir/$f"
 done
 echo "init dir: $dir"

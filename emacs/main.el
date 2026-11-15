@@ -1052,12 +1052,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
                             (format "-L%s/lib" enchant-lib-path)))))))
   (johnny5-jinx-get-paths)
   (keymap-set jinx-repeat-map "RET" 'jinx-correct))
-;;; emacs-env
-;; Manage dated Emacs environments for testing emacs-overlay updates
-(let ((env-file (locate-user-emacs-file "emacs-env/emacs-env.el")))
-  (when (file-exists-p env-file)
-    (load env-file)))
-
 ;;; load custom.el
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)
