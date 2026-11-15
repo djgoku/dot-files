@@ -817,8 +817,8 @@ After downloading, restart eglot in affected buffers to pick up changes."
          (typescript-ts-mode . eglot-ensure)
          (yaml-ts-mode . eglot-ensure))
   :bind(:map eglot-mode-map
-             ("C-c l r" . eglot-rename)
-             ("C-c l a" . eglot-code-actions)
+             ("C-c l r" . refactor-rename)
+             ("C-c l a" . refactor)
              ("M-n" . flymake-goto-next-error)
              ("M-p" . flymake-goto-prev-error))
   :custom
