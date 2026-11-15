@@ -1,6 +1,6 @@
 ;;; main config  -*- lexical-binding: t; -*-
 ;;; create directories for auto-saves, backups and locks
-(dolist (directory '("auto-saves" "backups" "locks"))
+(dolist (directory '("auto-saves" "locks"))
   (unless (file-directory-p (concat user-emacs-directory directory))
     (mkdir (concat user-emacs-directory directory))))
 ;;; functions
@@ -113,8 +113,6 @@ Return nil if test execution fails."
 (use-package markdown-mode)
 ;;; json-mode
 (use-package json-mode)
-;;; jeison
-(use-package jeison)
 ;;; toml
 (use-package toml-ts-mode
   :ensure nil
@@ -750,7 +748,6 @@ Press 'q' to exit and edit manually."
 ;;;; consult-denote
 (use-package consult-denote)
 ;;; programming
-(use-package elixir-ts-mode)
 (use-package elixir-mode)
 (setq treesit-extra-load-path (list (expand-file-name "~/dev/github/casouri/tree-sitter-module/dist")))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
@@ -807,10 +804,8 @@ After downloading, restart eglot in affected buffers to pick up changes."
       (setq-default eglot-workspace-configuration
                     `(:yaml (:schemaStore (:enable t)
                              :validate t)))))
-  (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ,(eglot-alternatives
-                                                                                        '(("expert" "--stdio")
-                                                                                          ("elixir-ls"))))))
+  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode)
+                                        . ,(eglot-alternatives '(("expert" "--stdio") ("elixir-ls")))))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
@@ -887,33 +882,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
          ("C-c C-j" .   avy-resume)
          :map isearch-mode-map
          ("C-'" . avy-isearch)))
-;;; vterm
-;; (defun setup-vterm-init ()
-;;   "This might be hacky, but this allows me to use mise vterm or compile with cmake."
-;;   (setq vterm-buffer-name-string "vterm %s"
-;;         vterm-kill-buffer-on-exit nil
-;;         vterm-max-scrollback 1000000
-;;         vterm-use-vterm-prompt-detection-method t
-;;         vterm--maybe-compile nil)
-;;   (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
-;;             (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
-;;       (progn
-;;         (add-to-list 'load-path maybe-load-path)
-;;         (message "----- using mise vterm -----"))
-;;     (setq vterm--maybe-compile t)
-;;     (setq vterm-always-compile-module t)
-;;     (message "----- downloading and compiling vterm -----")))
-
-;; (setup-vterm-init)
-
-;; (if vterm--maybe-compile
-;;     (use-package vterm)
-;;   (use-package vterm
-;;     :ensure nil))
-
-;; (eval-after-load 'vterm
-;;   '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-;;                                                   (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init

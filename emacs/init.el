@@ -62,8 +62,6 @@
 ;;;; outline
 (use-package outline
   :ensure nil
-  :hook
-  (prog-mode-hook . outline-minor-mode)
   :bind
   (:map outline-minor-mode-map
         ("C-<tab>" . outline-cycle-buffer)
@@ -74,8 +72,7 @@
   :ensure (:host github :repo "jdtsmith/outli")
   :bind (:map outli-mode-map ; convenience key to get back to containing heading
               ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
-  :hook ((prog-mode text-mode) . outli-mode)
-  :init (outli-mode 1))
+  :hook ((prog-mode text-mode) . outli-mode))
 ;;; emacs
 (use-package emacs
   :ensure nil
@@ -89,7 +86,6 @@
   (if (fboundp 'toggle-scroll-bar)
       (toggle-scroll-bar nil))
   (tool-bar-mode -1)
-  (ido-mode -1)
   (setq auto-revert-interval 1)
   (global-auto-revert-mode 1)
   (setq make-backup-files nil)
@@ -102,7 +98,6 @@
   (display-time-mode 1)
   (setq display-time-default-load-average nil)
   (setq display-time-format "%F %H:%M - %a")
-  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
   (setq delete-by-moving-to-trash t)

@@ -43,23 +43,6 @@
    (t
     (push (list "ripgrep" t (format "found %s" johnny--maybe-ripgrep-executable)) test-init--results))))
 
-(defun test-init--check-vterm ()
-  "Verify vterm loads and can create a buffer."
-  (condition-case err
-      (progn
-        (require 'vterm)
-        (let ((buf (vterm "test-init-vterm")))
-          (unwind-protect
-              (with-current-buffer buf
-                (if (eq major-mode 'vterm-mode)
-                    (push (list "vterm" t "vterm buffer created and cleaned up") test-init--results)
-                  (push (list "vterm" nil (format "expected vterm-mode, got %s" major-mode)) test-init--results)))
-            (let ((proc (get-buffer-process buf)))
-              (when proc (delete-process proc)))
-            (kill-buffer buf))))
-    (error
-     (push (list "vterm" nil (format "error: %s" (error-message-string err))) test-init--results))))
-
 (defun test-init--check-org-gtd ()
   "Verify org-gtd, its directory, agenda files, keywords and babel setup."
   (let ((failures nil)
@@ -123,7 +106,6 @@
   "Run all smoke tests and exit."
   (test-init--check-init)
   (test-init--check-ripgrep)
-  (test-init--check-vterm)
   (test-init--check-org-gtd)
   (test-init--report-and-exit))
 
