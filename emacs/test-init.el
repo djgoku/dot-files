@@ -1,6 +1,6 @@
 ;;; test-init.el --- Emacs config smoke tests -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; Loaded via: emacs --init-directory=./emacs -l ./emacs/test-init.el
+;; Run with: mise run test-emacs
 ;;
 ;; Two scenarios:
 ;; - Cached packages (local): elpaca finishes before -l runs, tests run immediately

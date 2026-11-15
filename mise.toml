@@ -37,3 +37,20 @@ for src in .github/workflows/*.pkl; do
   diff -u "$out" "$rendered"
 done
 """
+
+[tasks.test-emacs]
+description = "Start Emacs on a temporary init dir and run the emacs/test-init.el smoke tests (EMACS overrides the binary)"
+run = """
+set -eu
+src="$PWD/emacs"
+dir="$(mktemp -d)"
+mkdir -p "$src/elpaca"
+for f in early-init.el init.el main.el test-init.el emacs-env elpaca; do
+  ln -s "$src/$f" "$dir/$f"
+done
+echo "init dir: $dir"
+status=0
+TMPDIR="$dir/" "${EMACS:-emacs}" --init-directory "$dir" -l "$dir/test-init.el" || status=$?
+cat "$dir/emacs-test-results.txt"
+exit "$status"
+"""
