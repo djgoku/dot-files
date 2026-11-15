@@ -101,8 +101,6 @@
   (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves/") t)))
   (setq lock-file-name-transforms `((".*" ,(concat user-emacs-directory "locks/") t)))
   (setq delete-by-moving-to-trash t)
-  (setq initial-major-mode #'org-mode)
-  (setq initial-scratch-message "* test\n#+begin_src emacs-lisp\n#+end_src")
   (setq window-combination-resize t)
   (setq use-short-answers t)
   (delete-selection-mode 1)

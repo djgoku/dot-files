@@ -737,8 +737,7 @@ Press 'q' to exit and edit manually."
 (use-package ob-elixir)
 ;;;; org-gtd
 (use-package org-gtd
-  :after org
-  :demand t
+  :defer 2
   :init
   (setq org-gtd-update-ack "4.0.0"
         org-gtd-directory "~/dev/gtd/")

@@ -44,7 +44,9 @@
     (push (list "ripgrep" t (format "found %s" johnny--maybe-ripgrep-executable)) test-init--results))))
 
 (defun test-init--check-org-gtd ()
-  "Verify org-gtd, its directory, agenda files, keywords and babel setup."
+  "Load org-gtd, then verify its directory, agenda files, keywords and babel setup.
+Startup loads org-gtd on an idle timer, after these tests run."
+  (require 'org-gtd)
   (let ((failures nil)
         (keywords (mapcar (lambda (k) (replace-regexp-in-string "(.*" "" k))
                           (apply #'append (mapcar #'cdr org-todo-keywords)))))
