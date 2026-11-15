@@ -104,40 +104,55 @@ Return nil if test execution fails."
   :config
   (global-kkp-mode 1))
 ;;; transient
-(use-package transient)
+(use-package transient
+  :defer t)
 ;;; string-inflection
-(use-package string-inflection)
+(use-package string-inflection
+  :defer t)
 ;;; powerthesaurus
-(use-package powerthesaurus)
+(use-package powerthesaurus
+  :defer t)
 ;;; markdown-mode
-(use-package markdown-mode)
+(use-package markdown-mode
+  :defer t)
 ;;; json-mode
-(use-package json-mode)
+(use-package json-mode
+  :defer t)
 ;;; toml
 (use-package toml-ts-mode
   :ensure nil
   :config
   (setq toml-ts-mode-indent-offset 0))
 ;;; pkl
-(use-package pkl-mode)
+(use-package pkl-mode
+  :defer t)
 ;;; ipcalc
-(use-package ipcalc)
+(use-package ipcalc
+  :defer t)
 ;;; htmlize
-(use-package htmlize)
+(use-package htmlize
+  :defer t)
 ;;; elfeed
-(use-package elfeed)
+(use-package elfeed
+  :defer t)
 ;;; docker
-(use-package docker)
+(use-package docker
+  :defer t)
 ;;; dired
 ;;;; dired-preview
-(use-package dired-preview)
+(use-package dired-preview
+  :defer t)
 ;;;; dired-x
 ;; adds F to dired buffers 'dired-do-find-marked-files'
-(require 'dired-x)
+(use-package dired-x
+  :ensure nil
+  :after dired)
 ;;; define-word
-(use-package define-word)
+(use-package define-word
+  :defer t)
 ;;; kubel
 (use-package kubel
+  :defer t
   :preface (setq-default kubectl-command (executable-find "kubectl"))
   :if kubectl-command)
 ;;; consult
@@ -177,7 +192,8 @@ Return nil if test execution fails."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<")) ;; "C-+"
 ;;;; consult-dir
-(use-package consult-dir)
+(use-package consult-dir
+  :defer t)
 ;;; marginalia
 (use-package marginalia
   :init
@@ -263,9 +279,10 @@ Return nil if test execution fails."
 ;;;; rg
 (use-package rg
   :if johnny--maybe-ripgrep-executable
+  :bind (("C-c s" . rg-menu)
+         :map rg-mode-map
+         ("m" . rg-menu))
   :config
-  (rg-enable-default-bindings)
-  (rg-enable-menu)
   (setq rg-executable johnny--maybe-ripgrep-executable))
 ;;;; wgrep
 (use-package wgrep
@@ -618,9 +635,11 @@ that only draw the graph are padded to keep it aligned."
     (pinentry-start)
     (add-hook 'kill-emacs-hook #'pinentry-stop)))
 ;;; git-link
-(use-package git-link)
+(use-package git-link
+  :defer t)
 ;;; git-timemachine
-(use-package git-timemachine)
+(use-package git-timemachine
+  :defer t)
 ;;; smerge
 ;;;; smerge-nav
 ;; Provides a simple navigation mode for smerge conflicts.
@@ -743,12 +762,15 @@ Press 'q' to exit and edit manually."
    ("C-c ." . org-gtd-agenda-transient)))
 ;;; denote
 (use-package denote
+  :defer t
   :config
   (setq denote-directory "~/dev/notes"))
 ;;;; consult-denote
-(use-package consult-denote)
+(use-package consult-denote
+  :defer t)
 ;;; programming
-(use-package elixir-mode)
+(use-package elixir-mode
+  :defer t)
 (setq treesit-extra-load-path (list (expand-file-name "~/dev/github/casouri/tree-sitter-module/dist")))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package treesit-auto
