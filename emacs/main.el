@@ -755,6 +755,9 @@ Press 'q' to exit and edit manually."
   :custom
   (treesit-auto-install 'prompt)
   :config
+  ;; markdown-ts-mode also needs a markdown-inline grammar, which
+  ;; tree-sitter-module does not build, so .md files stay in markdown-mode.
+  (setq treesit-auto-langs (remq 'markdown treesit-auto-langs))
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 ;;; schema-store
