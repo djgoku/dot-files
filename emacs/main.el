@@ -783,7 +783,7 @@ After downloading, restart eglot in affected buffers to pick up changes."
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
-  :ensure (:depth 1)
+  :ensure nil
   :config
   ;; else eglot + python will not work well
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
@@ -863,6 +863,7 @@ After downloading, restart eglot in affected buffers to pick up changes."
   (add-to-list 'corfu-continue-commands #'corfu-move-to-minibuffer))
 ;;; which-key
 (use-package which-key
+  :ensure nil
   :config (which-key-mode))
 ;;; switch-window
 (use-package switch-window
