@@ -1,6 +1,6 @@
 ;;; test-init.el --- Emacs config smoke tests -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; Loaded via: emacs --init-directory=./emacs -l ./emacs/test-init.el
+;; Run with: mise run test-emacs
 ;;
 ;; Two scenarios:
 ;; - Cached packages (local): elpaca finishes before -l runs, tests run immediately
@@ -43,25 +43,10 @@
    (t
     (push (list "ripgrep" t (format "found %s" johnny--maybe-ripgrep-executable)) test-init--results))))
 
-(defun test-init--check-vterm ()
-  "Verify vterm loads and can create a buffer."
-  (condition-case err
-      (progn
-        (require 'vterm)
-        (let ((buf (vterm "test-init-vterm")))
-          (unwind-protect
-              (with-current-buffer buf
-                (if (eq major-mode 'vterm-mode)
-                    (push (list "vterm" t "vterm buffer created and cleaned up") test-init--results)
-                  (push (list "vterm" nil (format "expected vterm-mode, got %s" major-mode)) test-init--results)))
-            (let ((proc (get-buffer-process buf)))
-              (when proc (delete-process proc)))
-            (kill-buffer buf))))
-    (error
-     (push (list "vterm" nil (format "error: %s" (error-message-string err))) test-init--results))))
-
 (defun test-init--check-org-gtd ()
-  "Verify org-gtd, its directory, agenda files, keywords and babel setup."
+  "Load org-gtd, then verify its directory, agenda files, keywords and babel setup.
+Startup loads org-gtd on an idle timer, after these tests run."
+  (require 'org-gtd)
   (let ((failures nil)
         (keywords (mapcar (lambda (k) (replace-regexp-in-string "(.*" "" k))
                           (apply #'append (mapcar #'cdr org-todo-keywords)))))
@@ -123,7 +108,6 @@
   "Run all smoke tests and exit."
   (test-init--check-init)
   (test-init--check-ripgrep)
-  (test-init--check-vterm)
   (test-init--check-org-gtd)
   (test-init--report-and-exit))
 

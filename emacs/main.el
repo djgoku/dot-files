@@ -1,6 +1,6 @@
 ;;; main config  -*- lexical-binding: t; -*-
 ;;; create directories for auto-saves, backups and locks
-(dolist (directory '("auto-saves" "backups" "locks"))
+(dolist (directory '("auto-saves" "locks"))
   (unless (file-directory-p (concat user-emacs-directory directory))
     (mkdir (concat user-emacs-directory directory))))
 ;;; functions
@@ -104,42 +104,55 @@ Return nil if test execution fails."
   :config
   (global-kkp-mode 1))
 ;;; transient
-(use-package transient)
+(use-package transient
+  :defer t)
 ;;; string-inflection
-(use-package string-inflection)
+(use-package string-inflection
+  :defer t)
 ;;; powerthesaurus
-(use-package powerthesaurus)
+(use-package powerthesaurus
+  :defer t)
 ;;; markdown-mode
-(use-package markdown-mode)
+(use-package markdown-mode
+  :defer t)
 ;;; json-mode
-(use-package json-mode)
-;;; jeison
-(use-package jeison)
+(use-package json-mode
+  :defer t)
 ;;; toml
 (use-package toml-ts-mode
   :ensure nil
   :config
   (setq toml-ts-mode-indent-offset 0))
 ;;; pkl
-(use-package pkl-mode)
+(use-package pkl-mode
+  :defer t)
 ;;; ipcalc
-(use-package ipcalc)
+(use-package ipcalc
+  :defer t)
 ;;; htmlize
-(use-package htmlize)
+(use-package htmlize
+  :defer t)
 ;;; elfeed
-(use-package elfeed)
+(use-package elfeed
+  :defer t)
 ;;; docker
-(use-package docker)
+(use-package docker
+  :defer t)
 ;;; dired
 ;;;; dired-preview
-(use-package dired-preview)
+(use-package dired-preview
+  :defer t)
 ;;;; dired-x
 ;; adds F to dired buffers 'dired-do-find-marked-files'
-(require 'dired-x)
+(use-package dired-x
+  :ensure nil
+  :after dired)
 ;;; define-word
-(use-package define-word)
+(use-package define-word
+  :defer t)
 ;;; kubel
 (use-package kubel
+  :defer t
   :preface (setq-default kubectl-command (executable-find "kubectl"))
   :if kubectl-command)
 ;;; consult
@@ -179,7 +192,8 @@ Return nil if test execution fails."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<")) ;; "C-+"
 ;;;; consult-dir
-(use-package consult-dir)
+(use-package consult-dir
+  :defer t)
 ;;; marginalia
 (use-package marginalia
   :init
@@ -265,9 +279,10 @@ Return nil if test execution fails."
 ;;;; rg
 (use-package rg
   :if johnny--maybe-ripgrep-executable
+  :bind (("C-c s" . rg-menu)
+         :map rg-mode-map
+         ("m" . rg-menu))
   :config
-  (rg-enable-default-bindings)
-  (rg-enable-menu)
   (setq rg-executable johnny--maybe-ripgrep-executable))
 ;;;; wgrep
 (use-package wgrep
@@ -620,9 +635,11 @@ that only draw the graph are padded to keep it aligned."
     (pinentry-start)
     (add-hook 'kill-emacs-hook #'pinentry-stop)))
 ;;; git-link
-(use-package git-link)
+(use-package git-link
+  :defer t)
 ;;; git-timemachine
-(use-package git-timemachine)
+(use-package git-timemachine
+  :defer t)
 ;;; smerge
 ;;;; smerge-nav
 ;; Provides a simple navigation mode for smerge conflicts.
@@ -720,8 +737,7 @@ Press 'q' to exit and edit manually."
 (use-package ob-elixir)
 ;;;; org-gtd
 (use-package org-gtd
-  :after org
-  :demand t
+  :defer 2
   :init
   (setq org-gtd-update-ack "4.0.0"
         org-gtd-directory "~/dev/gtd/")
@@ -745,19 +761,24 @@ Press 'q' to exit and edit manually."
    ("C-c ." . org-gtd-agenda-transient)))
 ;;; denote
 (use-package denote
+  :defer t
   :config
   (setq denote-directory "~/dev/notes"))
 ;;;; consult-denote
-(use-package consult-denote)
+(use-package consult-denote
+  :defer t)
 ;;; programming
-(use-package elixir-ts-mode)
-(use-package elixir-mode)
+(use-package elixir-mode
+  :defer t)
 (setq treesit-extra-load-path (list (expand-file-name "~/dev/github/casouri/tree-sitter-module/dist")))
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 (use-package treesit-auto
   :custom
   (treesit-auto-install 'prompt)
   :config
+  ;; markdown-ts-mode also needs a markdown-inline grammar, which
+  ;; tree-sitter-module does not build, so .md files stay in markdown-mode.
+  (setq treesit-auto-langs (remq 'markdown treesit-auto-langs))
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 ;;; schema-store
@@ -786,7 +807,7 @@ After downloading, restart eglot in affected buffers to pick up changes."
 ;; M-, xref-go-back
 ;; M-? xref-find-references
 (use-package eglot
-  :ensure (:depth 1)
+  :ensure nil
   :config
   ;; else eglot + python will not work well
   ;; https://github.com/joaotavora/eglot/discussions/1226#discussioncomment-6010670
@@ -807,10 +828,8 @@ After downloading, restart eglot in affected buffers to pick up changes."
       (setq-default eglot-workspace-configuration
                     `(:yaml (:schemaStore (:enable t)
                              :validate t)))))
-  (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode) . ,(eglot-alternatives
-                                                                                        '(("expert" "--stdio")
-                                                                                          ("elixir-ls"))))))
+  (add-to-list 'eglot-server-programs `((elixir-mode elixir-ts-mode heex-ts-mode)
+                                        . ,(eglot-alternatives '(("expert" "--stdio") ("elixir-ls")))))
   :hook ((elixir-mode . eglot-ensure)
          (elixir-ts-mode . eglot-ensure)
          (heex-ts-mode . eglot-ensure)
@@ -822,8 +841,8 @@ After downloading, restart eglot in affected buffers to pick up changes."
          (typescript-ts-mode . eglot-ensure)
          (yaml-ts-mode . eglot-ensure))
   :bind(:map eglot-mode-map
-             ("C-c l r" . eglot-rename)
-             ("C-c l a" . eglot-code-actions)
+             ("C-c l r" . refactor-rename)
+             ("C-c l a" . refactor)
              ("M-n" . flymake-goto-next-error)
              ("M-p" . flymake-goto-prev-error))
   :custom
@@ -868,6 +887,7 @@ After downloading, restart eglot in affected buffers to pick up changes."
   (add-to-list 'corfu-continue-commands #'corfu-move-to-minibuffer))
 ;;; which-key
 (use-package which-key
+  :ensure nil
   :config (which-key-mode))
 ;;; switch-window
 (use-package switch-window
@@ -887,33 +907,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
          ("C-c C-j" .   avy-resume)
          :map isearch-mode-map
          ("C-'" . avy-isearch)))
-;;; vterm
-;; (defun setup-vterm-init ()
-;;   "This might be hacky, but this allows me to use mise vterm or compile with cmake."
-;;   (setq vterm-buffer-name-string "vterm %s"
-;;         vterm-kill-buffer-on-exit nil
-;;         vterm-max-scrollback 1000000
-;;         vterm-use-vterm-prompt-detection-method t
-;;         vterm--maybe-compile nil)
-;;   (if-let* ((vterm-base (getenv "MISE_VTERM_PATH"))
-;;             (maybe-load-path (car (file-expand-wildcards (concat vterm-base "/share/emacs/site-lisp/elpa/vterm*")))))
-;;       (progn
-;;         (add-to-list 'load-path maybe-load-path)
-;;         (message "----- using mise vterm -----"))
-;;     (setq vterm--maybe-compile t)
-;;     (setq vterm-always-compile-module t)
-;;     (message "----- downloading and compiling vterm -----")))
-
-;; (setup-vterm-init)
-
-;; (if vterm--maybe-compile
-;;     (use-package vterm)
-;;   (use-package vterm
-;;     :ensure nil))
-
-;; (eval-after-load 'vterm
-;;   '(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path)
-;;                                                   (setq default-directory path)))))
 ;;; elisp-demos
 (use-package elisp-demos
   :init
@@ -977,19 +970,9 @@ After downloading, restart eglot in affected buffers to pick up changes."
 (use-package yasnippet
   :config
   (yas-global-mode 1))
-;;; burly
-(use-package burly
-  :ensure (:type git :host github :repo "alphapapa/burly.el"))
 ;;; tab-bar-history-mode:
 ;; better than winnner, no tabs required
 ;; https://www.reddit.com/r/emacs/comments/1kz57i5/comment/mv4zgji
-(defmacro johnny5-repeat-it (group cmds)
-  (let ((map (intern (concat (symbol-name group) "-repeat-map"))))
-    `(progn
-       (defvar ,map (make-sparse-keymap))
-       (cl-loop for (key def) in ,cmds do
-                (define-key ,map (kbd key) def)
-                (put def 'repeat-map ',map)))))
 (defun johnny5-tab-bar-history-report-position ()
   (let* ((f (selected-frame))
          (back (length (gethash f tab-bar-history-back)))
@@ -1006,10 +989,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
   (setq tab-bar-history-limit 200)
   :config
   (tab-bar-history-mode 1)
-  (johnny5-repeat-it tab-bar-history-mode '(("<left>" tab-bar-history-back)
-                                            ("M-s-<left>" tab-bar-history-back)
-                                            ("<right>" tab-bar-history-forward)
-                                            ("M-s-<right>" tab-bar-history-forward)))
   (advice-add 'tab-bar-history-forward :after 'johnny5-tab-bar-history-report-position)
   (advice-add 'tab-bar-history-back :after 'johnny5-tab-bar-history-report-position))
 ;;; ws-butler
@@ -1050,12 +1029,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
   ;;                                  parenthesized_expression subscript)))
   :config
   (require 'indent-bars-ts)             ; not needed with straight
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (setq-local
-               indent-tabs-mode t ; make sure tabs-based indenting is on, even if we disable it globally
-               indent-bars-no-descend-lists nil) ; elisp is mostly continued lists!  allow bars to descend inside
-              (indent-bars-mode 1)))
   :hook ((python-base-mode yaml-mode elixir-ts-mode) . indent-bars-mode))
 ;;; jinx
 ;; If this errors when loading and enchant is installed try
@@ -1079,12 +1052,6 @@ After downloading, restart eglot in affected buffers to pick up changes."
                             (format "-L%s/lib" enchant-lib-path)))))))
   (johnny5-jinx-get-paths)
   (keymap-set jinx-repeat-map "RET" 'jinx-correct))
-;;; emacs-env
-;; Manage dated Emacs environments for testing emacs-overlay updates
-(let ((env-file (locate-user-emacs-file "emacs-env/emacs-env.el")))
-  (when (file-exists-p env-file)
-    (load env-file)))
-
 ;;; load custom.el
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)

@@ -30,8 +30,7 @@ the tools they need; machine setup lives in `config/mise/`. References to
 ├── emacs/
 │   ├── init.el                 # Emacs init (loads main.el)
 │   ├── main.el                 # Main configuration
-│   ├── early-init.el           # Early init (elpaca bootstrap)
-│   └── emacs-env/              # Dated environment selector
+│   └── early-init.el           # Early init (elpaca bootstrap)
 ├── gnupg/gpg-agent.conf.tmpl   # Rendered to ~/.gnupg/gpg-agent.conf
 ├── macos/com.apple.Terminal.plist
 ├── zsh/.zshrc
@@ -117,6 +116,7 @@ the tools they need; machine setup lives in `config/mise/`. References to
 ```bash
 mise exec -- hk check --all   # project formatting and syntax checks
 mise run check-workflows      # generated YAML still matches its .pkl source
+mise run test-emacs           # start Emacs on a temporary init dir and run emacs/test-init.el
 mise bootstrap --dry-run      # inspect every stage, change nothing
 mise bootstrap --only files --yes
 mise config ls                # confirm which config files are actually loaded

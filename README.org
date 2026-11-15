@@ -53,8 +53,7 @@ mise bootstrap --yes
 ├── emacs/
 │   ├── init.el                 # Emacs init
 │   ├── main.el                 # Main configuration
-│   ├── early-init.el
-│   └── emacs-env/              # Environment selector
+│   └── early-init.el
 ├── mise.toml                   # PROJECT config: this repo's tasks only
 ├── .github/
 │   ├── PklProject              # pins com.github.actions (pkl-pantry)
