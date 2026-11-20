@@ -1249,33 +1249,33 @@ url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgre
 url_api = "https://api.github.com/repos/phiresky/ripgrep-all/releases/assets/314433087"
 
 [[tools.aws-cli]]
-version = "2.41.0"
+version = "2.41.1"
 backend = "aqua:aws/aws-cli"
 specifiers = ["latest"]
 
 [tools.aws-cli."platforms.linux-arm64"]
-checksum = "blake3:56106f06101233224b3a3a9ebe75ad70bb7c2d36f9297940c0dd24bf6f8f1066"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.0.zip"
+checksum = "blake3:7dfb2da07b2013b5426711fdd073d03f0c0be4d69bb1be5676242cb1a06068e3"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.1.zip"
 
 [tools.aws-cli."platforms.linux-arm64-musl"]
-checksum = "sha256:a1bdbb55835d5e5159f7ad9ad4f55bcce838565a2f12aded2aefee2f4bf71d0a"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.0.zip"
+checksum = "sha256:83f3bb8440cf6a05e6289f8024126b8c8e15e9513adfe0d6c059747350cdb1e2"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.1.zip"
 
 [tools.aws-cli."platforms.linux-x64"]
-checksum = "sha256:41c0e2d33e30ff34f0fcac8ec2a013d8c3b95100cf7d4bd1007302b7d4f655e5"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.0.zip"
+checksum = "sha256:f1b67518c009e9deb94152aaba5cc015e80af6b0630a7931d3662df42b5f568e"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.1.zip"
 
 [tools.aws-cli."platforms.linux-x64-musl"]
-checksum = "sha256:41c0e2d33e30ff34f0fcac8ec2a013d8c3b95100cf7d4bd1007302b7d4f655e5"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.0.zip"
+checksum = "sha256:f1b67518c009e9deb94152aaba5cc015e80af6b0630a7931d3662df42b5f568e"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.1.zip"
 
 [tools.aws-cli."platforms.macos-arm64"]
-checksum = "sha256:e4212731cf74ec59a049f6097412fe2c9d0553e0dbee71cb24611e829b2ed403"
-url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.0.pkg"
+checksum = "sha256:fcc64d3b7c5425a7e236bfb2faba4cbdfa580f888c7165268715e474d9d1408d"
+url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.1.pkg"
 
 [tools.aws-cli."platforms.macos-x64"]
-checksum = "sha256:e4212731cf74ec59a049f6097412fe2c9d0553e0dbee71cb24611e829b2ed403"
-url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.0.pkg"
+checksum = "sha256:fcc64d3b7c5425a7e236bfb2faba4cbdfa580f888c7165268715e474d9d1408d"
+url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.1.pkg"
 
 [[tools."conda:git"]]
 version = "2.56.1"
