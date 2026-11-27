@@ -1178,39 +1178,44 @@ url = "https://github.com/apple/container/releases/download/1.4.1/container-1.4.
 url_api = "https://api.github.com/repos/apple/container/releases/assets/551745110"
 
 [[tools."aqua:ripgrep"]]
-version = "15.2.0"
+version = "16.0.0"
 backend = "aqua:ripgrep"
 specifiers = ["latest"]
 
 [tools."aqua:ripgrep"."platforms.linux-arm64"]
-checksum = "sha256:a740b91c82eaf9914cfedd353572f2791cbe0162c84101ee0951058f4dcbc90d"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478119579"
+checksum = "sha256:0b0bddcfaf42be1f3c56bf929d70defd1a2d96f2577aecbd7029a3734ddb4740"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780739969"
 
 [tools."aqua:ripgrep"."platforms.linux-arm64-musl"]
-checksum = "sha256:800b1e7206afe799dfb5a6901f23147cfaabe0e52210538100f61e86e1740915"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478120060"
+checksum = "sha256:0b0bddcfaf42be1f3c56bf929d70defd1a2d96f2577aecbd7029a3734ddb4740"
+checksum_source = "mise-versions"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780739969"
 
 [tools."aqua:ripgrep"."platforms.linux-x64"]
-checksum = "sha256:33e15bcf1624b25cdd2a55813a47a2f95dbe126268203e76aa6a585d1e7b149c"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478120097"
+checksum = "sha256:165451eaf35f977c0bd6cff1fb93e4fcce0ebd87e90a4b5e976507baf50f4a03"
+checksum_source = "mise-versions"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780739448"
 
 [tools."aqua:ripgrep"."platforms.linux-x64-musl"]
-checksum = "sha256:33e15bcf1624b25cdd2a55813a47a2f95dbe126268203e76aa6a585d1e7b149c"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478120097"
+checksum = "sha256:54268ab4643c00a290a29b0086066d64b3f56236dd805ec64629a86f9bd29fd0"
+checksum_source = "mise-versions"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780740424"
 
 [tools."aqua:ripgrep"."platforms.macos-arm64"]
-checksum = "sha256:3750b2e93f37e0c692657da574d7019a101c0084da05a790c83fd335bad973e4"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478118851"
+checksum = "sha256:5a145656d5067144001bfce6648767fd3254599aa736f1ffdb7fb907760b8ca1"
+checksum_source = "mise-versions"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780739338"
 
 [tools."aqua:ripgrep"."platforms.macos-x64"]
-checksum = "sha256:af7825fcc69a2afc7a7aea55fc9af90e26421d8f20fe59df32e233c0b8a231c1"
-url = "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/478119585"
+checksum = "sha256:aa9183b0e0bfac03c5818895ad18b75001c402d230063898abfe5a58cd413caa"
+checksum_source = "mise-versions"
+url = "https://github.com/BurntSushi/ripgrep/releases/download/16.0.0/ripgrep-16.0.0-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/BurntSushi/ripgrep/releases/assets/780739975"
 
 [[tools."aqua:ripgrep-all"]]
 version = "0.10.10"
@@ -1249,33 +1254,33 @@ url = "https://github.com/phiresky/ripgrep-all/releases/download/v0.10.10/ripgre
 url_api = "https://api.github.com/repos/phiresky/ripgrep-all/releases/assets/314433087"
 
 [[tools.aws-cli]]
-version = "2.41.1"
+version = "2.42.4"
 backend = "aqua:aws/aws-cli"
 specifiers = ["latest"]
 
 [tools.aws-cli."platforms.linux-arm64"]
-checksum = "blake3:7dfb2da07b2013b5426711fdd073d03f0c0be4d69bb1be5676242cb1a06068e3"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.1.zip"
+checksum = "blake3:b2089a373797d4b1ca954ad4115f6436385096a74e2b304c6d8578c860a51e9a"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.42.4.zip"
 
 [tools.aws-cli."platforms.linux-arm64-musl"]
-checksum = "sha256:83f3bb8440cf6a05e6289f8024126b8c8e15e9513adfe0d6c059747350cdb1e2"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.41.1.zip"
+checksum = "sha256:d0203a83caa162118c128ad16bc6c11835e998bd23763a3b195aeb323c78d010"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.42.4.zip"
 
 [tools.aws-cli."platforms.linux-x64"]
-checksum = "sha256:f1b67518c009e9deb94152aaba5cc015e80af6b0630a7931d3662df42b5f568e"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.1.zip"
+checksum = "sha256:8998885d7fc32370c50efc2e44746c34b222a03d70015113a5554f98be79165c"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.42.4.zip"
 
 [tools.aws-cli."platforms.linux-x64-musl"]
-checksum = "sha256:f1b67518c009e9deb94152aaba5cc015e80af6b0630a7931d3662df42b5f568e"
-url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.41.1.zip"
+checksum = "sha256:8998885d7fc32370c50efc2e44746c34b222a03d70015113a5554f98be79165c"
+url = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.42.4.zip"
 
 [tools.aws-cli."platforms.macos-arm64"]
-checksum = "sha256:fcc64d3b7c5425a7e236bfb2faba4cbdfa580f888c7165268715e474d9d1408d"
-url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.1.pkg"
+checksum = "sha256:6f5a5d523f128bfa736841523fabe936a9a4c9da7fce7273c535043a53016ea5"
+url = "https://awscli.amazonaws.com/AWSCLIV2-2.42.4.pkg"
 
 [tools.aws-cli."platforms.macos-x64"]
-checksum = "sha256:fcc64d3b7c5425a7e236bfb2faba4cbdfa580f888c7165268715e474d9d1408d"
-url = "https://awscli.amazonaws.com/AWSCLIV2-2.41.1.pkg"
+checksum = "sha256:6f5a5d523f128bfa736841523fabe936a9a4c9da7fce7273c535043a53016ea5"
+url = "https://awscli.amazonaws.com/AWSCLIV2-2.42.4.pkg"
 
 [[tools."conda:git"]]
 version = "2.56.1"
@@ -1928,33 +1933,33 @@ url = "https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-darw
 url_api = "https://api.github.com/repos/junegunn/fzf/releases/assets/720590841"
 
 [[tools.packslip]]
-version = "1.11.4"
+version = "1.11.5"
 backend = "packslip:packslip.dev"
 specifiers = ["latest"]
 
 [tools.packslip."platforms.linux-arm64"]
-checksum = "sha256:0cd0e3f96917dacbc0a993affacfc2a838df2503e3ac2017cee072c064cb30bc"
-url = "https://packslip.dev/v1.11.4/packslip-v1.11.4-linux-arm64.tar.xz"
+checksum = "sha256:22542a0243235de8edcdceb5e13dc56dd3351efd382cdbc6555f13f7ae9d6493"
+url = "https://packslip.dev/v1.11.5/packslip-v1.11.5-linux-arm64.tar.xz"
 signer = "sigstore-oidc:https://github.com/jdx/packslip/.github/workflows/release.yml"
 
 [tools.packslip."platforms.linux-arm64-musl"]
-checksum = "sha256:0cd0e3f96917dacbc0a993affacfc2a838df2503e3ac2017cee072c064cb30bc"
-url = "https://packslip.dev/v1.11.4/packslip-v1.11.4-linux-arm64.tar.xz"
+checksum = "sha256:22542a0243235de8edcdceb5e13dc56dd3351efd382cdbc6555f13f7ae9d6493"
+url = "https://packslip.dev/v1.11.5/packslip-v1.11.5-linux-arm64.tar.xz"
 signer = "sigstore-oidc:https://github.com/jdx/packslip/.github/workflows/release.yml"
 
 [tools.packslip."platforms.linux-x64"]
-checksum = "sha256:011ccc784584a466bd12a96f76c8e7a3ff365a2c99aee53884140cecf020aadd"
-url = "https://packslip.dev/v1.11.4/packslip-v1.11.4-linux-x64.tar.xz"
+checksum = "sha256:8f69db2646f31a59ccbee65ffd907bd5d0fb7edca772fcdb416d69359ce8630f"
+url = "https://packslip.dev/v1.11.5/packslip-v1.11.5-linux-x64.tar.xz"
 signer = "sigstore-oidc:https://github.com/jdx/packslip/.github/workflows/release.yml"
 
 [tools.packslip."platforms.linux-x64-musl"]
-checksum = "sha256:011ccc784584a466bd12a96f76c8e7a3ff365a2c99aee53884140cecf020aadd"
-url = "https://packslip.dev/v1.11.4/packslip-v1.11.4-linux-x64.tar.xz"
+checksum = "sha256:8f69db2646f31a59ccbee65ffd907bd5d0fb7edca772fcdb416d69359ce8630f"
+url = "https://packslip.dev/v1.11.5/packslip-v1.11.5-linux-x64.tar.xz"
 signer = "sigstore-oidc:https://github.com/jdx/packslip/.github/workflows/release.yml"
 
 [tools.packslip."platforms.macos-arm64"]
-checksum = "sha256:a97d048677de32ade64ea353d85c4aeebc8dc1e2adee51f83e0cb0311e135e52"
-url = "https://packslip.dev/v1.11.4/packslip-v1.11.4-darwin-arm64.tar.xz"
+checksum = "sha256:ec9f6b799030f5db24429f8e467a9fc3ed246097262ca9390feca93075b91123"
+url = "https://packslip.dev/v1.11.5/packslip-v1.11.5-darwin-arm64.tar.xz"
 signer = "sigstore-oidc:https://github.com/jdx/packslip/.github/workflows/release.yml"
 
 [[tools."packslip:github.com/djgoku/misemacs-emacs-master"]]
@@ -2103,36 +2108,36 @@ url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/7556264
 provenance = "github-attestations"
 
 [[tools.usage]]
-version = "7.4.0"
+version = "7.4.1"
 backend = "packslip:github.com/jdx/usage"
 specifiers = ["latest"]
 
 [tools.usage."platforms.linux-arm64"]
-checksum = "sha256:63ec67fd6bc8c54ad9e2775e95d6eea565565a30568d65c75be8423b3dd842ea"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-aarch64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:c2a8631b5c0601580a3d0908ac1dfddcee5e45f27f35981bf9f09c653c7608cd"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-aarch64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
 
 [tools.usage."platforms.linux-arm64-musl"]
-checksum = "sha256:2b522480691d6af6bb2a96de28cf9edbd90af3a52195cefe0d19217c18652c4a"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:9683435e8c77ed19413e10556e2ad4e97a2e780c59ef7408992eba4b631c3403"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-aarch64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
 
 [tools.usage."platforms.linux-x64"]
-checksum = "sha256:c66011f163619cf3946182498eedd16966bf3d32a6c6cf28c73c8034dfe467d6"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:4d21ce353b671d4aa4bbf4bb2719ae15c9a82d6d2268516d24f7eb5dd061533d"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
 
 [tools.usage."platforms.linux-x64-musl"]
-checksum = "sha256:223f8819cc26543ffcc11161659497450c6bdbe947ad8580b70183dac4c9d182"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:5b2ff85406de4a7e13ccac16f26a40df86b9e85ab6d96b098a4b725eeef889d7"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
 
 [tools.usage."platforms.macos-arm64"]
-checksum = "sha256:606dbdda615111940c6b39e1cb64dbf4871839304146e8e40e7302312be095d6"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-universal-apple-darwin.tar.gz"
+checksum = "sha256:c10054cc2649a25c9a88522f8c891166f3a3151fe2cd1b20ebde3194a938ae91"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-universal-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
 
 [tools.usage."platforms.macos-x64"]
-checksum = "sha256:606dbdda615111940c6b39e1cb64dbf4871839304146e8e40e7302312be095d6"
-url = "https://github.com/jdx/usage/releases/download/v7.4.0/usage-universal-apple-darwin.tar.gz"
+checksum = "sha256:c10054cc2649a25c9a88522f8c891166f3a3151fe2cd1b20ebde3194a938ae91"
+url = "https://github.com/jdx/usage/releases/download/v7.4.1/usage-universal-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/usage/.github/workflows/publish-cli.yml"
